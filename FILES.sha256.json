@@ -144,6 +144,7 @@
   "candidate/repair-A/review-B.md": "2adf0193956cf5b0d97a094cef82ba628e153dd8a66b49fc070066e4a62b9000",
   "candidate/repair-A/red.log": "b93f1b477187981b7eba579f088fea4c1c9df5cff17b4cb7dfb83c0fc1e44cff",
   "candidate/repair-A/probe.py": "a0f0bb20ae312c1cd411e2ba894599d77575fb1c4755c7484b6c3fc741733df4",
+  "candidate/repair-A/imports.jsonl": "71994c49ebd9f368bc219c5c9511c8145dc4aa221b5f833e4a25cee021961ff2",
   "candidate/repair-C/green.log": "c300ab2b30532041547828ba73b077d45cb8cb210c847fe79403a03a986b494b",
   "candidate/repair-C/REPORT.md": "36debd02fe2766c9d08d56e1782d6f2282ae5fd8505f0d54200bf37e3db1fcfb",
   "candidate/repair-C/protocol-schema.md": "5aaa9ee04906f6717604bb55051f7d608579b568c0849734ed3c663f996cf090",
@@ -193,6 +194,7 @@
   "candidate/integration/test-fixtures/work/core-source-corrupt/state/music-schedule/context.json": "7fd5c27aad5c8ca1945c4a09f9eb2fb18f3291190e310b6e3562c09eef2618bb",
   "candidate/integration/test-fixtures/work/plugin-runtime-test/library/catalog.json": "d17339cc9c02d7dea2ee9ef1781fe85e949852715f749c0265e34fe019dcc37e",
   "candidate/integration/test-fixtures/work/plugin-runtime-test/evidence/live-state.json": "3ad96a01bee13dda0f22bff8baa0749141c57d3b5b417948855cdf22dd30d1b8",
+  "candidate/integration/test-fixtures/work/plugin-runtime-test/evidence/session-trace.jsonl": "73527564199ff698920c7ec37a8431764bcb06f0c2ff09a668022209dc7feae4",
   "candidate/integration/test-fixtures/work/core-source/state/music-schedule/context.json": "362d3411753653ff516bad3fbf90ee00ad6a5a56e6259ad1701f1aa44619b41e",
   "candidate/integration/test-fixtures/context_player/tests/test_experiments.py": "17ec85d3d592178a9d15b43e74515261c058bc8b06261e5c7a88f2c14bb2c6c9",
   "candidate/integration/test-fixtures/context_player/tests/test_lazy_validation.py": "3b3c786e3d871d26eeeed3c69af0f00cf8225e5df69759678b1a2002f6cf3bd0",
@@ -221,5 +223,6 @@
   "candidate/eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/controls.log": "f42f191628da272db894c1aec3fb162a03d3deb523278e1b4097132a72dfea32",
   "candidate/eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/artifacts.log": "5714a13ccdb29e4e8c8283779676f92c43de1f10e106c5b84dd74d479a383a27",
   "candidate/eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/original34/original34.log": "3ff49d1fc68d8038c613a6537a9a407db1e4f01439a26766cb250af7f3e73bb4",
-  "candidate/eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/original34/original34.json": "f48051f822f6584b635de842f796cdad14400eb0553fce8f65b3f8067823a73f"
+  "candidate/eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/original34/original34.json": "f48051f822f6584b635de842f796cdad14400eb0553fce8f65b3f8067823a73f",
+  "candidate/eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/original34/imports.jsonl": "2eac057a95b585c1c98ab613358c7486de750d5a6f624e9a615fc394386eebec"
 }

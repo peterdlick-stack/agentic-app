@@ -1,0 +1,15 @@
+{
+  "catalog_entries": 544,
+  "matched": 544,
+  "mismatch": [],
+  "missing": [],
+  "orphan_wavs": [
+    {
+      "path": "/mnt/f/context-player-cache-20261004/library/real_2d7d94cca8e3aecc08a3b9a9.wav",
+      "content_id": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "bytes": 0,
+      "mtime_ns": 1791092456000000000
+    }
+  ],
+  "policy": "catalog members only; orphan preserved read-only"
+}

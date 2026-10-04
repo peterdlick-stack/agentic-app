@@ -1,0 +1,3987 @@
+{
+  "created_utc": "2026-10-04T10:41:42.108184+00:00",
+  "R0_frozen_match": 81,
+  "R1_frozen_match": 81,
+  "files": [
+    {
+      "path": "README.zh-CN.md",
+      "bytes": 1755
+    },
+    {
+      "path": "run_candidate.py",
+      "bytes": 493
+    },
+    {
+      "path": "REPORT.zh-CN.md",
+      "bytes": 5374
+    },
+    {
+      "path": "run_smoke.py",
+      "bytes": 237
+    },
+    {
+      "path": "PROGRESS.md",
+      "bytes": 5166
+    },
+    {
+      "path": "launcher.py",
+      "bytes": 1683
+    },
+    {
+      "path": "BLOCKED.md",
+      "bytes": 545
+    },
+    {
+      "path": "verify.py",
+      "bytes": 112
+    },
+    {
+      "path": "run_controls.py",
+      "bytes": 834
+    },
+    {
+      "path": "acceptance.py",
+      "bytes": 2461
+    },
+    {
+      "path": "repair-allowlist.json",
+      "bytes": 3603
+    },
+    {
+      "path": "repair-config.json",
+      "bytes": 263
+    },
+    {
+      "path": "repair-amendment.md",
+      "bytes": 1856
+    },
+    {
+      "path": "audio/pilot_report.json",
+      "bytes": 343
+    },
+    {
+      "path": "audio/test_exit.json",
+      "bytes": 241
+    },
+    {
+      "path": "audio/manifest_all_wav.json",
+      "bytes": 142242
+    },
+    {
+      "path": "audio/catalog_hash_check.json",
+      "bytes": 442
+    },
+    {
+      "path": "audio/native_inventory_exit.json",
+      "bytes": 107
+    },
+    {
+      "path": "audio/pilot_exit.json",
+      "bytes": 332
+    },
+    {
+      "path": "audio/extract.py",
+      "bytes": 8077
+    },
+    {
+      "path": "audio/PROGRESS.md",
+      "bytes": 1792
+    },
+    {
+      "path": "audio/review-B.md",
+      "bytes": 971
+    },
+    {
+      "path": "audio/splits.json",
+      "bytes": 50002
+    },
+    {
+      "path": "audio/run_audio.py",
+      "bytes": 1505
+    },
+    {
+      "path": "audio/accuracy.json",
+      "bytes": 622
+    },
+    {
+      "path": "audio/README.md",
+      "bytes": 2956
+    },
+    {
+      "path": "audio/native_inventory_checkpoint.json",
+      "bytes": 142242
+    },
+    {
+      "path": "audio/test_extract.py",
+      "bytes": 2238
+    },
+    {
+      "path": "audio/review_b_probe.py",
+      "bytes": 597
+    },
+    {
+      "path": "audio/inventory_native.py",
+      "bytes": 2205
+    },
+    {
+      "path": "audio/features.json",
+      "bytes": 195622
+    },
+    {
+      "path": "audio/extract_iteration1.py",
+      "bytes": 7146
+    },
+    {
+      "path": "audio/finalize.py",
+      "bytes": 1648
+    },
+    {
+      "path": "audio/versions.json",
+      "bytes": 983
+    },
+    {
+      "path": "audio/native_fullhash_exit.json",
+      "bytes": 105
+    },
+    {
+      "path": "audio/manifest.json",
+      "bytes": 141988
+    },
+    {
+      "path": "repair-B/green.log",
+      "bytes": 2839
+    },
+    {
+      "path": "repair-B/REPORT.md",
+      "bytes": 653
+    },
+    {
+      "path": "repair-B/PROGRESS.md",
+      "bytes": 853
+    },
+    {
+      "path": "repair-B/review-C.md",
+      "bytes": 3901
+    },
+    {
+      "path": "repair-B/red.log",
+      "bytes": 5154
+    },
+    {
+      "path": "contract/CONTRACT.md",
+      "bytes": 5050
+    },
+    {
+      "path": "contract/ADDENDUM-v1.0.1.md",
+      "bytes": 1386
+    },
+    {
+      "path": "eval/task0-fixture.json",
+      "bytes": 110
+    },
+    {
+      "path": "eval/engineering-controls.py",
+      "bytes": 1878
+    },
+    {
+      "path": "eval/run-original34.py",
+      "bytes": 1951
+    },
+    {
+      "path": "eval/negative_controls.py",
+      "bytes": 1490
+    },
+    {
+      "path": "eval/task0-red-green.json",
+      "bytes": 1275
+    },
+    {
+      "path": "eval/STUDY_PROTOCOL.md",
+      "bytes": 1983
+    },
+    {
+      "path": "eval/integration-smoke.json",
+      "bytes": 982
+    },
+    {
+      "path": "eval/candidate-original34-exit.json",
+      "bytes": 157
+    },
+    {
+      "path": "eval/artifact_checks.py",
+      "bytes": 2823
+    },
+    {
+      "path": "eval/metrics.py",
+      "bytes": 32263
+    },
+    {
+      "path": "eval/activity_retest.py",
+      "bytes": 573
+    },
+    {
+      "path": "eval/stop-smoke.json",
+      "bytes": 123
+    },
+    {
+      "path": "eval/acceptance.json",
+      "bytes": 6942
+    },
+    {
+      "path": "eval/negative-red-green.json",
+      "bytes": 4336
+    },
+    {
+      "path": "eval/test_metrics.py",
+      "bytes": 1646
+    },
+    {
+      "path": "eval/smoke.py",
+      "bytes": 1811
+    },
+    {
+      "path": "eval/test_protocol.py",
+      "bytes": 28303
+    },
+    {
+      "path": "eval/playback-smoke.json",
+      "bytes": 140
+    },
+    {
+      "path": "eval/guard.json",
+      "bytes": 1685
+    },
+    {
+      "path": "eval/entrypoints-smoke.json",
+      "bytes": 120
+    },
+    {
+      "path": "eval/effect-status.json",
+      "bytes": 1378
+    },
+    {
+      "path": "integration/policy-gates.json",
+      "bytes": 152
+    },
+    {
+      "path": "integration/play.ps1",
+      "bytes": 1867
+    },
+    {
+      "path": "integration/compare.py",
+      "bytes": 6397
+    },
+    {
+      "path": "integration/stop.ps1",
+      "bytes": 643
+    },
+    {
+      "path": "learner/repair_iteration2.py",
+      "bytes": 2002
+    },
+    {
+      "path": "learner/model.py",
+      "bytes": 10809
+    },
+    {
+      "path": "learner/PROGRESS.md",
+      "bytes": 1413
+    },
+    {
+      "path": "learner/test_model.py",
+      "bytes": 10753
+    },
+    {
+      "path": "learner/README.md",
+      "bytes": 3914
+    },
+    {
+      "path": "learner/store.py",
+      "bytes": 7795
+    },
+    {
+      "path": "learner/deliver.py",
+      "bytes": 1494
+    },
+    {
+      "path": "learner/__init__.py",
+      "bytes": 2
+    },
+    {
+      "path": "learner/review_c_check.py",
+      "bytes": 866
+    },
+    {
+      "path": "learner/review-C.md",
+      "bytes": 1672
+    },
+    {
+      "path": "learner/versions.json",
+      "bytes": 511
+    },
+    {
+      "path": "learner/report.json",
+      "bytes": 1183
+    },
+    {
+      "path": "activity/baseline.py",
+      "bytes": 5708
+    },
+    {
+      "path": "activity/REPORT.md",
+      "bytes": 2180
+    },
+    {
+      "path": "activity/candidate-scored.json",
+      "bytes": 424645
+    },
+    {
+      "path": "activity/candidate.py",
+      "bytes": 2713
+    },
+    {
+      "path": "activity/hashes.json",
+      "bytes": 2114
+    },
+    {
+      "path": "activity/checks.json",
+      "bytes": 1597
+    },
+    {
+      "path": "activity/PROGRESS.md",
+      "bytes": 601
+    },
+    {
+      "path": "activity/baseline-scored.json",
+      "bytes": 424821
+    },
+    {
+      "path": "activity/review-A.md",
+      "bytes": 1999
+    },
+    {
+      "path": "activity/RETEST.sh",
+      "bytes": 269
+    },
+    {
+      "path": "activity/predictions.json",
+      "bytes": 3643867
+    },
+    {
+      "path": "activity/review_audio_probe.py",
+      "bytes": 518
+    },
+    {
+      "path": "activity/checkpoint.json",
+      "bytes": 106
+    },
+    {
+      "path": "activity/reference_eval.py",
+      "bytes": 5558
+    },
+    {
+      "path": "activity/execution.json",
+      "bytes": 179
+    },
+    {
+      "path": "activity/run.py",
+      "bytes": 5845
+    },
+    {
+      "path": "activity/report.json",
+      "bytes": 24235
+    },
+    {
+      "path": "activity/COLLECTION_PROTOCOL.md",
+      "bytes": 2619
+    },
+    {
+      "path": "repair-A/imports.jsonl",
+      "bytes": 2346
+    },
+    {
+      "path": "repair-A/green.log",
+      "bytes": 483
+    },
+    {
+      "path": "repair-A/REPORT.md",
+      "bytes": 1995
+    },
+    {
+      "path": "repair-A/test_resources.py",
+      "bytes": 1906
+    },
+    {
+      "path": "repair-A/probe.json",
+      "bytes": 4470
+    },
+    {
+      "path": "repair-A/PROGRESS.md",
+      "bytes": 629
+    },
+    {
+      "path": "repair-A/review-B.md",
+      "bytes": 1903
+    },
+    {
+      "path": "repair-A/red.log",
+      "bytes": 1832
+    },
+    {
+      "path": "repair-A/probe.py",
+      "bytes": 1868
+    },
+    {
+      "path": "repair-C/green.log",
+      "bytes": 23250
+    },
+    {
+      "path": "repair-C/REPORT.md",
+      "bytes": 5086
+    },
+    {
+      "path": "repair-C/protocol-schema.md",
+      "bytes": 4712
+    },
+    {
+      "path": "repair-C/PROGRESS.md",
+      "bytes": 2200
+    },
+    {
+      "path": "repair-C/review-A.md",
+      "bytes": 2122
+    },
+    {
+      "path": "repair-C/red.log",
+      "bytes": 33690
+    },
+    {
+      "path": "repair-C/protocol-addendum-v2.1.md",
+      "bytes": 1180
+    },
+    {
+      "path": "ledger/prior-record-hashes.json",
+      "bytes": 669
+    },
+    {
+      "path": "ledger/old-assertions.md",
+      "bytes": 491
+    },
+    {
+      "path": "ledger/final-source-hashes-v2.json",
+      "bytes": 8581
+    },
+    {
+      "path": "ledger/playback.json",
+      "bytes": 530
+    },
+    {
+      "path": "ledger/differences.json",
+      "bytes": 93098
+    },
+    {
+      "path": "ledger/differences-v2.json",
+      "bytes": 90914
+    },
+    {
+      "path": "ledger/r0-independent-review.md",
+      "bytes": 2409
+    },
+    {
+      "path": "ledger/r0-freeze-check.json",
+      "bytes": 74
+    },
+    {
+      "path": "ledger/r0-final-source-hashes.json",
+      "bytes": 8494
+    },
+    {
+      "path": "ledger/input-hashes.json",
+      "bytes": 7067
+    },
+    {
+      "path": "ledger/native-entrypoints.json",
+      "bytes": 1775
+    },
+    {
+      "path": "ledger/r0-copied-original.json",
+      "bytes": 21690
+    },
+    {
+      "path": "ledger/independent-review.md",
+      "bytes": 1784
+    },
+    {
+      "path": "ledger/engineering-red-green.json",
+      "bytes": 19162
+    },
+    {
+      "path": "ledger/freeze-revisions.json",
+      "bytes": 610
+    },
+    {
+      "path": "ledger/acceptance-cases.json",
+      "bytes": 915
+    },
+    {
+      "path": "ledger/versions.json",
+      "bytes": 2075
+    },
+    {
+      "path": "ledger/copy-baseline.json",
+      "bytes": 15735
+    },
+    {
+      "path": "ledger/schema-freeze.json",
+      "bytes": 291
+    },
+    {
+      "path": "ledger/final-source-hashes.json",
+      "bytes": 8581
+    },
+    {
+      "path": "guard/sitecustomize.py",
+      "bytes": 3009
+    },
+    {
+      "path": "tmp/launcher/tmpidhngt5a",
+      "bytes": 7
+    },
+    {
+      "path": "tmp/launcher/tmp5gcxf2xm",
+      "bytes": 7
+    },
+    {
+      "path": "tmp/launcher/tmpeh6c_k19",
+      "bytes": 7
+    },
+    {
+      "path": "tmp/repair-C/imports.jsonl",
+      "bytes": 381
+    },
+    {
+      "path": "tmp/acceptance/play-route/P0/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "tmp/acceptance/play-route/P0/latest.json",
+      "bytes": 2338
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/README.zh-CN.md",
+      "bytes": 1618
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/run_candidate.py",
+      "bytes": 493
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/REPORT.zh-CN.md",
+      "bytes": 4657
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/run_smoke.py",
+      "bytes": 237
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/PROGRESS.md",
+      "bytes": 4690
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/launcher.py",
+      "bytes": 1683
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/BLOCKED.md",
+      "bytes": 533
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/verify.py",
+      "bytes": 112
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/run_controls.py",
+      "bytes": 834
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/acceptance.py",
+      "bytes": 2461
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-allowlist.json",
+      "bytes": 3603
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-config.json",
+      "bytes": 263
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-amendment.md",
+      "bytes": 1856
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/README.zh-CN.md",
+      "bytes": 1374
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/run_candidate.py",
+      "bytes": 493
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/run_smoke.py",
+      "bytes": 237
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/PROGRESS.md",
+      "bytes": 3583
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/launcher.py",
+      "bytes": 1683
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/BLOCKED.md",
+      "bytes": 388
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/verify.py",
+      "bytes": 112
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/run_controls.py",
+      "bytes": 834
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/acceptance.py",
+      "bytes": 2461
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-allowlist.json",
+      "bytes": 3491
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-config.json",
+      "bytes": 263
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-amendment.md",
+      "bytes": 1856
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/README.zh-CN.md",
+      "bytes": 1374
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/run_candidate.py",
+      "bytes": 493
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/run_smoke.py",
+      "bytes": 237
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/PROGRESS.md",
+      "bytes": 2637
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/launcher.py",
+      "bytes": 1683
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/BLOCKED.md",
+      "bytes": 388
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/verify.py",
+      "bytes": 112
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/run_controls.py",
+      "bytes": 834
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/acceptance.py",
+      "bytes": 2401
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/repair-allowlist.json",
+      "bytes": 3452
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/repair-config.json",
+      "bytes": 263
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/repair-amendment.md",
+      "bytes": 1856
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/pilot_report.json",
+      "bytes": 343
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/test_exit.json",
+      "bytes": 241
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/manifest_all_wav.json",
+      "bytes": 142242
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/catalog_hash_check.json",
+      "bytes": 442
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/native_inventory_exit.json",
+      "bytes": 107
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/pilot_exit.json",
+      "bytes": 332
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/extract.py",
+      "bytes": 8077
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/PROGRESS.md",
+      "bytes": 1792
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/review-B.md",
+      "bytes": 971
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/splits.json",
+      "bytes": 50002
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/run_audio.py",
+      "bytes": 1505
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/accuracy.json",
+      "bytes": 622
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/README.md",
+      "bytes": 2956
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/native_inventory_checkpoint.json",
+      "bytes": 142242
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/test_extract.py",
+      "bytes": 2238
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/review_b_probe.py",
+      "bytes": 597
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/inventory_native.py",
+      "bytes": 2205
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/features.json",
+      "bytes": 195622
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/extract_iteration1.py",
+      "bytes": 7146
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/finalize.py",
+      "bytes": 1648
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/versions.json",
+      "bytes": 983
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/native_fullhash_exit.json",
+      "bytes": 105
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio/manifest.json",
+      "bytes": 141988
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-B/green.log",
+      "bytes": 2839
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-B/REPORT.md",
+      "bytes": 653
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-B/PROGRESS.md",
+      "bytes": 853
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-B/review-C.md",
+      "bytes": 3901
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-B/red.log",
+      "bytes": 5154
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/contract/CONTRACT.md",
+      "bytes": 5050
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/contract/ADDENDUM-v1.0.1.md",
+      "bytes": 1386
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/task0-fixture.json",
+      "bytes": 110
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/engineering-controls.py",
+      "bytes": 1878
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/run-original34.py",
+      "bytes": 1951
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/negative_controls.py",
+      "bytes": 1490
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/task0-red-green.json",
+      "bytes": 1275
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/STUDY_PROTOCOL.md",
+      "bytes": 1983
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/integration-smoke.json",
+      "bytes": 1090
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/candidate-original34-exit.json",
+      "bytes": 157
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/artifact_checks.py",
+      "bytes": 2823
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/metrics.py",
+      "bytes": 32263
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/activity_retest.py",
+      "bytes": 573
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/stop-smoke.json",
+      "bytes": 123
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/acceptance.json",
+      "bytes": 8726
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/negative-red-green.json",
+      "bytes": 4876
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/test_metrics.py",
+      "bytes": 1646
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/smoke.py",
+      "bytes": 1811
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/test_protocol.py",
+      "bytes": 28303
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/playback-smoke.json",
+      "bytes": 140
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/guard.json",
+      "bytes": 1847
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/entrypoints-smoke.json",
+      "bytes": 120
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/effect-status.json",
+      "bytes": 1378
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/policy-gates.json",
+      "bytes": 152
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/play.ps1",
+      "bytes": 1867
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/compare.py",
+      "bytes": 6397
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/stop.ps1",
+      "bytes": 643
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/learner/repair_iteration2.py",
+      "bytes": 2002
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/learner/model.py",
+      "bytes": 10809
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/learner/PROGRESS.md",
+      "bytes": 1413
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/learner/test_model.py",
+      "bytes": 10753
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/learner/README.md",
+      "bytes": 3914
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/learner/store.py",
+      "bytes": 7795
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/learner/deliver.py",
+      "bytes": 1494
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/learner/__init__.py",
+      "bytes": 2
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/learner/review_c_check.py",
+      "bytes": 866
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/learner/review-C.md",
+      "bytes": 1672
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/learner/versions.json",
+      "bytes": 511
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/learner/report.json",
+      "bytes": 1183
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/activity/baseline.py",
+      "bytes": 5708
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/activity/REPORT.md",
+      "bytes": 2180
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/activity/candidate-scored.json",
+      "bytes": 424645
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/activity/candidate.py",
+      "bytes": 2713
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/activity/hashes.json",
+      "bytes": 2114
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/activity/checks.json",
+      "bytes": 1597
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/activity/PROGRESS.md",
+      "bytes": 601
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/activity/baseline-scored.json",
+      "bytes": 424821
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/activity/review-A.md",
+      "bytes": 1999
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/activity/RETEST.sh",
+      "bytes": 269
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/activity/predictions.json",
+      "bytes": 3643867
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/activity/review_audio_probe.py",
+      "bytes": 518
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/activity/checkpoint.json",
+      "bytes": 106
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/activity/reference_eval.py",
+      "bytes": 5558
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/activity/execution.json",
+      "bytes": 179
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/activity/run.py",
+      "bytes": 5845
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/activity/report.json",
+      "bytes": 24235
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/activity/COLLECTION_PROTOCOL.md",
+      "bytes": 2619
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-A/imports.jsonl",
+      "bytes": 2346
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-A/green.log",
+      "bytes": 483
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-A/REPORT.md",
+      "bytes": 1995
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-A/test_resources.py",
+      "bytes": 1906
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-A/probe.json",
+      "bytes": 5118
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-A/PROGRESS.md",
+      "bytes": 629
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-A/review-B.md",
+      "bytes": 1903
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-A/red.log",
+      "bytes": 1832
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-A/probe.py",
+      "bytes": 1868
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-C/green.log",
+      "bytes": 23250
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-C/REPORT.md",
+      "bytes": 5086
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-C/protocol-schema.md",
+      "bytes": 4712
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-C/PROGRESS.md",
+      "bytes": 2200
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-C/review-A.md",
+      "bytes": 2122
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-C/red.log",
+      "bytes": 33690
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-C/protocol-addendum-v2.1.md",
+      "bytes": 1180
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/ledger/prior-record-hashes.json",
+      "bytes": 669
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/ledger/old-assertions.md",
+      "bytes": 491
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/ledger/final-source-hashes-v2.json",
+      "bytes": 8581
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/ledger/playback.json",
+      "bytes": 530
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/ledger/differences.json",
+      "bytes": 92297
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/ledger/differences-v2.json",
+      "bytes": 90914
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/ledger/r0-independent-review.md",
+      "bytes": 2409
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/ledger/r0-freeze-check.json",
+      "bytes": 74
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/ledger/r0-final-source-hashes.json",
+      "bytes": 8494
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/ledger/input-hashes.json",
+      "bytes": 7067
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/ledger/native-entrypoints.json",
+      "bytes": 1775
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/ledger/r0-copied-original.json",
+      "bytes": 21690
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/ledger/engineering-red-green.json",
+      "bytes": 19166
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/ledger/freeze-revisions.json",
+      "bytes": 610
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/ledger/acceptance-cases.json",
+      "bytes": 915
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/ledger/versions.json",
+      "bytes": 2075
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/ledger/copy-baseline.json",
+      "bytes": 15735
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/ledger/schema-freeze.json",
+      "bytes": 291
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/ledger/final-source-hashes.json",
+      "bytes": 8581
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/guard/sitecustomize.py",
+      "bytes": 3009
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/tmp/launcher/tmp702ddrsi",
+      "bytes": 7
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/tmp/launcher/tmp3mljlfy7",
+      "bytes": 7
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/tmp/launcher/tmpif2hv9k8/escape",
+      "symlink_target": "/tmp"
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/tmp/launcher/tmph7qho0m4/escape",
+      "symlink_target": "/tmp"
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/integration-smoke/d30d634d-6dec-4bd4-9cd5-f5f47ae050c2/P1/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/integration-smoke/d30d634d-6dec-4bd4-9cd5-f5f47ae050c2/P1/latest.json",
+      "bytes": 851
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/integration-smoke/d30d634d-6dec-4bd4-9cd5-f5f47ae050c2/P0/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/integration-smoke/d30d634d-6dec-4bd4-9cd5-f5f47ae050c2/P0/latest.json",
+      "bytes": 2338
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/integration-smoke/d30d634d-6dec-4bd4-9cd5-f5f47ae050c2/P2/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/integration-smoke/d30d634d-6dec-4bd4-9cd5-f5f47ae050c2/P2/latest.json",
+      "bytes": 2345
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/integration-smoke/88a8105c-8a75-467d-9035-ec155b9a1909/P1/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/integration-smoke/88a8105c-8a75-467d-9035-ec155b9a1909/P1/latest.json",
+      "bytes": 854
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/integration-smoke/88a8105c-8a75-467d-9035-ec155b9a1909/P0/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/integration-smoke/88a8105c-8a75-467d-9035-ec155b9a1909/P0/latest.json",
+      "bytes": 2338
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/integration-smoke/88a8105c-8a75-467d-9035-ec155b9a1909/P2/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/integration-smoke/88a8105c-8a75-467d-9035-ec155b9a1909/P2/latest.json",
+      "bytes": 2345
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/control-fixtures/library/control.wav",
+      "bytes": 1644
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-2b1928d53adf4a93a6b957cc0c5d8ee1/resources.log",
+      "bytes": 101
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-2b1928d53adf4a93a6b957cc0c5d8ee1/environment-probes.log",
+      "bytes": 5119
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-2b1928d53adf4a93a6b957cc0c5d8ee1/integration.log",
+      "bytes": 1091
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-2b1928d53adf4a93a6b957cc0c5d8ee1/protocol.log",
+      "bytes": 146
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-2b1928d53adf4a93a6b957cc0c5d8ee1/metrics.log",
+      "bytes": 103
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-2b1928d53adf4a93a6b957cc0c5d8ee1/audio.log",
+      "bytes": 659
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-2b1928d53adf4a93a6b957cc0c5d8ee1/acceptance.json",
+      "bytes": 8726
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-2b1928d53adf4a93a6b957cc0c5d8ee1/learner.log",
+      "bytes": 2826
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-2b1928d53adf4a93a6b957cc0c5d8ee1/activity-denominators.log",
+      "bytes": 387
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-2b1928d53adf4a93a6b957cc0c5d8ee1/guard.log",
+      "bytes": 1836
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-2b1928d53adf4a93a6b957cc0c5d8ee1/controls.log",
+      "bytes": 314
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-2b1928d53adf4a93a6b957cc0c5d8ee1/artifacts.log",
+      "bytes": 904
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/resources.log",
+      "bytes": 3019
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/environment-probes.log",
+      "bytes": 5119
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/integration.log",
+      "bytes": 1091
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/protocol.log",
+      "bytes": 146
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/metrics.log",
+      "bytes": 103
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/audio.log",
+      "bytes": 659
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/acceptance.json",
+      "bytes": 8724
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/learner.log",
+      "bytes": 2826
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/activity-denominators.log",
+      "bytes": 387
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/guard.log",
+      "bytes": 1836
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/controls.log",
+      "bytes": 314
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/artifacts.log",
+      "bytes": 485
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-2b1928d53adf4a93a6b957cc0c5d8ee1/original34/imports.jsonl",
+      "bytes": 4545
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-2b1928d53adf4a93a6b957cc0c5d8ee1/original34/original34.log",
+      "bytes": 4490
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-2b1928d53adf4a93a6b957cc0c5d8ee1/original34/original34.json",
+      "bytes": 3501
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/original34/imports.jsonl",
+      "bytes": 4535
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/original34/original34.log",
+      "bytes": 28332
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/original34/original34.json",
+      "bytes": 3494
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/context_player/feedback.py",
+      "bytes": 8262
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/context_player/transport.py",
+      "bytes": 11159
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/context_player/context.py",
+      "bytes": 9899
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/context_player/__init__.py",
+      "bytes": 90
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/context_player/recommend.py",
+      "bytes": 9647
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/context_player/experiments.py",
+      "bytes": 10563
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/context_player/backend.py",
+      "bytes": 16236
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/context_player/feedback.py",
+      "bytes": 8085
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/context_player/transport.py",
+      "bytes": 11159
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/context_player/context.py",
+      "bytes": 9899
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/context_player/__init__.py",
+      "bytes": 90
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/context_player/recommend.py",
+      "bytes": 9647
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/context_player/experiments.py",
+      "bytes": 10563
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/context_player/backend.py",
+      "bytes": 16236
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t17.wav",
+      "bytes": 1499444
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t11.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t08.wav",
+      "bytes": 1587644
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t04.wav",
+      "bytes": 1675844
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t19.wav",
+      "bytes": 1675844
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/LICENSE.md",
+      "bytes": 282
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t07.wav",
+      "bytes": 1499444
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t21.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t10.wav",
+      "bytes": 1764044
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t20.wav",
+      "bytes": 1764044
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t01.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t24.wav",
+      "bytes": 1675844
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t05.wav",
+      "bytes": 1764044
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t15.wav",
+      "bytes": 1764044
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t09.wav",
+      "bytes": 1675844
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t22.wav",
+      "bytes": 1499444
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t13.wav",
+      "bytes": 1587644
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t18.wav",
+      "bytes": 1587644
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/catalog.json",
+      "bytes": 10088
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t14.wav",
+      "bytes": 1675844
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t02.wav",
+      "bytes": 1499444
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t03.wav",
+      "bytes": 1587644
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t06.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t16.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t23.wav",
+      "bytes": 1587644
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/library/t12.wav",
+      "bytes": 1499444
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/context_player/tests/test_experiments.py",
+      "bytes": 4057
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/context_player/tests/test_lazy_validation.py",
+      "bytes": 1447
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/context_player/tests/test_recommend.py",
+      "bytes": 5393
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/context_player/tests/test_feedback.py",
+      "bytes": 5504
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/context_player/tests/test_backend.py",
+      "bytes": 5123
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/work/core-corrupt/bad.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/work/core-source-corrupt/state/music-schedule/context.json",
+      "bytes": 12
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/work/plugin-runtime-test/library/catalog.json",
+      "bytes": 10088
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/work/plugin-runtime-test/evidence/live-state.json",
+      "bytes": 1471
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/work/plugin-runtime-test/evidence/session-trace.jsonl",
+      "bytes": 404
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures/work/core-source/state/music-schedule/context.json",
+      "bytes": 112
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/context_player/tests/test_experiments.py",
+      "bytes": 4057
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/context_player/tests/test_lazy_validation.py",
+      "bytes": 1447
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/context_player/tests/test_recommend.py",
+      "bytes": 5393
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/context_player/tests/test_feedback.py",
+      "bytes": 5504
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/context_player/tests/test_backend.py",
+      "bytes": 5123
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/platform/crates/music-plugin-p40-replay/tools/test_replay.py",
+      "bytes": 10759
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/platform/crates/music-plugin-p40-replay/tools/replay.py",
+      "bytes": 13911
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/platform/crates/music-plugin-p40-replay/tools/test_activity.py",
+      "bytes": 2944
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/platform/crates/music-plugin-p40-replay/tools/activity.py",
+      "bytes": 5708
+    },
+    {
+      "path": "tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/learner/state/model.json",
+      "bytes": 807
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/pilot_report.json",
+      "bytes": 343
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/test_exit.json",
+      "bytes": 241
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/manifest_all_wav.json",
+      "bytes": 142242
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/catalog_hash_check.json",
+      "bytes": 442
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/native_inventory_exit.json",
+      "bytes": 107
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/pilot_exit.json",
+      "bytes": 332
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/extract.py",
+      "bytes": 8077
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/PROGRESS.md",
+      "bytes": 1792
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/review-B.md",
+      "bytes": 971
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/splits.json",
+      "bytes": 50002
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/run_audio.py",
+      "bytes": 1505
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/accuracy.json",
+      "bytes": 622
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/README.md",
+      "bytes": 2956
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/native_inventory_checkpoint.json",
+      "bytes": 142242
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/test_extract.py",
+      "bytes": 2238
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/review_b_probe.py",
+      "bytes": 597
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/inventory_native.py",
+      "bytes": 2205
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/features.json",
+      "bytes": 195622
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/extract_iteration1.py",
+      "bytes": 7146
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/finalize.py",
+      "bytes": 1648
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/versions.json",
+      "bytes": 983
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/native_fullhash_exit.json",
+      "bytes": 105
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/audio/manifest.json",
+      "bytes": 141988
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-B/green.log",
+      "bytes": 2839
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-B/REPORT.md",
+      "bytes": 653
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-B/PROGRESS.md",
+      "bytes": 853
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-B/review-C.md",
+      "bytes": 3901
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-B/red.log",
+      "bytes": 5154
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/contract/CONTRACT.md",
+      "bytes": 5050
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/contract/ADDENDUM-v1.0.1.md",
+      "bytes": 1386
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/task0-fixture.json",
+      "bytes": 110
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/engineering-controls.py",
+      "bytes": 1878
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/run-original34.py",
+      "bytes": 1951
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/negative_controls.py",
+      "bytes": 1490
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/task0-red-green.json",
+      "bytes": 1275
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/STUDY_PROTOCOL.md",
+      "bytes": 1983
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/integration-smoke.json",
+      "bytes": 1090
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/candidate-original34-exit.json",
+      "bytes": 157
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/artifact_checks.py",
+      "bytes": 2823
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/metrics.py",
+      "bytes": 32122
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/activity_retest.py",
+      "bytes": 573
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/stop-smoke.json",
+      "bytes": 123
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/acceptance.json",
+      "bytes": 8728
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/negative-red-green.json",
+      "bytes": 4876
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/test_metrics.py",
+      "bytes": 1646
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/smoke.py",
+      "bytes": 1811
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/test_protocol.py",
+      "bytes": 27043
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/playback-smoke.json",
+      "bytes": 140
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/guard.json",
+      "bytes": 1847
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/entrypoints-smoke.json",
+      "bytes": 120
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/effect-status.json",
+      "bytes": 1378
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/policy-gates.json",
+      "bytes": 152
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/play.ps1",
+      "bytes": 1867
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/compare.py",
+      "bytes": 6397
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/stop.ps1",
+      "bytes": 643
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/learner/repair_iteration2.py",
+      "bytes": 2002
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/learner/model.py",
+      "bytes": 10809
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/learner/PROGRESS.md",
+      "bytes": 1413
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/learner/test_model.py",
+      "bytes": 10753
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/learner/README.md",
+      "bytes": 3914
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/learner/store.py",
+      "bytes": 7795
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/learner/deliver.py",
+      "bytes": 1494
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/learner/__init__.py",
+      "bytes": 2
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/learner/review_c_check.py",
+      "bytes": 866
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/learner/review-C.md",
+      "bytes": 1672
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/learner/versions.json",
+      "bytes": 511
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/learner/report.json",
+      "bytes": 1183
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/activity/baseline.py",
+      "bytes": 5708
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/activity/REPORT.md",
+      "bytes": 2180
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/activity/candidate-scored.json",
+      "bytes": 424645
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/activity/candidate.py",
+      "bytes": 2713
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/activity/hashes.json",
+      "bytes": 2114
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/activity/checks.json",
+      "bytes": 1597
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/activity/PROGRESS.md",
+      "bytes": 601
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/activity/baseline-scored.json",
+      "bytes": 424821
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/activity/review-A.md",
+      "bytes": 1999
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/activity/RETEST.sh",
+      "bytes": 269
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/activity/predictions.json",
+      "bytes": 3643867
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/activity/review_audio_probe.py",
+      "bytes": 518
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/activity/checkpoint.json",
+      "bytes": 106
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/activity/reference_eval.py",
+      "bytes": 5558
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/activity/execution.json",
+      "bytes": 179
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/activity/run.py",
+      "bytes": 5845
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/activity/report.json",
+      "bytes": 24235
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/activity/COLLECTION_PROTOCOL.md",
+      "bytes": 2619
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-A/imports.jsonl",
+      "bytes": 2346
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-A/green.log",
+      "bytes": 483
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-A/REPORT.md",
+      "bytes": 1995
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-A/test_resources.py",
+      "bytes": 1906
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-A/probe.json",
+      "bytes": 5118
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-A/PROGRESS.md",
+      "bytes": 629
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-A/review-B.md",
+      "bytes": 1903
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-A/red.log",
+      "bytes": 1832
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-A/probe.py",
+      "bytes": 1868
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-C/green.log",
+      "bytes": 11260
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-C/REPORT.md",
+      "bytes": 3835
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-C/protocol-schema.md",
+      "bytes": 4712
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-C/PROGRESS.md",
+      "bytes": 949
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-C/review-A.md",
+      "bytes": 2122
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-C/red.log",
+      "bytes": 6118
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/repair-C/protocol-addendum-v2.1.md",
+      "bytes": 1180
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/ledger/prior-record-hashes.json",
+      "bytes": 669
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/ledger/old-assertions.md",
+      "bytes": 491
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/ledger/playback.json",
+      "bytes": 530
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/ledger/differences.json",
+      "bytes": 90914
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/ledger/r0-independent-review.md",
+      "bytes": 2409
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/ledger/r0-freeze-check.json",
+      "bytes": 74
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/ledger/r0-final-source-hashes.json",
+      "bytes": 8494
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/ledger/input-hashes.json",
+      "bytes": 7067
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/ledger/native-entrypoints.json",
+      "bytes": 1775
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/ledger/r0-copied-original.json",
+      "bytes": 21690
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/ledger/engineering-red-green.json",
+      "bytes": 17600
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/ledger/acceptance-cases.json",
+      "bytes": 915
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/ledger/versions.json",
+      "bytes": 2018
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/ledger/copy-baseline.json",
+      "bytes": 15735
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/ledger/schema-freeze.json",
+      "bytes": 291
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/ledger/final-source-hashes.json",
+      "bytes": 8581
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/guard/sitecustomize.py",
+      "bytes": 3009
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/tmp/launcher/tmpjiww1v4v",
+      "bytes": 7
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/tmp/launcher/tmpo5xkssww",
+      "bytes": 7
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/tmp/launcher/tmpw6pz1mta/escape",
+      "symlink_target": "/tmp"
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/tmp/launcher/tmpntzr2ypd/escape",
+      "symlink_target": "/tmp"
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/integration-smoke/5a57a5d3-f634-4ef1-b643-0ee3e3bfa541/P1/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/integration-smoke/5a57a5d3-f634-4ef1-b643-0ee3e3bfa541/P1/latest.json",
+      "bytes": 855
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/integration-smoke/5a57a5d3-f634-4ef1-b643-0ee3e3bfa541/P0/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/integration-smoke/5a57a5d3-f634-4ef1-b643-0ee3e3bfa541/P0/latest.json",
+      "bytes": 2338
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/integration-smoke/5a57a5d3-f634-4ef1-b643-0ee3e3bfa541/P2/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/integration-smoke/5a57a5d3-f634-4ef1-b643-0ee3e3bfa541/P2/latest.json",
+      "bytes": 2343
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/integration-smoke/300abd94-7758-4c97-8305-c4efd1ad78fa/P1/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/integration-smoke/300abd94-7758-4c97-8305-c4efd1ad78fa/P1/latest.json",
+      "bytes": 851
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/integration-smoke/300abd94-7758-4c97-8305-c4efd1ad78fa/P0/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/integration-smoke/300abd94-7758-4c97-8305-c4efd1ad78fa/P0/latest.json",
+      "bytes": 2335
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/integration-smoke/300abd94-7758-4c97-8305-c4efd1ad78fa/P2/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/integration-smoke/300abd94-7758-4c97-8305-c4efd1ad78fa/P2/latest.json",
+      "bytes": 2341
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/control-fixtures/library/control.wav",
+      "bytes": 1644
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-503af95153f74ff499ff4982d49847a9/resources.log",
+      "bytes": 3019
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-503af95153f74ff499ff4982d49847a9/environment-probes.log",
+      "bytes": 5119
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-503af95153f74ff499ff4982d49847a9/integration.log",
+      "bytes": 1091
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-503af95153f74ff499ff4982d49847a9/protocol.log",
+      "bytes": 143
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-503af95153f74ff499ff4982d49847a9/metrics.log",
+      "bytes": 103
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-503af95153f74ff499ff4982d49847a9/audio.log",
+      "bytes": 659
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-503af95153f74ff499ff4982d49847a9/acceptance.json",
+      "bytes": 8728
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-503af95153f74ff499ff4982d49847a9/learner.log",
+      "bytes": 2826
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-503af95153f74ff499ff4982d49847a9/activity-denominators.log",
+      "bytes": 387
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-503af95153f74ff499ff4982d49847a9/guard.log",
+      "bytes": 1836
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-503af95153f74ff499ff4982d49847a9/controls.log",
+      "bytes": 314
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-503af95153f74ff499ff4982d49847a9/artifacts.log",
+      "bytes": 485
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-67782aafb26348d5bcf5cd0138761dcd/resources.log",
+      "bytes": 101
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-67782aafb26348d5bcf5cd0138761dcd/environment-probes.log",
+      "bytes": 5119
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-67782aafb26348d5bcf5cd0138761dcd/integration.log",
+      "bytes": 1091
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-67782aafb26348d5bcf5cd0138761dcd/protocol.log",
+      "bytes": 143
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-67782aafb26348d5bcf5cd0138761dcd/metrics.log",
+      "bytes": 103
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-67782aafb26348d5bcf5cd0138761dcd/audio.log",
+      "bytes": 659
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-67782aafb26348d5bcf5cd0138761dcd/acceptance.json",
+      "bytes": 8728
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-67782aafb26348d5bcf5cd0138761dcd/learner.log",
+      "bytes": 2826
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-67782aafb26348d5bcf5cd0138761dcd/activity-denominators.log",
+      "bytes": 387
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-67782aafb26348d5bcf5cd0138761dcd/guard.log",
+      "bytes": 1836
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-67782aafb26348d5bcf5cd0138761dcd/controls.log",
+      "bytes": 314
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-67782aafb26348d5bcf5cd0138761dcd/artifacts.log",
+      "bytes": 904
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-503af95153f74ff499ff4982d49847a9/original34/imports.jsonl",
+      "bytes": 4535
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-503af95153f74ff499ff4982d49847a9/original34/original34.log",
+      "bytes": 28332
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-503af95153f74ff499ff4982d49847a9/original34/original34.json",
+      "bytes": 3494
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-67782aafb26348d5bcf5cd0138761dcd/original34/imports.jsonl",
+      "bytes": 4545
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-67782aafb26348d5bcf5cd0138761dcd/original34/original34.log",
+      "bytes": 4490
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/eval/runs/acceptance-67782aafb26348d5bcf5cd0138761dcd/original34/original34.json",
+      "bytes": 3500
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/context_player/feedback.py",
+      "bytes": 8262
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/context_player/transport.py",
+      "bytes": 11159
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/context_player/context.py",
+      "bytes": 9899
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/context_player/__init__.py",
+      "bytes": 90
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/context_player/recommend.py",
+      "bytes": 9647
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/context_player/experiments.py",
+      "bytes": 10563
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/context_player/backend.py",
+      "bytes": 16236
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/context_player/feedback.py",
+      "bytes": 8085
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/context_player/transport.py",
+      "bytes": 11159
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/context_player/context.py",
+      "bytes": 9899
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/context_player/__init__.py",
+      "bytes": 90
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/context_player/recommend.py",
+      "bytes": 9647
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/context_player/experiments.py",
+      "bytes": 10563
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/context_player/backend.py",
+      "bytes": 16236
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t17.wav",
+      "bytes": 1499444
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t11.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t08.wav",
+      "bytes": 1587644
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t04.wav",
+      "bytes": 1675844
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t19.wav",
+      "bytes": 1675844
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/LICENSE.md",
+      "bytes": 282
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t07.wav",
+      "bytes": 1499444
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t21.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t10.wav",
+      "bytes": 1764044
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t20.wav",
+      "bytes": 1764044
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t01.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t24.wav",
+      "bytes": 1675844
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t05.wav",
+      "bytes": 1764044
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t15.wav",
+      "bytes": 1764044
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t09.wav",
+      "bytes": 1675844
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t22.wav",
+      "bytes": 1499444
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t13.wav",
+      "bytes": 1587644
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t18.wav",
+      "bytes": 1587644
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/catalog.json",
+      "bytes": 10088
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t14.wav",
+      "bytes": 1675844
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t02.wav",
+      "bytes": 1499444
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t03.wav",
+      "bytes": 1587644
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t06.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t16.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t23.wav",
+      "bytes": 1587644
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/library/t12.wav",
+      "bytes": 1499444
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/context_player/tests/test_experiments.py",
+      "bytes": 4057
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/context_player/tests/test_lazy_validation.py",
+      "bytes": 1447
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/context_player/tests/test_recommend.py",
+      "bytes": 5393
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/context_player/tests/test_feedback.py",
+      "bytes": 5504
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/context_player/tests/test_backend.py",
+      "bytes": 5123
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/work/core-corrupt/bad.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/work/core-source-corrupt/state/music-schedule/context.json",
+      "bytes": 12
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/work/plugin-runtime-test/library/catalog.json",
+      "bytes": 10088
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/work/plugin-runtime-test/evidence/live-state.json",
+      "bytes": 1471
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/work/plugin-runtime-test/evidence/session-trace.jsonl",
+      "bytes": 404
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/test-fixtures/work/core-source/state/music-schedule/context.json",
+      "bytes": 112
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/context_player/tests/test_experiments.py",
+      "bytes": 4057
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/context_player/tests/test_lazy_validation.py",
+      "bytes": 1447
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/context_player/tests/test_recommend.py",
+      "bytes": 5393
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/context_player/tests/test_feedback.py",
+      "bytes": 5504
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/context_player/tests/test_backend.py",
+      "bytes": 5123
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/platform/crates/music-plugin-p40-replay/tools/test_replay.py",
+      "bytes": 10759
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/platform/crates/music-plugin-p40-replay/tools/replay.py",
+      "bytes": 13911
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/platform/crates/music-plugin-p40-replay/tools/test_activity.py",
+      "bytes": 2944
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/integration/platform/crates/music-plugin-p40-replay/tools/activity.py",
+      "bytes": 5708
+    },
+    {
+      "path": "tmp/destructive-copy/ca34f4558d654f3aa78803f082d18924/learner/state/model.json",
+      "bytes": 807
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/pilot_report.json",
+      "bytes": 343
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/test_exit.json",
+      "bytes": 241
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/manifest_all_wav.json",
+      "bytes": 142242
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/catalog_hash_check.json",
+      "bytes": 442
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/native_inventory_exit.json",
+      "bytes": 107
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/pilot_exit.json",
+      "bytes": 332
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/extract.py",
+      "bytes": 8077
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/PROGRESS.md",
+      "bytes": 1792
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/review-B.md",
+      "bytes": 971
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/splits.json",
+      "bytes": 50002
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/run_audio.py",
+      "bytes": 1505
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/accuracy.json",
+      "bytes": 622
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/README.md",
+      "bytes": 2956
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/native_inventory_checkpoint.json",
+      "bytes": 142242
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/test_extract.py",
+      "bytes": 2238
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/review_b_probe.py",
+      "bytes": 597
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/inventory_native.py",
+      "bytes": 2205
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/features.json",
+      "bytes": 195622
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/extract_iteration1.py",
+      "bytes": 7146
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/finalize.py",
+      "bytes": 1648
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/versions.json",
+      "bytes": 983
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/native_fullhash_exit.json",
+      "bytes": 105
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/audio/manifest.json",
+      "bytes": 141988
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/repair-B/green.log",
+      "bytes": 2839
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/repair-B/REPORT.md",
+      "bytes": 653
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/repair-B/PROGRESS.md",
+      "bytes": 853
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/repair-B/review-C.md",
+      "bytes": 3901
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/repair-B/red.log",
+      "bytes": 5154
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/contract/CONTRACT.md",
+      "bytes": 5050
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/contract/ADDENDUM-v1.0.1.md",
+      "bytes": 1386
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/task0-fixture.json",
+      "bytes": 110
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/engineering-controls.py",
+      "bytes": 1878
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/run-original34.py",
+      "bytes": 1951
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/negative_controls.py",
+      "bytes": 1490
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/task0-red-green.json",
+      "bytes": 1275
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/STUDY_PROTOCOL.md",
+      "bytes": 1983
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/integration-smoke.json",
+      "bytes": 1090
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/candidate-original34-exit.json",
+      "bytes": 157
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/artifact_checks.py",
+      "bytes": 2440
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/metrics.py",
+      "bytes": 31515
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/activity_retest.py",
+      "bytes": 573
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/stop-smoke.json",
+      "bytes": 123
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/acceptance.json",
+      "bytes": 7997
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/negative-red-green.json",
+      "bytes": 4876
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/test_metrics.py",
+      "bytes": 1646
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/smoke.py",
+      "bytes": 1811
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/test_protocol.py",
+      "bytes": 26982
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/playback-smoke.json",
+      "bytes": 140
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/guard.json",
+      "bytes": 1847
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/entrypoints-smoke.json",
+      "bytes": 120
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/effect-status.json",
+      "bytes": 1378
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/policy-gates.json",
+      "bytes": 152
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/play.ps1",
+      "bytes": 1867
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/compare.py",
+      "bytes": 6397
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/stop.ps1",
+      "bytes": 643
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/learner/repair_iteration2.py",
+      "bytes": 2002
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/learner/model.py",
+      "bytes": 10809
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/learner/PROGRESS.md",
+      "bytes": 1413
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/learner/test_model.py",
+      "bytes": 10753
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/learner/README.md",
+      "bytes": 3914
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/learner/store.py",
+      "bytes": 7795
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/learner/deliver.py",
+      "bytes": 1494
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/learner/__init__.py",
+      "bytes": 2
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/learner/review_c_check.py",
+      "bytes": 866
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/learner/review-C.md",
+      "bytes": 1672
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/learner/versions.json",
+      "bytes": 511
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/learner/report.json",
+      "bytes": 1183
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/activity/baseline.py",
+      "bytes": 5708
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/activity/REPORT.md",
+      "bytes": 2180
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/activity/candidate-scored.json",
+      "bytes": 424645
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/activity/candidate.py",
+      "bytes": 2713
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/activity/hashes.json",
+      "bytes": 2114
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/activity/checks.json",
+      "bytes": 1597
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/activity/PROGRESS.md",
+      "bytes": 601
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/activity/baseline-scored.json",
+      "bytes": 424821
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/activity/review-A.md",
+      "bytes": 1999
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/activity/RETEST.sh",
+      "bytes": 269
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/activity/predictions.json",
+      "bytes": 3643867
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/activity/review_audio_probe.py",
+      "bytes": 518
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/activity/checkpoint.json",
+      "bytes": 106
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/activity/reference_eval.py",
+      "bytes": 5558
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/activity/execution.json",
+      "bytes": 179
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/activity/run.py",
+      "bytes": 5845
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/activity/report.json",
+      "bytes": 24235
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/activity/COLLECTION_PROTOCOL.md",
+      "bytes": 2619
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/repair-A/imports.jsonl",
+      "bytes": 2346
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/repair-A/green.log",
+      "bytes": 483
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/repair-A/REPORT.md",
+      "bytes": 1995
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/repair-A/test_resources.py",
+      "bytes": 1906
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/repair-A/probe.json",
+      "bytes": 4529
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/repair-A/PROGRESS.md",
+      "bytes": 629
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/repair-A/review-B.md",
+      "bytes": 1903
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/repair-A/red.log",
+      "bytes": 1832
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/repair-A/probe.py",
+      "bytes": 1868
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/repair-C/green.log",
+      "bytes": 5619
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/repair-C/protocol-schema.md",
+      "bytes": 4712
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/repair-C/PROGRESS.md",
+      "bytes": 552
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/repair-C/red.log",
+      "bytes": 6118
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/repair-C/protocol-addendum-v2.1.md",
+      "bytes": 1180
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/ledger/old-assertions.md",
+      "bytes": 491
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/ledger/r0-independent-review.md",
+      "bytes": 2409
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/ledger/r0-freeze-check.json",
+      "bytes": 74
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/ledger/r0-final-source-hashes.json",
+      "bytes": 8494
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/ledger/input-hashes.json",
+      "bytes": 7067
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/ledger/native-entrypoints.json",
+      "bytes": 1775
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/ledger/r0-copied-original.json",
+      "bytes": 21690
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/ledger/acceptance-cases.json",
+      "bytes": 915
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/ledger/versions.json",
+      "bytes": 582
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/ledger/copy-baseline.json",
+      "bytes": 15735
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/ledger/schema-freeze.json",
+      "bytes": 291
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/guard/sitecustomize.py",
+      "bytes": 3009
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/tmp/launcher/tmpp2c4_bdu",
+      "bytes": 7
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/tmp/launcher/tmpkc7lpjik",
+      "bytes": 7
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/integration-smoke/1bb5e1e3-5198-4be9-b53c-676d57dcbb8b/P1/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/integration-smoke/1bb5e1e3-5198-4be9-b53c-676d57dcbb8b/P1/latest.json",
+      "bytes": 855
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/integration-smoke/1bb5e1e3-5198-4be9-b53c-676d57dcbb8b/P0/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/integration-smoke/1bb5e1e3-5198-4be9-b53c-676d57dcbb8b/P0/latest.json",
+      "bytes": 2338
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/integration-smoke/1bb5e1e3-5198-4be9-b53c-676d57dcbb8b/P2/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/integration-smoke/1bb5e1e3-5198-4be9-b53c-676d57dcbb8b/P2/latest.json",
+      "bytes": 2344
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/integration-smoke/27d0d330-498d-4a6a-8cee-66128525c72e/P1/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/integration-smoke/27d0d330-498d-4a6a-8cee-66128525c72e/P1/latest.json",
+      "bytes": 853
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/integration-smoke/27d0d330-498d-4a6a-8cee-66128525c72e/P0/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/integration-smoke/27d0d330-498d-4a6a-8cee-66128525c72e/P0/latest.json",
+      "bytes": 2338
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/integration-smoke/27d0d330-498d-4a6a-8cee-66128525c72e/P2/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/integration-smoke/27d0d330-498d-4a6a-8cee-66128525c72e/P2/latest.json",
+      "bytes": 2343
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/control-fixtures/library/control.wav",
+      "bytes": 1644
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-4c9af1ab9423427092c6d6082f9a48d7/resources.log",
+      "bytes": 101
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-4c9af1ab9423427092c6d6082f9a48d7/integration.log",
+      "bytes": 1091
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-4c9af1ab9423427092c6d6082f9a48d7/protocol.log",
+      "bytes": 143
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-4c9af1ab9423427092c6d6082f9a48d7/metrics.log",
+      "bytes": 103
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-4c9af1ab9423427092c6d6082f9a48d7/audio.log",
+      "bytes": 659
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-4c9af1ab9423427092c6d6082f9a48d7/acceptance.json",
+      "bytes": 7997
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-4c9af1ab9423427092c6d6082f9a48d7/learner.log",
+      "bytes": 2826
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-4c9af1ab9423427092c6d6082f9a48d7/activity-denominators.log",
+      "bytes": 387
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-4c9af1ab9423427092c6d6082f9a48d7/guard.log",
+      "bytes": 1836
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-4c9af1ab9423427092c6d6082f9a48d7/controls.log",
+      "bytes": 314
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-4c9af1ab9423427092c6d6082f9a48d7/artifacts.log",
+      "bytes": 815
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-1e1f6d8510e840d280c5fd975640cf54/resources.log",
+      "bytes": 3019
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-1e1f6d8510e840d280c5fd975640cf54/integration.log",
+      "bytes": 1091
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-1e1f6d8510e840d280c5fd975640cf54/protocol.log",
+      "bytes": 143
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-1e1f6d8510e840d280c5fd975640cf54/metrics.log",
+      "bytes": 103
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-1e1f6d8510e840d280c5fd975640cf54/audio.log",
+      "bytes": 659
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-1e1f6d8510e840d280c5fd975640cf54/acceptance.json",
+      "bytes": 7993
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-1e1f6d8510e840d280c5fd975640cf54/learner.log",
+      "bytes": 2826
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-1e1f6d8510e840d280c5fd975640cf54/activity-denominators.log",
+      "bytes": 387
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-1e1f6d8510e840d280c5fd975640cf54/guard.log",
+      "bytes": 1836
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-1e1f6d8510e840d280c5fd975640cf54/controls.log",
+      "bytes": 314
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-1e1f6d8510e840d280c5fd975640cf54/artifacts.log",
+      "bytes": 815
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-4c9af1ab9423427092c6d6082f9a48d7/original34/imports.jsonl",
+      "bytes": 2517
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-4c9af1ab9423427092c6d6082f9a48d7/original34/original34.log",
+      "bytes": 4490
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-4c9af1ab9423427092c6d6082f9a48d7/original34/original34.json",
+      "bytes": 3500
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-1e1f6d8510e840d280c5fd975640cf54/original34/imports.jsonl",
+      "bytes": 2507
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-1e1f6d8510e840d280c5fd975640cf54/original34/original34.log",
+      "bytes": 28332
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/eval/runs/acceptance-1e1f6d8510e840d280c5fd975640cf54/original34/original34.json",
+      "bytes": 3494
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/context_player/feedback.py",
+      "bytes": 8262
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/context_player/transport.py",
+      "bytes": 11159
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/context_player/context.py",
+      "bytes": 9899
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/context_player/__init__.py",
+      "bytes": 90
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/context_player/recommend.py",
+      "bytes": 9647
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/context_player/experiments.py",
+      "bytes": 10563
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/context_player/backend.py",
+      "bytes": 16236
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/context_player/feedback.py",
+      "bytes": 8085
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/context_player/transport.py",
+      "bytes": 11159
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/context_player/context.py",
+      "bytes": 9899
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/context_player/__init__.py",
+      "bytes": 90
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/context_player/recommend.py",
+      "bytes": 9647
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/context_player/experiments.py",
+      "bytes": 10563
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/context_player/backend.py",
+      "bytes": 16236
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t17.wav",
+      "bytes": 1499444
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t11.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t08.wav",
+      "bytes": 1587644
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t04.wav",
+      "bytes": 1675844
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t19.wav",
+      "bytes": 1675844
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/LICENSE.md",
+      "bytes": 282
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t07.wav",
+      "bytes": 1499444
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t21.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t10.wav",
+      "bytes": 1764044
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t20.wav",
+      "bytes": 1764044
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t01.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t24.wav",
+      "bytes": 1675844
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t05.wav",
+      "bytes": 1764044
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t15.wav",
+      "bytes": 1764044
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t09.wav",
+      "bytes": 1675844
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t22.wav",
+      "bytes": 1499444
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t13.wav",
+      "bytes": 1587644
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t18.wav",
+      "bytes": 1587644
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/catalog.json",
+      "bytes": 10088
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t14.wav",
+      "bytes": 1675844
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t02.wav",
+      "bytes": 1499444
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t03.wav",
+      "bytes": 1587644
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t06.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t16.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t23.wav",
+      "bytes": 1587644
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/library/t12.wav",
+      "bytes": 1499444
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/context_player/tests/test_experiments.py",
+      "bytes": 4057
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/context_player/tests/test_lazy_validation.py",
+      "bytes": 1447
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/context_player/tests/test_recommend.py",
+      "bytes": 5393
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/context_player/tests/test_feedback.py",
+      "bytes": 5504
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/context_player/tests/test_backend.py",
+      "bytes": 5123
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/work/core-corrupt/bad.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/work/core-source-corrupt/state/music-schedule/context.json",
+      "bytes": 12
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/work/plugin-runtime-test/library/catalog.json",
+      "bytes": 10088
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/work/plugin-runtime-test/evidence/live-state.json",
+      "bytes": 1471
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/work/plugin-runtime-test/evidence/session-trace.jsonl",
+      "bytes": 404
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/test-fixtures/work/core-source/state/music-schedule/context.json",
+      "bytes": 112
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/context_player/tests/test_experiments.py",
+      "bytes": 4057
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/context_player/tests/test_lazy_validation.py",
+      "bytes": 1447
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/context_player/tests/test_recommend.py",
+      "bytes": 5393
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/context_player/tests/test_feedback.py",
+      "bytes": 5504
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/context_player/tests/test_backend.py",
+      "bytes": 5123
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/platform/crates/music-plugin-p40-replay/tools/test_replay.py",
+      "bytes": 10759
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/platform/crates/music-plugin-p40-replay/tools/replay.py",
+      "bytes": 13911
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/platform/crates/music-plugin-p40-replay/tools/test_activity.py",
+      "bytes": 2944
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/integration/platform/crates/music-plugin-p40-replay/tools/activity.py",
+      "bytes": 5708
+    },
+    {
+      "path": "tmp/destructive-copy/38e5aa6e9caa4f7aa1c055b25bb80615/learner/state/model.json",
+      "bytes": 807
+    },
+    {
+      "path": "tmp/launcher/tmpuhq7f9x2/escape",
+      "symlink_target": "/tmp"
+    },
+    {
+      "path": "tmp/launcher/tmpwid6vvfi/escape",
+      "symlink_target": "/tmp"
+    },
+    {
+      "path": "tmp/launcher/tmpolv_tagm/escape",
+      "symlink_target": "/tmp"
+    },
+    {
+      "path": "eval/runs/full-broken-ca34f4558d654f3aa78803f082d18924.log",
+      "bytes": 8729
+    },
+    {
+      "path": "eval/runs/full-broken-4443bcd3e6814d0ab33854f0c37339da.log",
+      "bytes": 8725
+    },
+    {
+      "path": "eval/runs/full-restored-ca34f4558d654f3aa78803f082d18924.log",
+      "bytes": 8729
+    },
+    {
+      "path": "eval/runs/full-broken-38e5aa6e9caa4f7aa1c055b25bb80615.log",
+      "bytes": 7994
+    },
+    {
+      "path": "eval/runs/full-restored-38e5aa6e9caa4f7aa1c055b25bb80615.log",
+      "bytes": 7998
+    },
+    {
+      "path": "eval/runs/full-restored-4443bcd3e6814d0ab33854f0c37339da.log",
+      "bytes": 8727
+    },
+    {
+      "path": "eval/integration-smoke/51837d85-a758-4ca5-a512-c3174da5c3d4/P1/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "eval/integration-smoke/51837d85-a758-4ca5-a512-c3174da5c3d4/P1/latest.json",
+      "bytes": 809
+    },
+    {
+      "path": "eval/integration-smoke/51837d85-a758-4ca5-a512-c3174da5c3d4/P0/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "eval/integration-smoke/51837d85-a758-4ca5-a512-c3174da5c3d4/P0/latest.json",
+      "bytes": 2290
+    },
+    {
+      "path": "eval/integration-smoke/51837d85-a758-4ca5-a512-c3174da5c3d4/P2/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "eval/integration-smoke/51837d85-a758-4ca5-a512-c3174da5c3d4/P2/latest.json",
+      "bytes": 2299
+    },
+    {
+      "path": "eval/integration-smoke/8de7ab1a-d229-48b4-80b4-1e5246923540/P1/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "eval/integration-smoke/8de7ab1a-d229-48b4-80b4-1e5246923540/P1/latest.json",
+      "bytes": 855
+    },
+    {
+      "path": "eval/integration-smoke/8de7ab1a-d229-48b4-80b4-1e5246923540/P0/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "eval/integration-smoke/8de7ab1a-d229-48b4-80b4-1e5246923540/P0/latest.json",
+      "bytes": 2338
+    },
+    {
+      "path": "eval/integration-smoke/8de7ab1a-d229-48b4-80b4-1e5246923540/P2/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "eval/integration-smoke/8de7ab1a-d229-48b4-80b4-1e5246923540/P2/latest.json",
+      "bytes": 2343
+    },
+    {
+      "path": "eval/integration-smoke/d8972c18-0db9-4d7e-a9f4-2720d1df07ef/P1/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "eval/integration-smoke/d8972c18-0db9-4d7e-a9f4-2720d1df07ef/P1/latest.json",
+      "bytes": 855
+    },
+    {
+      "path": "eval/integration-smoke/d8972c18-0db9-4d7e-a9f4-2720d1df07ef/P0/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "eval/integration-smoke/d8972c18-0db9-4d7e-a9f4-2720d1df07ef/P0/latest.json",
+      "bytes": 2338
+    },
+    {
+      "path": "eval/integration-smoke/d8972c18-0db9-4d7e-a9f4-2720d1df07ef/P2/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "eval/integration-smoke/d8972c18-0db9-4d7e-a9f4-2720d1df07ef/P2/latest.json",
+      "bytes": 2345
+    },
+    {
+      "path": "eval/integration-smoke/c7a92ad9-6735-4cc4-ae02-5a2ca3ab97ce/P1/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "eval/integration-smoke/c7a92ad9-6735-4cc4-ae02-5a2ca3ab97ce/P1/latest.json",
+      "bytes": 855
+    },
+    {
+      "path": "eval/integration-smoke/c7a92ad9-6735-4cc4-ae02-5a2ca3ab97ce/P0/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "eval/integration-smoke/c7a92ad9-6735-4cc4-ae02-5a2ca3ab97ce/P0/latest.json",
+      "bytes": 2336
+    },
+    {
+      "path": "eval/integration-smoke/c7a92ad9-6735-4cc4-ae02-5a2ca3ab97ce/P2/scenario.sqlite3",
+      "bytes": 36864
+    },
+    {
+      "path": "eval/integration-smoke/c7a92ad9-6735-4cc4-ae02-5a2ca3ab97ce/P2/latest.json",
+      "bytes": 2343
+    },
+    {
+      "path": "eval/control-fixtures/library/control.wav",
+      "bytes": 1644
+    },
+    {
+      "path": "eval/runs/preflight/activity.log",
+      "bytes": 387
+    },
+    {
+      "path": "eval/runs/preflight/audio.log",
+      "bytes": 659
+    },
+    {
+      "path": "eval/runs/preflight/learner.log",
+      "bytes": 2826
+    },
+    {
+      "path": "eval/runs/preflight/controls.log",
+      "bytes": 314
+    },
+    {
+      "path": "eval/runs/preflight/artifacts.log",
+      "bytes": 648
+    },
+    {
+      "path": "eval/runs/acceptance-01881501a3334108b261011af41b2dc5/resources.log",
+      "bytes": 101
+    },
+    {
+      "path": "eval/runs/acceptance-01881501a3334108b261011af41b2dc5/environment-probes.log",
+      "bytes": 4471
+    },
+    {
+      "path": "eval/runs/acceptance-01881501a3334108b261011af41b2dc5/integration.log",
+      "bytes": 983
+    },
+    {
+      "path": "eval/runs/acceptance-01881501a3334108b261011af41b2dc5/protocol.log",
+      "bytes": 143
+    },
+    {
+      "path": "eval/runs/acceptance-01881501a3334108b261011af41b2dc5/metrics.log",
+      "bytes": 103
+    },
+    {
+      "path": "eval/runs/acceptance-01881501a3334108b261011af41b2dc5/audio.log",
+      "bytes": 659
+    },
+    {
+      "path": "eval/runs/acceptance-01881501a3334108b261011af41b2dc5/acceptance.json",
+      "bytes": 6943
+    },
+    {
+      "path": "eval/runs/acceptance-01881501a3334108b261011af41b2dc5/learner.log",
+      "bytes": 2826
+    },
+    {
+      "path": "eval/runs/acceptance-01881501a3334108b261011af41b2dc5/activity-denominators.log",
+      "bytes": 387
+    },
+    {
+      "path": "eval/runs/acceptance-01881501a3334108b261011af41b2dc5/guard.log",
+      "bytes": 1674
+    },
+    {
+      "path": "eval/runs/acceptance-01881501a3334108b261011af41b2dc5/controls.log",
+      "bytes": 314
+    },
+    {
+      "path": "eval/runs/acceptance-01881501a3334108b261011af41b2dc5/artifacts.log",
+      "bytes": 904
+    },
+    {
+      "path": "eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/resources.log",
+      "bytes": 101
+    },
+    {
+      "path": "eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/environment-probes.log",
+      "bytes": 4471
+    },
+    {
+      "path": "eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/integration.log",
+      "bytes": 983
+    },
+    {
+      "path": "eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/protocol.log",
+      "bytes": 146
+    },
+    {
+      "path": "eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/metrics.log",
+      "bytes": 103
+    },
+    {
+      "path": "eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/audio.log",
+      "bytes": 659
+    },
+    {
+      "path": "eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/acceptance.json",
+      "bytes": 6942
+    },
+    {
+      "path": "eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/learner.log",
+      "bytes": 2826
+    },
+    {
+      "path": "eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/activity-denominators.log",
+      "bytes": 387
+    },
+    {
+      "path": "eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/guard.log",
+      "bytes": 1674
+    },
+    {
+      "path": "eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/controls.log",
+      "bytes": 314
+    },
+    {
+      "path": "eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/artifacts.log",
+      "bytes": 904
+    },
+    {
+      "path": "eval/runs/original34-39faa0347329404bbc1ce260435f05ef/imports.jsonl",
+      "bytes": 1588
+    },
+    {
+      "path": "eval/runs/original34-39faa0347329404bbc1ce260435f05ef/original34.log",
+      "bytes": 4490
+    },
+    {
+      "path": "eval/runs/original34-39faa0347329404bbc1ce260435f05ef/original34.json",
+      "bytes": 2834
+    },
+    {
+      "path": "eval/runs/acceptance-7eb580f17ddb4d27a9b0095e1e32c0df/resources.log",
+      "bytes": 101
+    },
+    {
+      "path": "eval/runs/acceptance-7eb580f17ddb4d27a9b0095e1e32c0df/integration.log",
+      "bytes": 983
+    },
+    {
+      "path": "eval/runs/acceptance-7eb580f17ddb4d27a9b0095e1e32c0df/protocol.log",
+      "bytes": 143
+    },
+    {
+      "path": "eval/runs/acceptance-7eb580f17ddb4d27a9b0095e1e32c0df/metrics.log",
+      "bytes": 103
+    },
+    {
+      "path": "eval/runs/acceptance-7eb580f17ddb4d27a9b0095e1e32c0df/audio.log",
+      "bytes": 659
+    },
+    {
+      "path": "eval/runs/acceptance-7eb580f17ddb4d27a9b0095e1e32c0df/acceptance.json",
+      "bytes": 6382
+    },
+    {
+      "path": "eval/runs/acceptance-7eb580f17ddb4d27a9b0095e1e32c0df/learner.log",
+      "bytes": 2826
+    },
+    {
+      "path": "eval/runs/acceptance-7eb580f17ddb4d27a9b0095e1e32c0df/activity-denominators.log",
+      "bytes": 387
+    },
+    {
+      "path": "eval/runs/acceptance-7eb580f17ddb4d27a9b0095e1e32c0df/guard.log",
+      "bytes": 1674
+    },
+    {
+      "path": "eval/runs/acceptance-7eb580f17ddb4d27a9b0095e1e32c0df/controls.log",
+      "bytes": 314
+    },
+    {
+      "path": "eval/runs/acceptance-7eb580f17ddb4d27a9b0095e1e32c0df/artifacts.log",
+      "bytes": 791
+    },
+    {
+      "path": "eval/runs/acceptance-01881501a3334108b261011af41b2dc5/original34/imports.jsonl",
+      "bytes": 3563
+    },
+    {
+      "path": "eval/runs/acceptance-01881501a3334108b261011af41b2dc5/original34/original34.log",
+      "bytes": 4490
+    },
+    {
+      "path": "eval/runs/acceptance-01881501a3334108b261011af41b2dc5/original34/original34.json",
+      "bytes": 2845
+    },
+    {
+      "path": "eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/original34/imports.jsonl",
+      "bytes": 3573
+    },
+    {
+      "path": "eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/original34/original34.log",
+      "bytes": 4490
+    },
+    {
+      "path": "eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/original34/original34.json",
+      "bytes": 2851
+    },
+    {
+      "path": "eval/runs/acceptance-7eb580f17ddb4d27a9b0095e1e32c0df/original34/imports.jsonl",
+      "bytes": 1967
+    },
+    {
+      "path": "eval/runs/acceptance-7eb580f17ddb4d27a9b0095e1e32c0df/original34/original34.log",
+      "bytes": 4490
+    },
+    {
+      "path": "eval/runs/acceptance-7eb580f17ddb4d27a9b0095e1e32c0df/original34/original34.json",
+      "bytes": 2844
+    },
+    {
+      "path": "integration/context_player/feedback.py",
+      "bytes": 8262
+    },
+    {
+      "path": "integration/context_player/transport.py",
+      "bytes": 11159
+    },
+    {
+      "path": "integration/context_player/context.py",
+      "bytes": 9899
+    },
+    {
+      "path": "integration/context_player/__init__.py",
+      "bytes": 90
+    },
+    {
+      "path": "integration/context_player/recommend.py",
+      "bytes": 9647
+    },
+    {
+      "path": "integration/context_player/experiments.py",
+      "bytes": 10563
+    },
+    {
+      "path": "integration/context_player/backend.py",
+      "bytes": 16236
+    },
+    {
+      "path": "integration/test-fixtures/context_player/feedback.py",
+      "bytes": 8085
+    },
+    {
+      "path": "integration/test-fixtures/context_player/transport.py",
+      "bytes": 11159
+    },
+    {
+      "path": "integration/test-fixtures/context_player/context.py",
+      "bytes": 9899
+    },
+    {
+      "path": "integration/test-fixtures/context_player/__init__.py",
+      "bytes": 90
+    },
+    {
+      "path": "integration/test-fixtures/context_player/recommend.py",
+      "bytes": 9647
+    },
+    {
+      "path": "integration/test-fixtures/context_player/experiments.py",
+      "bytes": 10563
+    },
+    {
+      "path": "integration/test-fixtures/context_player/backend.py",
+      "bytes": 16236
+    },
+    {
+      "path": "integration/test-fixtures/library/t17.wav",
+      "bytes": 1499444
+    },
+    {
+      "path": "integration/test-fixtures/library/t11.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "integration/test-fixtures/library/t08.wav",
+      "bytes": 1587644
+    },
+    {
+      "path": "integration/test-fixtures/library/t04.wav",
+      "bytes": 1675844
+    },
+    {
+      "path": "integration/test-fixtures/library/t19.wav",
+      "bytes": 1675844
+    },
+    {
+      "path": "integration/test-fixtures/library/LICENSE.md",
+      "bytes": 282
+    },
+    {
+      "path": "integration/test-fixtures/library/t07.wav",
+      "bytes": 1499444
+    },
+    {
+      "path": "integration/test-fixtures/library/t21.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "integration/test-fixtures/library/t10.wav",
+      "bytes": 1764044
+    },
+    {
+      "path": "integration/test-fixtures/library/t20.wav",
+      "bytes": 1764044
+    },
+    {
+      "path": "integration/test-fixtures/library/t01.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "integration/test-fixtures/library/t24.wav",
+      "bytes": 1675844
+    },
+    {
+      "path": "integration/test-fixtures/library/t05.wav",
+      "bytes": 1764044
+    },
+    {
+      "path": "integration/test-fixtures/library/t15.wav",
+      "bytes": 1764044
+    },
+    {
+      "path": "integration/test-fixtures/library/t09.wav",
+      "bytes": 1675844
+    },
+    {
+      "path": "integration/test-fixtures/library/t22.wav",
+      "bytes": 1499444
+    },
+    {
+      "path": "integration/test-fixtures/library/t13.wav",
+      "bytes": 1587644
+    },
+    {
+      "path": "integration/test-fixtures/library/t18.wav",
+      "bytes": 1587644
+    },
+    {
+      "path": "integration/test-fixtures/library/catalog.json",
+      "bytes": 10088
+    },
+    {
+      "path": "integration/test-fixtures/library/t14.wav",
+      "bytes": 1675844
+    },
+    {
+      "path": "integration/test-fixtures/library/t02.wav",
+      "bytes": 1499444
+    },
+    {
+      "path": "integration/test-fixtures/library/t03.wav",
+      "bytes": 1587644
+    },
+    {
+      "path": "integration/test-fixtures/library/t06.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "integration/test-fixtures/library/t16.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "integration/test-fixtures/library/t23.wav",
+      "bytes": 1587644
+    },
+    {
+      "path": "integration/test-fixtures/library/t12.wav",
+      "bytes": 1499444
+    },
+    {
+      "path": "integration/test-fixtures/context_player/tests/test_experiments.py",
+      "bytes": 4057
+    },
+    {
+      "path": "integration/test-fixtures/context_player/tests/test_lazy_validation.py",
+      "bytes": 1447
+    },
+    {
+      "path": "integration/test-fixtures/context_player/tests/test_recommend.py",
+      "bytes": 5393
+    },
+    {
+      "path": "integration/test-fixtures/context_player/tests/test_feedback.py",
+      "bytes": 5504
+    },
+    {
+      "path": "integration/test-fixtures/context_player/tests/test_backend.py",
+      "bytes": 5123
+    },
+    {
+      "path": "integration/test-fixtures/work/core-corrupt/bad.wav",
+      "bytes": 1411244
+    },
+    {
+      "path": "integration/test-fixtures/work/core-source-corrupt/state/music-schedule/context.json",
+      "bytes": 12
+    },
+    {
+      "path": "integration/test-fixtures/work/plugin-runtime-test/library/catalog.json",
+      "bytes": 10088
+    },
+    {
+      "path": "integration/test-fixtures/work/plugin-runtime-test/evidence/live-state.json",
+      "bytes": 1471
+    },
+    {
+      "path": "integration/test-fixtures/work/plugin-runtime-test/evidence/session-trace.jsonl",
+      "bytes": 404
+    },
+    {
+      "path": "integration/test-fixtures/work/core-source/state/music-schedule/context.json",
+      "bytes": 112
+    },
+    {
+      "path": "integration/context_player/tests/test_experiments.py",
+      "bytes": 4057
+    },
+    {
+      "path": "integration/context_player/tests/test_lazy_validation.py",
+      "bytes": 1447
+    },
+    {
+      "path": "integration/context_player/tests/test_recommend.py",
+      "bytes": 5393
+    },
+    {
+      "path": "integration/context_player/tests/test_feedback.py",
+      "bytes": 5504
+    },
+    {
+      "path": "integration/context_player/tests/test_backend.py",
+      "bytes": 5123
+    },
+    {
+      "path": "integration/platform/crates/music-plugin-p40-replay/tools/test_replay.py",
+      "bytes": 10759
+    },
+    {
+      "path": "integration/platform/crates/music-plugin-p40-replay/tools/replay.py",
+      "bytes": 13911
+    },
+    {
+      "path": "integration/platform/crates/music-plugin-p40-replay/tools/test_activity.py",
+      "bytes": 2944
+    },
+    {
+      "path": "integration/platform/crates/music-plugin-p40-replay/tools/activity.py",
+      "bytes": 5708
+    },
+    {
+      "path": "learner/state/model.json",
+      "bytes": 807
+    }
+  ]
+}

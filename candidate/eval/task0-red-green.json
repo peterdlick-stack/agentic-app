@@ -1,0 +1,17 @@
+[
+  {
+    "phase": "good",
+    "exit_code": 0,
+    "output": "{\"status\": \"PASS\", \"fixture\": \"/mnt/f/context-recommend-v1-20261004-154611/eval/task0-fixture.json\"}\n"
+  },
+  {
+    "phase": "broken",
+    "exit_code": 1,
+    "output": "Traceback (most recent call last):\n  File \"/mnt/f/context-recommend-v1-20261004-154611/verify.py\", line 26, in <module>\n    if __name__=='__main__':sys.exit(main())\n                                     ^^^^^^\n  File \"/mnt/f/context-recommend-v1-20261004-154611/verify.py\", line 13, in main\n    print(json.dumps(check_fixture(args.fixture)));return 0\n                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/mnt/f/context-recommend-v1-20261004-154611/verify.py\", line 7, in check_fixture\n    if x.get('schema_version')!=1 or x.get('content_id')!='sha256:'+hashlib.sha256(b'fixture').hexdigest():raise ValueError('invalid_contract_fixture')\n                                                                                                           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nValueError: invalid_contract_fixture\n"
+  },
+  {
+    "phase": "restored",
+    "exit_code": 0,
+    "output": "{\"status\": \"PASS\", \"fixture\": \"/mnt/f/context-recommend-v1-20261004-154611/eval/task0-fixture.json\"}\n"
+  }
+]

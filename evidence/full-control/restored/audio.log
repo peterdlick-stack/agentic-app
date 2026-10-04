@@ -1,0 +1,12 @@
+test_constant_amplitude_rms (test_extract.ExtractTests.test_constant_amplitude_rms) ... ok
+test_corrupt_audio (test_extract.ExtractTests.test_corrupt_audio) ... ok
+test_mechanism_click_tempos (test_extract.ExtractTests.test_mechanism_click_tempos) ... ok
+test_pcm24_sign (test_extract.ExtractTests.test_pcm24_sign) ... ok
+test_silence_abstains (test_extract.ExtractTests.test_silence_abstains) ... ok
+test_source_hash_binding (test_extract.ExtractTests.test_source_hash_binding) ... ok
+test_write_boundary (test_extract.ExtractTests.test_write_boundary) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.030s
+
+OK

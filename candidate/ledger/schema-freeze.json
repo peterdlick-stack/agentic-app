@@ -1,0 +1,9 @@
+{
+  "path": "repair-C/protocol-schema.md",
+  "sha256": "5aaa9ee04906f6717604bb55051f7d608579b568c0849734ed3c663f996cf090",
+  "version": 2,
+  "addendum": {
+    "path": "repair-C/protocol-addendum-v2.1.md",
+    "sha256": "334aae84b9ffaa2d7bd0d5ff2a6c4f196b93c39d34bb77f70e9f8d5534793639"
+  }
+}

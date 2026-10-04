@@ -1,0 +1,66 @@
+{
+  "command": [
+    "python3",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "context_player/tests",
+    "-p",
+    "test_*.py",
+    "-v"
+  ],
+  "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration",
+  "start_epoch": 1791110346.7365468,
+  "end_epoch": 1791110350.2081141,
+  "exit_code": 0,
+  "tests": 34,
+  "zero_skips": true,
+  "imports": [
+    {
+      "pid": 1274,
+      "ppid": 1273,
+      "module": "context_player.backend",
+      "path": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/context_player/backend.py",
+      "sha256": "9ba6b35595f4d9da3719157036984156236f7a891fade855b8df17f8df7aac09",
+      "time_ns": 1791110346771827163,
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration"
+    },
+    {
+      "pid": 1274,
+      "ppid": 1273,
+      "module": "context_player.feedback",
+      "path": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/context_player/feedback.py",
+      "sha256": "c63e59eb556f0aa3b8a4eb0b056c2efdd4b55c5101715f6220a7ecad2af5bc79",
+      "time_ns": 1791110346787887318,
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration"
+    },
+    {
+      "pid": 1275,
+      "ppid": 1274,
+      "module": "context_player.backend",
+      "path": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/context_player/backend.py",
+      "sha256": "9ba6b35595f4d9da3719157036984156236f7a891fade855b8df17f8df7aac09",
+      "time_ns": 1791110347878928959,
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures"
+    },
+    {
+      "pid": 1275,
+      "ppid": 1274,
+      "module": "context_player.feedback",
+      "path": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/context_player/feedback.py",
+      "sha256": "c63e59eb556f0aa3b8a4eb0b056c2efdd4b55c5101715f6220a7ecad2af5bc79",
+      "time_ns": 1791110347896001435,
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/test-fixtures"
+    }
+  ],
+  "source_hashes": {
+    "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/context_player/backend.py": "9ba6b35595f4d9da3719157036984156236f7a891fade855b8df17f8df7aac09",
+    "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/context_player/feedback.py": "c63e59eb556f0aa3b8a4eb0b056c2efdd4b55c5101715f6220a7ecad2af5bc79"
+  },
+  "import_ok": true,
+  "parent_and_child_verified": true,
+  "passed": true,
+  "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-2b1928d53adf4a93a6b957cc0c5d8ee1/original34/original34.log"
+}

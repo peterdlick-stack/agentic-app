@@ -1,0 +1,64 @@
+{
+  "audio": {
+    "callbacks": 0,
+    "current_id": "",
+    "device": "",
+    "duration": 0.0,
+    "error": "",
+    "index": 0,
+    "natural_ends": 0,
+    "nonzero_samples": 0,
+    "output_frames": 0,
+    "peak": 0.0,
+    "playing": false,
+    "position": 0.0
+  },
+  "busy": false,
+  "context_busy": false,
+  "context_message": "普通模式可直接推荐；手机接收默认关闭",
+  "context_player": {
+    "condition": "C",
+    "context": {
+      "activity": "unknown",
+      "freshness": "unverifiable",
+      "source_kind": "manual"
+    },
+    "mode": "normal"
+  },
+  "generation": 3,
+  "ids": [
+    "t01"
+  ],
+  "plugin_result": {
+    "data": {
+      "total_seconds": 32.0,
+      "track_count": 1,
+      "vocal_count": 0,
+      "vocal_unknown_count": 0
+    },
+    "message": "当前歌单 1 首，共 32 秒，已标注含人声 0 首，人声未知 0 首。",
+    "plugin": "queue-summary",
+    "selection": null
+  },
+  "plugin_status": "歌单概览：当前歌单 1 首，共 32 秒，已标注含人声 0 首，人声未知 0 首。",
+  "plugins": {
+    "api_version": 1,
+    "errors": [],
+    "registered": [
+      {
+        "id": "queue-summary",
+        "modules": [],
+        "name": "歌单概览",
+        "version": "0.1.0"
+      },
+      {
+        "id": "p40-replay",
+        "modules": [],
+        "name": "P40 历史回放",
+        "version": "0.1.0"
+      }
+    ]
+  },
+  "selection": null,
+  "status": "选歌已取消；迟到结果将丢弃"
+}

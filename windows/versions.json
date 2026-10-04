@@ -1,0 +1,47 @@
+{
+  "python": "3.12.3",
+  "numpy": "2.3.4",
+  "system": "Linux-5.15.167.4-microsoft-standard-WSL2-x86_64-with-glibc2.39",
+  "candidate_identity": "file hashes, not upstream HEAD",
+  "algorithm_tuning_rounds_added": 0,
+  "audio_extraction_rerun": false,
+  "activity_candidate_retrained_or_replayed": false,
+  "paid_model_calls": 0,
+  "original_test_command": [
+    "python3",
+    "-B",
+    "-m",
+    "unittest",
+    "discover",
+    "-s",
+    "context_player/tests",
+    "-p",
+    "test_*.py",
+    "-v"
+  ],
+  "real_p2_training_runs": 0,
+  "synthetic_training_mechanism_tests": true,
+  "frozen_at_utc": "2026-10-04T10:38:57.042104+00:00",
+  "frozen_source_count": 81,
+  "native_entrypoint_hashes": {
+    "START.cmd": "3facf78ed8ff6e25732764461a6601be25562d9ccfad350789cd9aeb2c5c3bfb",
+    "STOP.cmd": "d38272d0d2cf4df00fe90bcd9e6bc22ad3ff0192cd49c871c1e7a9360b40966a",
+    "play.ps1": "1ad7571d5caebf49376eff192cc3e8f13c829e78bf793bda64e4bc1c0986a52d",
+    "stop.ps1": "b8aaa1da8da0b6ad9fbe34a79daefdf9144e67a7ceb559744d9049ddfd528ecb",
+    "RETEST.cmd": "3a694d8cdc57ac0ce48296a1b98963196829feaab82e6cce762700907fbe4e44"
+  },
+  "E1_helper_hashes": {
+    "setup.py": "20dd80098f6e74133ba1ff39e1f377f3668c34c96322c5ea8e4f8a876ca666c7",
+    "integrate.py": "da44b3a209e677c7c5481c0d28cbae62d0b51b6480af4dfdb9d906b0d5b0b0c4",
+    "play.ps1": "1ad7571d5caebf49376eff192cc3e8f13c829e78bf793bda64e4bc1c0986a52d",
+    "stop.ps1": "b8aaa1da8da0b6ad9fbe34a79daefdf9144e67a7ceb559744d9049ddfd528ecb",
+    "START.cmd": "3facf78ed8ff6e25732764461a6601be25562d9ccfad350789cd9aeb2c5c3bfb",
+    "STOP.cmd": "d38272d0d2cf4df00fe90bcd9e6bc22ad3ff0192cd49c871c1e7a9360b40966a",
+    "RETEST.cmd": "3a694d8cdc57ac0ce48296a1b98963196829feaab82e6cce762700907fbe4e44",
+    "build_verifier.py": "f91520f6ad3a510ade8efdc4767a16be1df7259d6975ef787eee08c13536e685",
+    "smoke-native.ps1": "e47b801c467de0df97901f54ea5df58fd6d65a71a0a457710214ff668e4c0efb",
+    "finish.py": "369a100369e8d53ee04529dcd50113411a9d3586396cd2a56ea0a5bb0c55c2a6"
+  },
+  "engineering_version": "v2.1",
+  "protocol_tests": 47
+}

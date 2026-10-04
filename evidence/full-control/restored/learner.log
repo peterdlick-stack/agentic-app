@@ -1,0 +1,28 @@
+test_alias_split_is_content_based (learner.test_model.MechanismTests.test_alias_split_is_content_based) ... ok
+test_duplicate_and_future_feedback_detected (learner.test_model.MechanismTests.test_duplicate_and_future_feedback_detected) ... ok
+test_expired_context_fallback_and_strict_detection (learner.test_model.MechanismTests.test_expired_context_fallback_and_strict_detection) ... ok
+test_fit_restore_and_future_model_guard (learner.test_model.MechanismTests.test_fit_restore_and_future_model_guard) ... ok
+test_missing_required_feature_detected (learner.test_model.MechanismTests.test_missing_required_feature_detected) ... ok
+test_missing_unknown_and_stationary_not_reading (learner.test_model.MechanismTests.test_missing_unknown_and_stationary_not_reading) ... ok
+test_p0_exact_ordinary_score_and_alias_ties (learner.test_model.MechanismTests.test_p0_exact_ordinary_score_and_alias_ties) ... ok
+test_p1_soft_tempo (learner.test_model.MechanismTests.test_p1_soft_tempo) ... ok
+test_prequential_prefix_ignores_future_evidence (learner.test_model.MechanismTests.test_prequential_prefix_ignores_future_evidence) ... ok
+test_sdk_reading_rejected (learner.test_model.MechanismTests.test_sdk_reading_rejected) ... ok
+test_skips_not_negative (learner.test_model.MechanismTests.test_skips_not_negative) ... ok
+test_snapshot_feature_hash_binding (learner.test_model.MechanismTests.test_snapshot_feature_hash_binding) ... ok
+test_snapshot_mutation_and_unexposed_rejected (learner.test_model.MechanismTests.test_snapshot_mutation_and_unexposed_rejected) ... ok
+test_song_like_never_trains_scenario (learner.test_model.MechanismTests.test_song_like_never_trains_scenario) ... ok
+test_store_idempotency_immutable_and_separate_targets (learner.test_model.MechanismTests.test_store_idempotency_immutable_and_separate_targets) ... ok
+test_synthetic_labels_never_train (learner.test_model.MechanismTests.test_synthetic_labels_never_train) ... ok
+test_untrained_p2_falls_back (learner.test_model.MechanismTests.test_untrained_p2_falls_back) ... ok
+test_all_unknown_same_as_p0 (learner.test_model.SoftRankingRepairTests.test_all_unknown_same_as_p0) ... ok
+test_equal_score_stable_alias_order (learner.test_model.SoftRankingRepairTests.test_equal_score_stable_alias_order) ... ok
+test_expired_stationary_p0_fallback (learner.test_model.SoftRankingRepairTests.test_expired_stationary_p0_fallback) ... ok
+test_fixed_counterexample (learner.test_model.SoftRankingRepairTests.test_fixed_counterexample) ... ok
+test_negative_preference_p0_unchanged (learner.test_model.SoftRankingRepairTests.test_negative_preference_p0_unchanged) ... ok
+test_untrained_p2_same_as_p0 (learner.test_model.SoftRankingRepairTests.test_untrained_p2_same_as_p0) ... ok
+
+----------------------------------------------------------------------
+Ran 23 tests in 0.272s
+
+OK

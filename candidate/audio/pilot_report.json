@@ -1,0 +1,14 @@
+{
+  "version": "pcm-onset-acf-v1",
+  "library_entries": 544,
+  "unique_contents": 544,
+  "requested_entries": 48,
+  "completed_unique": 48,
+  "verified_this_run": 48,
+  "failed": 0,
+  "bpm_nonnull": 47,
+  "elapsed_seconds": 88.35632134699999,
+  "accuracy": "NOT_RUN",
+  "status": "FEATURES_ESTIMATED",
+  "hard_bpm_constraints_enabled": false
+}

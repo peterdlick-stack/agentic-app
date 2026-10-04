@@ -1,0 +1,176 @@
+{
+  "version": "repair-v2",
+  "run_id": "acceptance-a9e70a3254384b9eb3d9dedd17b669a7",
+  "start_epoch": 1791110374.9487102,
+  "end_epoch": 1791110386.9075966,
+  "checks": [
+    {
+      "name": "original34",
+      "exit_code": 0,
+      "actual_subprocess_exit": 0,
+      "result": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/original34/original34.json"
+    },
+    {
+      "name": "learner",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "learner.test_model",
+        "-v"
+      ],
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749",
+      "start_epoch": 1791110378.626005,
+      "end_epoch": 1791110379.020703,
+      "exit_code": 0,
+      "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/learner.log"
+    },
+    {
+      "name": "audio",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/audio",
+        "-p",
+        "test_extract.py",
+        "-v"
+      ],
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/audio",
+      "start_epoch": 1791110379.020752,
+      "end_epoch": 1791110379.14197,
+      "exit_code": 0,
+      "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/audio.log"
+    },
+    {
+      "name": "metrics",
+      "command": [
+        "python3",
+        "-B",
+        "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/eval/test_metrics.py"
+      ],
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749",
+      "start_epoch": 1791110379.1419864,
+      "end_epoch": 1791110379.2640579,
+      "exit_code": 0,
+      "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/metrics.log"
+    },
+    {
+      "name": "protocol",
+      "command": [
+        "python3",
+        "-B",
+        "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/eval/test_protocol.py"
+      ],
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749",
+      "start_epoch": 1791110379.2640731,
+      "end_epoch": 1791110382.4571676,
+      "exit_code": 0,
+      "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/protocol.log"
+    },
+    {
+      "name": "resources",
+      "command": [
+        "python3",
+        "-B",
+        "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/repair-A/test_resources.py"
+      ],
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749",
+      "start_epoch": 1791110382.4571822,
+      "end_epoch": 1791110382.5764143,
+      "exit_code": 0,
+      "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/resources.log"
+    },
+    {
+      "name": "controls",
+      "command": [
+        "python3",
+        "-B",
+        "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/run_controls.py"
+      ],
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749",
+      "start_epoch": 1791110382.5764334,
+      "end_epoch": 1791110384.195739,
+      "exit_code": 0,
+      "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/controls.log"
+    },
+    {
+      "name": "activity-denominators",
+      "command": [
+        "python3",
+        "-B",
+        "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/learner/review_c_check.py"
+      ],
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749",
+      "start_epoch": 1791110384.1957562,
+      "end_epoch": 1791110384.2373002,
+      "exit_code": 0,
+      "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/activity-denominators.log"
+    },
+    {
+      "name": "integration",
+      "command": [
+        "python3",
+        "-B",
+        "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/eval/smoke.py"
+      ],
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749",
+      "start_epoch": 1791110384.2373166,
+      "end_epoch": 1791110385.9194403,
+      "exit_code": 0,
+      "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/integration.log"
+    },
+    {
+      "name": "guard",
+      "command": [
+        "python3",
+        "-B",
+        "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/launcher.py",
+        "guard"
+      ],
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749",
+      "start_epoch": 1791110385.9194698,
+      "end_epoch": 1791110386.031269,
+      "exit_code": 0,
+      "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/guard.log"
+    },
+    {
+      "name": "environment-probes",
+      "command": [
+        "python3",
+        "-B",
+        "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/repair-A/probe.py"
+      ],
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749",
+      "start_epoch": 1791110386.031287,
+      "end_epoch": 1791110386.3006833,
+      "exit_code": 0,
+      "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/environment-probes.log"
+    },
+    {
+      "name": "artifacts",
+      "command": [
+        "python3",
+        "-B",
+        "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/eval/artifact_checks.py"
+      ],
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749",
+      "start_epoch": 1791110386.3006992,
+      "end_epoch": 1791110386.907584,
+      "exit_code": 0,
+      "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/eval/runs/acceptance-a9e70a3254384b9eb3d9dedd17b669a7/artifacts.log"
+    }
+  ],
+  "engineering": "ENGINEERING_REPAIRED",
+  "features": "FEATURES_ESTIMATED",
+  "activity": "ACCURACY_UNVERIFIED",
+  "benefit": "NO_USER_BENEFIT_EVIDENCE",
+  "jev": "JEV_NOT_RUN",
+  "research": "AWAITING_USER_EVIDENCE",
+  "activity_replay": "NOT_RUN_UNCHANGED_RESULTS_HASH_VERIFIED",
+  "no_overall_research_pass": true
+}

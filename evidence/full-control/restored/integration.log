@@ -1,0 +1,28 @@
+{
+  "status": "PASS",
+  "actual_import": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/integration/context_player/__init__.py",
+  "policies": [
+    {
+      "requested": "P0",
+      "effective": "P0",
+      "status": "OK",
+      "content_id": "sha256:00269864427c642f504260121d519c80151833303928ec9bbe5aa5863ee870bf"
+    },
+    {
+      "requested": "P1",
+      "effective": "P1",
+      "status": "OK",
+      "content_id": "sha256:099ba3d9ae4567003cd25977a478a861842eb449c573f3fa57d85a8b9ad6094d"
+    },
+    {
+      "requested": "P2",
+      "effective": "P0",
+      "status": "UNTRAINED",
+      "content_id": "sha256:00269864427c642f504260121d519c80151833303928ec9bbe5aa5863ee870bf"
+    }
+  ],
+  "feedback_restart": "synthetic_only_pass",
+  "hard_bpm_unknown_excluded": true,
+  "state": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/integration-smoke/88a8105c-8a75-467d-9035-ec155b9a1909",
+  "audio_audibility": "NOT_RUN"
+}

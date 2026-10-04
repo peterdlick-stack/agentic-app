@@ -1,0 +1,17 @@
+{
+  "v2": "ledger/final-source-hashes-v2.json",
+  "next": "v2.1",
+  "reason": "Independent review found finite_tree crashes on non-string dictionary key rather than structured insufficient; source scope C only, numerical criteria unchanged.",
+  "current": "v2.1",
+  "manifest": "ledger/final-source-hashes.json",
+  "frozen_at_utc": "2026-10-04T10:38:57.041760+00:00",
+  "patch_reasons": [
+    "non-string dict key structured rejection",
+    "unrepresentable integer structured numeric rejection"
+  ],
+  "changed_since_v2": [
+    "repair-allowlist.json",
+    "eval/metrics.py",
+    "eval/test_protocol.py"
+  ]
+}

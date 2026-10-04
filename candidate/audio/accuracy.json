@@ -1,0 +1,18 @@
+{
+  "status": "FEATURES_ESTIMATED",
+  "independent_sealed_truth_songs": 0,
+  "bpm_all_truth_hit_rate": null,
+  "bpm_valid_estimate_mae": null,
+  "bpm_conditional_hit_rate": null,
+  "bpm_half_double_error_rate": null,
+  "bpm_truth_coverage": null,
+  "vocal_precision": null,
+  "vocal_recall": null,
+  "vocal_f1": null,
+  "extracted_unique": 48,
+  "bpm_extraction_coverage": 0.9791666666666666,
+  "vocals_unknown": 48,
+  "accuracy_gate": "NOT_RUN",
+  "hard_bpm_constraints_enabled": false,
+  "reason": "No independently verified music truth labels available; mechanism fixtures are not accuracy evidence."
+}

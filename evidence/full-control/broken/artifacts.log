@@ -1,0 +1,5 @@
+Traceback (most recent call last):
+  File "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/artifact_checks.py", line 20, in <module>
+    for k,v in json.loads(manifest.read_text()).items():assert sha(R/k)==v,('FROZEN_CANDIDATE_CHANGED',k)
+                                                               ^^^^^^^^^^^
+AssertionError: ('FROZEN_CANDIDATE_CHANGED', 'integration/context_player/feedback.py')

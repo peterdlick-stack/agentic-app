@@ -1,0 +1,13 @@
+{
+  "command": [
+    "/usr/bin/python3",
+    "-B",
+    "-m",
+    "unittest",
+    "-v",
+    "test_extract"
+  ],
+  "exit_code": 0,
+  "elapsed_seconds": 24.68430915900001,
+  "isolated_root": "/mnt/f/context-recommend-v1-20261004-154611/audio"
+}

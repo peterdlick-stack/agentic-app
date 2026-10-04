@@ -1,0 +1,37 @@
+﻿{
+    "play_exit":  0,
+    "idle_stop_exit":  0,
+    "matched_before_stop":  true,
+    "start_utc":  "2026-10-04T10:17:53.3139575Z",
+    "end_utc":  "2026-10-04T10:18:00.2211155Z",
+    "process":  {
+                    "exe":  "C:\\Users\\admin\\AppData\\Local\\Microsoft\\WinGet\\Packages\\Gyan.FFmpeg_Microsoft.Winget.Source_8wekyb3d8bbwe\\ffmpeg-9.0.1-full_build\\bin\\ffplay.exe",
+                    "pid":  14696,
+                    "startTicks":  639267058773906147,
+                    "stopRequested":  false
+                },
+    "controller_exit":  0,
+    "audibility":  "NOT_RUN_MUTED",
+    "start_exit":  0,
+    "exact_pid_stopped":  true,
+    "play_command":  [
+                         "powershell.exe",
+                         "-NoProfile",
+                         "-File",
+                         "F:/context-recommend-repair-20261004-180749/play.ps1",
+                         "-AudioPath",
+                         "F:\\context-player-cache-20261004\\library\\real_a7d28506de30cc20da0f13a3.wav",
+                         "-Seconds",
+                         "2",
+                         "-Volume",
+                         "0"
+                     ],
+    "stop_exit":  0,
+    "hashes":  {
+                   "START.cmd":  "3facf78ed8ff6e25732764461a6601be25562d9ccfad350789cd9aeb2c5c3bfb",
+                   "STOP.cmd":  "d38272d0d2cf4df00fe90bcd9e6bc22ad3ff0192cd49c871c1e7a9360b40966a",
+                   "play.ps1":  "1ad7571d5caebf49376eff192cc3e8f13c829e78bf793bda64e4bc1c0986a52d",
+                   "stop.ps1":  "b8aaa1da8da0b6ad9fbe34a79daefdf9144e67a7ceb559744d9049ddfd528ecb",
+                   "RETEST.cmd":  "3a694d8cdc57ac0ce48296a1b98963196829feaab82e6cce762700907fbe4e44"
+               }
+}

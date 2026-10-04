@@ -1,0 +1,176 @@
+{
+  "version": "repair-v2",
+  "run_id": "acceptance-72c4c8145a5a465094f685a72afd2eb0",
+  "start_epoch": 1791110337.2018375,
+  "end_epoch": 1791110346.699343,
+  "checks": [
+    {
+      "name": "original34",
+      "exit_code": 1,
+      "actual_subprocess_exit": 1,
+      "result": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/original34/original34.json"
+    },
+    {
+      "name": "learner",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "learner.test_model",
+        "-v"
+      ],
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da",
+      "start_epoch": 1791110338.5203445,
+      "end_epoch": 1791110338.9509878,
+      "exit_code": 0,
+      "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/learner.log"
+    },
+    {
+      "name": "audio",
+      "command": [
+        "python3",
+        "-B",
+        "-m",
+        "unittest",
+        "discover",
+        "-s",
+        "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio",
+        "-p",
+        "test_extract.py",
+        "-v"
+      ],
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/audio",
+      "start_epoch": 1791110338.9510028,
+      "end_epoch": 1791110339.086912,
+      "exit_code": 0,
+      "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/audio.log"
+    },
+    {
+      "name": "metrics",
+      "command": [
+        "python3",
+        "-B",
+        "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/test_metrics.py"
+      ],
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da",
+      "start_epoch": 1791110339.086925,
+      "end_epoch": 1791110339.2359986,
+      "exit_code": 0,
+      "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/metrics.log"
+    },
+    {
+      "name": "protocol",
+      "command": [
+        "python3",
+        "-B",
+        "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/test_protocol.py"
+      ],
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da",
+      "start_epoch": 1791110339.2360182,
+      "end_epoch": 1791110342.6589544,
+      "exit_code": 0,
+      "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/protocol.log"
+    },
+    {
+      "name": "resources",
+      "command": [
+        "python3",
+        "-B",
+        "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-A/test_resources.py"
+      ],
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da",
+      "start_epoch": 1791110342.658968,
+      "end_epoch": 1791110342.716723,
+      "exit_code": 1,
+      "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/resources.log"
+    },
+    {
+      "name": "controls",
+      "command": [
+        "python3",
+        "-B",
+        "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/run_controls.py"
+      ],
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da",
+      "start_epoch": 1791110342.7167394,
+      "end_epoch": 1791110344.3313992,
+      "exit_code": 0,
+      "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/controls.log"
+    },
+    {
+      "name": "activity-denominators",
+      "command": [
+        "python3",
+        "-B",
+        "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/learner/review_c_check.py"
+      ],
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da",
+      "start_epoch": 1791110344.3314145,
+      "end_epoch": 1791110344.371166,
+      "exit_code": 0,
+      "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/activity-denominators.log"
+    },
+    {
+      "name": "integration",
+      "command": [
+        "python3",
+        "-B",
+        "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/smoke.py"
+      ],
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da",
+      "start_epoch": 1791110344.371182,
+      "end_epoch": 1791110345.7723408,
+      "exit_code": 0,
+      "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/integration.log"
+    },
+    {
+      "name": "guard",
+      "command": [
+        "python3",
+        "-B",
+        "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/launcher.py",
+        "guard"
+      ],
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da",
+      "start_epoch": 1791110345.7723536,
+      "end_epoch": 1791110345.8732033,
+      "exit_code": 0,
+      "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/guard.log"
+    },
+    {
+      "name": "environment-probes",
+      "command": [
+        "python3",
+        "-B",
+        "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/repair-A/probe.py"
+      ],
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da",
+      "start_epoch": 1791110345.873217,
+      "end_epoch": 1791110346.1422236,
+      "exit_code": 0,
+      "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/environment-probes.log"
+    },
+    {
+      "name": "artifacts",
+      "command": [
+        "python3",
+        "-B",
+        "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/artifact_checks.py"
+      ],
+      "cwd": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da",
+      "start_epoch": 1791110346.1422405,
+      "end_epoch": 1791110346.6993337,
+      "exit_code": 1,
+      "log": "/home/fanzhou/octosense-ws/repair-runs/context-recommend-20261004-180749/tmp/destructive-copy/4443bcd3e6814d0ab33854f0c37339da/eval/runs/acceptance-72c4c8145a5a465094f685a72afd2eb0/artifacts.log"
+    }
+  ],
+  "engineering": "ENGINEERING_BLOCKED",
+  "features": "FEATURES_ESTIMATED",
+  "activity": "ACCURACY_UNVERIFIED",
+  "benefit": "NO_USER_BENEFIT_EVIDENCE",
+  "jev": "JEV_NOT_RUN",
+  "research": "AWAITING_USER_EVIDENCE",
+  "activity_replay": "NOT_RUN_UNCHANGED_RESULTS_HASH_VERIFIED",
+  "no_overall_research_pass": true
+}

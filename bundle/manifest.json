@@ -21,7 +21,7 @@
   ],
   "id": "context-dj",
   "integrity": {
-    "bundle_blake3": "d34b3a2e0e701c89b7067db468b78942855eca15db23193b492c55ade493ee06"
+    "bundle_blake3": "1167483b3f51f84f939a2e5b7e923f0a76a6ee36e36c860b04d26f33a248a3c9"
   },
   "name": "情境 DJ",
   "network": {
@@ -30,5 +30,5 @@
     ]
   },
   "schema": 1,
-  "version": "0.2.0"
+  "version": "0.3.0"
 }

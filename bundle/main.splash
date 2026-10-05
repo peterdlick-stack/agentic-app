@@ -126,6 +126,9 @@ let show_all_acts = false
 // 这样情境卡和刚生成的歌单显示的是同一个活动（G1 报告的不一致问题）
 let session_act = nil   // {id source conf why at bucket}
 let SESSION_S = 1800
+// ---- 第一次相遇（DEMO-ILOVEU 4.2）：每首歌的初见 seen、初听 heard、心动 liked，各只记第一次 ----
+let encounters = []     // [{k seen heard liked}]，存到 encounters.json；不存坐标
+let playlist_intent = "" // 这份歌单生成时你说的那句话，初听、心动时一起记下
 let sim_places = []     // 模拟模式下标记的地点，只在内存里
 let here = {place: nil dist: -1}
 let sim = {kind: "off" lat: 0.0 lon: 0.0 t: 0}
@@ -233,6 +236,20 @@ fn load_fb_row(row){
         if key == k { songs[j].fb = fb_clean(pick(row, "fb", nil)) }
     }
 }
+// 读文件里的一个时刻，转成字段齐全的对象。之后一律直接读字段（m.sim），
+// 因为 pick() 对脚本里新建的对象无效：那种对象的键和字符串比较永远不相等（已实测）
+fn enc_clean(m){
+    if m == nil { return nil }
+    {at: pick(m, "at", 0) slot: pick(m, "slot", "") weekend: pick(m, "weekend", false) act: pick(m, "act", "")
+        place_kind: pick(m, "place_kind", "") motion: pick(m, "motion", "unknown") weather: pick(m, "weather", "")
+        city: pick(m, "city", "") intent: pick(m, "intent", "") sim: pick(m, "sim", false) == true}
+}
+fn load_enc(x){
+    let k = pick(x, "k", "")
+    if k != "" {
+        encounters.push({k: k seen: enc_clean(pick(x, "seen", nil)) heard: enc_clean(pick(x, "heard", nil)) liked: enc_clean(pick(x, "liked", nil))})
+    }
+}
 fn load_label(x){
     let chosen = pick(x, "chosen", "")
     if act_by_id(chosen) != nil {
@@ -282,7 +299,13 @@ fn load_step2(){
 // 第 3 步：分批读确认记录
 fn load_step3(){
     labels = []
-    run_chunks(as_list(read_json("labels.json")), 0, 50, |x| load_label(x), || load_step4())
+    run_chunks(as_list(read_json("labels.json")), 0, 50, |x| load_label(x), || load_step3b())
+}
+// 第 3b 步：分批读相遇记录（随听过的歌增长，照 AGENTS.md 的规则分批）
+fn load_step3b(){
+    encounters = []
+    // 每条要整理 3 个时刻、每个 11 个字段，比确认记录重，所以每批只读 20 条
+    run_chunks(as_list(read_json("encounters.json")), 0, 20, |x| load_enc(x), || load_step4())
 }
 // 第 4 步：恢复上次歌单，启动完成
 fn load_step4(){
@@ -290,6 +313,7 @@ fn load_step4(){
     if last != nil {
         let keys = pick(last, "keys", [])
         let whys = pick(last, "whys", [])
+        playlist_intent = pick(last, "intent", "")
         playlist = []
         for i k in keys {
             for j key in song_keys {
@@ -299,6 +323,8 @@ fn load_step4(){
         playlist_act = pick(last, "act", "")
         if playlist.len() > 0 { plan_note = "上次的歌单（重启后恢复）" }
     }
+    // 第一次打开（没有上次的歌单）时，别让"正在加载…"一直留在界面上
+    if plan_note == "正在加载…" { plan_note = "" }
     booted = true
     fetch_weather()
     sync_home()
@@ -330,8 +356,9 @@ fn save_last(){
         keys.push(key_of(songs[p.i]))
         whys.push(p.why)
     }
-    write_json("last.json", {keys: keys whys: whys act: playlist_act at: time_now()})
+    write_json("last.json", {keys: keys whys: whys act: playlist_act intent: playlist_intent at: time_now()})
 }
+fn save_encounters(){ write_json("encounters.json", encounters) }
 
 // ---- 时间 ----
 fn local_parts(){
@@ -414,7 +441,7 @@ fn fetch_weather_at(lat, lon, coords){
     let la = round(lat * 100) / 100
     let lo = round(lon * 100) / 100
     let url = "https://api.open-meteo.com/v1/forecast?latitude=" + la + "&longitude=" + lo + "&current=temperature_2m,weather_code&timezone=auto"
-    net.http_request(net.HttpRequest{url: url method: net.HttpMethod.GET headers: {"User-Agent": "ContextDJ/0.2"}}) do net.HttpEvents{
+    net.http_request(net.HttpRequest{url: url method: net.HttpMethod.GET headers: {"User-Agent": "ContextDJ/0.3"}}) do net.HttpEvents{
         on_response: |res| got_weather(res, coords, seq)
         on_error: |_err| weather_failed(seq)
     }
@@ -1209,10 +1236,65 @@ fn finish(picks, how, raw, it, ctx, note){
         }
     }
     plan_note = summary
+    playlist_intent = ("" + raw).trim()
     save_last()
     log_history(how, raw, ctx)
+    enc_seen(ctx)
     sync_home()
     refresh_views()
+}
+
+// ---- 第一次相遇（DEMO-ILOVEU 4.2）----
+// 一个时刻的情境快照：不存坐标，只存地点类型；天气不可用时为空；城市只在天气按城市查询时记
+fn enc_moment(act, place_kind, mt){
+    let p = local_parts()
+    let wx = ""
+    if weather_usable() { wx = weather.text + " " + round(weather.temp) + "°C" }
+    let city = ""
+    if weather.coords == "city" { city = CITIES[prefs.city].n }
+    {at: time_now() slot: slot_name(p.hour) weekend: p.weekday == 0 || p.weekday == 6 act: act
+        place_kind: place_kind motion: mt weather: wx city: city intent: playlist_intent sim: sim.kind != "off"}
+}
+fn enc_find(k){
+    for j e in encounters { if e.k == k { return j } }
+    -1
+}
+// 只记第一次，之后不再覆盖；唯一的例外：已有的是模拟记录，这次是真实的，就替换
+fn enc_take(old, m){
+    if old == nil { return true }
+    if m.sim { return false }
+    old.sim
+}
+// 返回这次有没有改动，调用方据此决定要不要写文件
+fn enc_mark(k, which, m){
+    let j = enc_find(k)
+    if j < 0 {
+        encounters.push({k: k seen: nil heard: nil liked: nil})
+        j = encounters.len() - 1
+    }
+    let e = encounters[j]
+    if which == "seen" && enc_take(e.seen, m) { e.seen = m return true }
+    if which == "heard" && enc_take(e.heard, m) { e.heard = m return true }
+    if which == "liked" && enc_take(e.liked, m) { e.liked = m return true }
+    false
+}
+// 初见：歌单生成时，按生成这份歌单的情境记
+fn enc_seen(ctx){
+    let pk = ""
+    if ctx.here.place != nil { pk = ctx.here.place.kind }
+    let m = enc_moment(ctx.activity.id, pk, ctx.motion.state)
+    let changed = false
+    for p in playlist {
+        if enc_mark(key_of(songs[p.i]), "seen", m) { changed = true }
+    }
+    if changed { save_encounters() }
+}
+// 初听、心动：按点下去那一刻的情境记；活动用歌单生成时的活动（和反馈一致）
+fn enc_event(i, which){
+    if !booted { return }
+    let pk = ""
+    if here.place != nil { pk = here.place.kind }
+    if enc_mark(key_of(songs[i]), which, enc_moment(playlist_act, pk, motion.state)) { save_encounters() }
 }
 
 // 历史不存坐标（PLAN 2.7）
@@ -1236,6 +1318,7 @@ fn feedback(i, v){
     s.fb.g = clamp(s.fb.g + v, -3, 3)
     if playlist_act != "" { fb_set(s.fb, playlist_act, clamp(fb_get(s.fb, playlist_act) + v, -3, 3)) }
     save_feedback()
+    if v > 0 { enc_event(i, "liked") }
     let where = "总体"
     if playlist_act != "" { where = "「" + act_name(playlist_act) + "」和总体" }
     if v > 0 { ui.plan.set_text("记下了：在" + where + "里更常推荐《" + s.t + "》") }
@@ -1461,6 +1544,7 @@ fn show(name){
     if name == "library" { ui.lib_list.render() }
 }
 fn play(i){
+    enc_event(i, "heard")
     playing = songs[i]
     ui.player_title.set_text(playing.t + " — " + playing.a)
     ui.player_fail.set_text("")

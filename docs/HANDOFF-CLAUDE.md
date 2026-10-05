@@ -40,6 +40,7 @@
 - **A/B 结论（evidence\T-main-2026-10-05\AB\REPORT.md）**：A 组（d88f706，数据放 WSL ext4）通过，三个 json 都生成了；B 组（534c327，D4 之前，数据放 /mnt/f）照样超时。两组可用内存都超过 14 GiB，swap 为 0。**结论：原因是 F 盘的读写路径，不是 D4 引入的。**
 - 由此带来的影响：PLAN G1 把桌面版的 `OCTOSENSE_APP_DATA` 设在了 F 盘，**Fano 日常使用的桌面版同样会卡在"正在加载…"**。必须改到 WSL ext4（应用存储上限 16 MiB，对 C 盘影响可以忽略）。
 - 代码加固仍然要做：评委和真机的环境我们控制不了，任何一步超时都不应该让启动永久卡死。**把 F 盘数据目录当作现成的压力测试**：加固后在 /mnt/f 上也能正常启动，就算合格。
+- **加固已完成（10-05 深夜，`main`，见 PLAN §14）**：启动拆成每步一次读写、加看门狗整步重试并显示原因，`finish()` 的写文件延后，启动完成前不写会增长的文件。Claude 在云端 card-host 里做了故障注入（T15–T19 全部通过）。**待 GPT-B 跑 T20**：数据放 `/mnt/f` 上冷启动、推荐、重启，然后补跑 T11–T13。
 
 ## ④ 下一步行动（新对话的起点）
 1. **D4（10-06，`main`）**：在 `bundle/main.splash` 实现 `encounters.json`，规格见 DEMO-ILOVEU §4.2。挂载点：`finish()` 里 `log_history()` 之后记 `seen`；`play(i)` 记 `heard`；`feedback(i, v)` 在 v>0 时记 `liked`。启动时在 `load_step3` 和 `load_step4` 之间插一步，用 `run_chunks` 分批读取。同步更新 `bundle/AGENT.md` 的文件说明，在 PLAN 里补测试用例，通知 GPT-B 跑 T11–T13。

@@ -205,14 +205,70 @@ fn read_json(name){
 }
 fn write_json(name, v){ fs.write(DATA + name, v.to_json()) }
 
-// ---- 启动加载（分批）：一次处理太多条会超过每个处理函数 20 万条指令的上限（500 条确认记录时实测超限），
-// 所以曲库、反馈、确认记录都分批，每批之间让出一次（start_timeout），也避开 64 ms 的单次时间上限 ----
+// ---- 启动加载 ----
+// 1. 每一步只读一个文件，读和分批处理各占自己的处理函数（start_timeout）：单次 64 ms 墙钟上限只摊到一次读写上。
+//    数据在慢盘上（WSL 访问 /mnt/f 走 9P）时，一次读写就可能吃掉大半个 64 ms（③-补2，A/B 已证实）。
+// 2. 分批：一次处理太多条会超过每个处理函数 20 万条指令的上限（500 条确认记录时实测超限）。
+// 3. 看门狗：任何一步超时都会中断它所在的处理函数，后面的链就断了。看门狗每 BOOT_STALL_S 秒看一次，
+//    一个周期没有进展就从断掉的那一步整步重试（每一步开头先清空自己要填的数据，重试不会重复）。
+//    boot_gen 每次重试加 1，旧链上残留的回调发现代号不对就退出，避免同一步跑两遍。
 let booted = false
-fn run_chunks(list, start, size, each, done){
+let BOOT_STALL_S = 1.0
+let boot_step = "dir"     // 正在做的一步，看门狗从这里重试
+let boot_gen = 0
+let boot_tick = 0         // 每有一点进展就加 1
+let boot_seen = -1        // 看门狗上次看到的 boot_tick
+let boot_tries = 0        // 当前这一步重试了几次（换下一步时清零）
+let boot_retries = 0      // 整个启动一共重试了几次，启动完成后显示出来，方便测试核对
+let boot_restored = false
+fn boot_next(step){
+    boot_step = step
+    boot_tries = 0
+    boot_tick = boot_tick + 1
+    let gen = boot_gen
+    start_timeout(0.01, || boot_run(gen, step))
+}
+// 读一个文件，下一个处理函数开始分批处理
+fn boot_read(gen, name, size, each, next){
+    let list = as_list(read_json(name))
+    boot_tick = boot_tick + 1
+    start_timeout(0.01, || boot_chunks(gen, list, 0, size, each, next))
+}
+fn boot_chunks(gen, list, start, size, each, next){
+    if gen != boot_gen { return }
     let end = min(start + size, list.len())
     for i in end - start { each(list[start + i]) }
-    if end < list.len() { start_timeout(0.01, || run_chunks(list, end, size, each, done)) }
-    else { done() }
+    boot_tick = boot_tick + 1
+    if end < list.len() { start_timeout(0.01, || boot_chunks(gen, list, end, size, each, next)) }
+    else { boot_next(next) }
+}
+fn boot_label(step){
+    if step == "dir" { return "数据目录" }
+    if step == "prefs" { return "偏好" }
+    if step == "places" { return "地点" }
+    if step == "library" { return "曲库" }
+    if step == "feedback" { return "反馈" }
+    if step == "labels" { return "确认记录" }
+    if step == "encounters" { return "相遇记录" }
+    if step == "last" { return "上次的歌单" }
+    "收尾"
+}
+fn boot_watch(){
+    if booted { return }
+    if boot_tick != boot_seen {
+        boot_seen = boot_tick
+        return
+    }
+    // 整整一个周期没有进展：链断了，整步重试，并把原因显示出来，而不是一直"正在加载…"
+    boot_tries = boot_tries + 1
+    boot_retries = boot_retries + 1
+    boot_gen = boot_gen + 1
+    plan_note = "正在加载…（读取" + boot_label(boot_step) + "超时，第 " + boot_tries + " 次重试）"
+    if boot_tries >= 3 { plan_note = plan_note + "\n数据所在的磁盘可能太慢，会一直重试下去" }
+    ui.plan.set_text(plan_note)
+    let gen = boot_gen
+    let step = boot_step
+    start_timeout(0.01, || boot_run(gen, step))
 }
 fn as_list(v){
     if v == nil { return [] }
@@ -257,13 +313,43 @@ fn load_label(x){
             motion: pick(x, "motion", "unknown") chosen: chosen top: pick(x, "top", []) how: pick(x, "how", "tap")})
     }
 }
-// 第 1 步：内置曲库、偏好、地点（都很小），然后分批读你的曲库
-fn load_all(){
-    fs.mkdir(DATA)
-    songs = []
-    for s in SEED {
-        songs.push({t: s.t a: s.a en: s.en vo: s.vo md: s.md lg: s.lg src: "seed" fb: blank_fb()})
+// 每一步一个处理函数；读了文件的步骤只读这一个文件。重试时整步重来，所以每步开头先清空自己要填的数据
+fn boot_run(gen, step){
+    if gen != boot_gen || booted { return }
+    if step == "dir" {
+        fs.mkdir(DATA)
+        boot_next("prefs")
+    } else if step == "prefs" {
+        boot_prefs()
+        boot_next("places")
+    } else if step == "places" {
+        boot_places()
+        boot_next("library")
+    } else if step == "library" {
+        songs = []
+        for s in SEED {
+            songs.push({t: s.t a: s.a en: s.en vo: s.vo md: s.md lg: s.lg src: "seed" fb: blank_fb()})
+        }
+        boot_read(gen, "library.json", 30, |s| load_lib_song(s), "feedback")
+    } else if step == "feedback" {
+        // 套反馈是覆盖写（songs[j].fb = …），重试不会叠加
+        index_songs()
+        boot_read(gen, "feedback.json", 30, |row| load_fb_row(row), "labels")
+    } else if step == "labels" {
+        labels = []
+        boot_read(gen, "labels.json", 50, |x| load_label(x), "encounters")
+    } else if step == "encounters" {
+        encounters = []
+        // 每条要整理 3 个时刻、每个 11 个字段，比确认记录重，所以每批只读 20 条
+        boot_read(gen, "encounters.json", 20, |x| load_enc(x), "last")
+    } else if step == "last" {
+        boot_last()
+        boot_next("done")
+    } else {
+        boot_done()
     }
+}
+fn boot_prefs(){
     let p = read_json("prefs.json")
     if p != nil {
         let city = pick(p, "city", 0)
@@ -280,6 +366,8 @@ fn load_all(){
         prefs.use_time = pick(p, "use_time", true)
         prefs.use_gps = pick(p, "use_gps", true)
     }
+}
+fn boot_places(){
     let pl = nil
     if fs.exists(PLACES_FILE) { pl = fs.read(PLACES_FILE).parse_json() }
     places = []
@@ -289,60 +377,54 @@ fn load_all(){
             places.push({id: pick(x, "id", kind) kind: kind name: kind_name(kind) lat: pick(x, "lat", 0.0) lon: pick(x, "lon", 0.0)})
         }
     }
-    run_chunks(as_list(read_json("library.json")), 0, 30, |s| load_lib_song(s), || load_step2())
 }
-// 第 2 步：分批套用反馈
-fn load_step2(){
-    index_songs()
-    run_chunks(as_list(read_json("feedback.json")), 0, 30, |row| load_fb_row(row), || load_step3())
-}
-// 第 3 步：分批读确认记录
-fn load_step3(){
-    labels = []
-    run_chunks(as_list(read_json("labels.json")), 0, 50, |x| load_label(x), || load_step3b())
-}
-// 第 3b 步：分批读相遇记录（随听过的歌增长，照 AGENTS.md 的规则分批）
-fn load_step3b(){
-    encounters = []
-    // 每条要整理 3 个时刻、每个 11 个字段，比确认记录重，所以每批只读 20 条
-    run_chunks(as_list(read_json("encounters.json")), 0, 20, |x| load_enc(x), || load_step4())
-}
-// 第 4 步：恢复上次歌单，启动完成
-fn load_step4(){
+// 恢复上次歌单
+fn boot_last(){
+    playlist = []
+    boot_restored = false
     let last = read_json("last.json")
     if last != nil {
         let keys = pick(last, "keys", [])
         let whys = pick(last, "whys", [])
         playlist_intent = pick(last, "intent", "")
-        playlist = []
         for i k in keys {
             for j key in song_keys {
                 if key == k && i < whys.len() { playlist.push({i: j why: whys[i]}) }
             }
         }
         playlist_act = pick(last, "act", "")
-        if playlist.len() > 0 { plan_note = "上次的歌单（重启后恢复）" }
     }
-    // 第一次打开（没有上次的歌单）时，别让"正在加载…"一直留在界面上
-    if plan_note == "正在加载…" { plan_note = "" }
+    boot_restored = playlist.len() > 0
+}
+// 启动完成。天气和定位各自放到后面的处理函数里，它们出问题也不影响启动
+fn boot_done(){
+    if boot_restored { plan_note = "上次的歌单（重启后恢复）" }
+    else { plan_note = "" }
+    if boot_retries > 0 {
+        if plan_note != "" { plan_note = plan_note + "\n" }
+        plan_note = plan_note + "（启动时读写超时，重试了 " + boot_retries + " 次）"
+    }
     booted = true
-    fetch_weather()
     sync_home()
     ui.cities.render()
-    gps_poll()
+    start_timeout(0.01, || fetch_weather())
+    start_timeout(0.02, || gps_poll())
 }
 
 fn save_prefs(){ write_json("prefs.json", prefs) }
 // 地点放在存储根目录，不放 accounts/device/：应用助手只能读后者，这样坐标不会经助手发给 AI
 let PLACES_FILE = "places.json"
 fn save_places(){ fs.write(PLACES_FILE, places.to_json()) }
-fn save_labels(){ write_json("labels.json", labels) }
+// 会增长的文件：启动没读完之前不写，否则慢盘上一边重试读、一边被只有一半数据的内存覆盖
+fn save_labels(){ if booted { write_json("labels.json", labels) } }
 fn save_library(){
+    if !booted { return }
     let out = []
     for s in songs { if s.src != "seed" { out.push({t: s.t a: s.a en: s.en vo: s.vo md: s.md lg: s.lg src: s.src}) } }
     write_json("library.json", out)
 }
 fn save_feedback(){
+    if !booted { return }
     let out = []
     for s in songs {
         if fb_nonzero(s.fb) { out.push({k: key_of(s) fb: s.fb}) }
@@ -358,7 +440,7 @@ fn save_last(){
     }
     write_json("last.json", {keys: keys whys: whys act: playlist_act intent: playlist_intent at: time_now()})
 }
-fn save_encounters(){ write_json("encounters.json", encounters) }
+fn save_encounters(){ if booted { write_json("encounters.json", encounters) } }
 
 // ---- 时间 ----
 fn local_parts(){
@@ -1237,11 +1319,17 @@ fn finish(picks, how, raw, it, ctx, note){
     }
     plan_note = summary
     playlist_intent = ("" + raw).trim()
-    save_last()
-    log_history(how, raw, ctx)
-    enc_seen(ctx)
     sync_home()
     refresh_views()
+    // 写文件放到界面更新之后，每次读写各占一个处理函数：慢盘上一次写超时，只丢这一条记录，
+    // 歌单照样显示出来（③-补2）。要用的值先取好，不依赖之后可能变化的全局变量
+    let keys = []
+    for p in picks { keys.push(key_of(songs[p.i])) }
+    let air = ai_raw
+    ai_raw = nil
+    start_timeout(0.01, || save_last())
+    start_timeout(0.02, || log_history(how, raw, ctx, keys, air))
+    start_timeout(0.03, || enc_seen(ctx, picks))
 }
 
 // ---- 第一次相遇（DEMO-ILOVEU 4.2）----
@@ -1279,12 +1367,12 @@ fn enc_mark(k, which, m){
     false
 }
 // 初见：歌单生成时，按生成这份歌单的情境记
-fn enc_seen(ctx){
+fn enc_seen(ctx, picks){
     let pk = ""
     if ctx.here.place != nil { pk = ctx.here.place.kind }
     let m = enc_moment(ctx.activity.id, pk, ctx.motion.state)
     let changed = false
-    for p in playlist {
+    for p in picks {
         if enc_mark(key_of(songs[p.i]), "seen", m) { changed = true }
     }
     if changed { save_encounters() }
@@ -1297,19 +1385,16 @@ fn enc_event(i, which){
     if enc_mark(key_of(songs[i]), which, enc_moment(playlist_act, pk, motion.state)) { save_encounters() }
 }
 
-// 历史不存坐标（PLAN 2.7）
-fn log_history(how, raw, ctx){
+// 历史不存坐标（PLAN 2.7）。读和写分在两个处理函数里
+fn log_history(how, raw, ctx, keys, air){
     let h = read_json("history.json")
     if h == nil { h = [] }
-    let keys = []
-    for p in playlist { keys.push(key_of(songs[p.i])) }
     let pk = ""
     if ctx.here.place != nil { pk = ctx.here.place.kind }
     let next = [{at: time_now() how: how intent: raw ctx_text: ctx_text(ctx) act: ctx.activity.id act_source: ctx.activity.source
-        motion: ctx.motion.state place_kind: pk sim: sim.kind != "off" picks: keys ai_raw: ai_raw}]
-    ai_raw = nil
+        motion: ctx.motion.state place_kind: pk sim: sim.kind != "off" picks: keys ai_raw: air}]
     for x in h { if next.len() < 30 { next.push(x) } }
-    write_json("history.json", next)
+    start_timeout(0.01, || write_json("history.json", next))
 }
 
 // ---- F 反馈：总体分 + 歌单生成时那个活动下的分 ----
@@ -1318,7 +1403,8 @@ fn feedback(i, v){
     s.fb.g = clamp(s.fb.g + v, -3, 3)
     if playlist_act != "" { fb_set(s.fb, playlist_act, clamp(fb_get(s.fb, playlist_act) + v, -3, 3)) }
     save_feedback()
-    if v > 0 { enc_event(i, "liked") }
+    // 第二次写文件放进单独的处理函数（③-补2）
+    if v > 0 { start_timeout(0.01, || enc_event(i, "liked")) }
     let where = "总体"
     if playlist_act != "" { where = "「" + act_name(playlist_act) + "」和总体" }
     if v > 0 { ui.plan.set_text("记下了：在" + where + "里更常推荐《" + s.t + "》") }
@@ -1544,7 +1630,7 @@ fn show(name){
     if name == "library" { ui.lib_list.render() }
 }
 fn play(i){
-    enc_event(i, "heard")
+    start_timeout(0.01, || enc_event(i, "heard"))
     playing = songs[i]
     ui.player_title.set_text(playing.t + " — " + playing.a)
     ui.player_fail.set_text("")
@@ -1573,9 +1659,11 @@ fn close_player(){
 fn boot(){
     plan_note = "正在加载…"
     sync_home()
-    load_all()
+    boot_next("dir")
 }
 start_timeout(0.05, || boot())
+// 启动看门狗：boot() 本身超时也能接住（boot_step 初值是 "dir"）
+start_interval(BOOT_STALL_S, || boot_watch())
 start_interval(GPS_POLL_S, || gps_poll())
 
 // ---- 外观 ----

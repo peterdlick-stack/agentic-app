@@ -31,9 +31,9 @@
 
 **素材准备（Fano 交给你之后）** → `F:\context-dj-work\demo-iloveu\assets\`
 1. 官方封面：从原始投稿获取。
-2. AI 另类封面：Fano 用别的 AI 生成后交给你。
+2. ~~AI 另类封面~~：已砍掉（Fano 10-05），不用等。
 3. 歌词：Fano 提供文本，存成 UTF-8 的 `iloveu.txt`。
-4. 图片一律压缩到 **300 KB 以内**（应用存储单个文件上限 1 MiB、总量 16 MiB），存成 `iloveu-front.jpg`、`iloveu-ai.jpg`。
+4. 图片一律压缩到 **300 KB 以内**（应用存储单个文件上限 1 MiB、总量 16 MiB），存成 `iloveu-front.jpg`。
 5. 写一个 `assets\README.md`，列出每个文件的来源和大小。
 6. **这个目录的内容绝不进任何 git 仓库。**
 

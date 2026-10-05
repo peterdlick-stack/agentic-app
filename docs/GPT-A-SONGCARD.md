@@ -38,8 +38,8 @@
 2. 按 DEMO-ILOVEU §3 实现四页卡片、页码圆点、控制栏。控制栏五个按钮接现有的 `feedback()` 和 `play()`；"✕ 不喜欢"在记反馈后自动切到下一首。
 3. 按 §4.1 读 `accounts/device/cards.json`。没有卡片内容的歌只显示第 1、4 页内容，第 2、3 页显示空状态。
 4. 第 4 页读 `accounts/device/encounters.json`。这个文件由 Claude 在 `main` 上加的记录逻辑写入（D4）。D4 合并之前，你用手写的测试文件，**文件里标 `sim: true`**。
-5. 把《I LOVE U》加进内置曲库 `SEED`，标签等 Fano 给。
-6. 素材（歌词、官方封面、AI 封面）由 GPT-B 放在 `F:\context-dj-work\demo-iloveu\assets\`，你**复制**到自己的 `octosense-data-demo\` 里。**素材绝不进仓库。**
+5. 把《I LOVE U》加进内置曲库 `SEED`：`{t: "I LOVE U" a: "洛天依" en: 4 vo: true md: "欢快" lg: "zh"}`（DEMO-ILOVEU §3.6）。**这条取代 Fano 之前说的"能量、情绪去掉"**：两个字段保留给算法用，只是界面上不显示数字。
+6. 素材（歌词、官方封面；**AI 封面已砍掉**）由 GPT-B 放在 `F:\context-dj-work\demo-iloveu\assets\`，你**复制**到自己的 `octosense-data-demo\` 里。**素材绝不进仓库。**
 7. 每次修改后跑 `tools/octo check bundle`，必须 `PASSED`。
 8. 截图：四页各一张、封面背面一张、每页空状态各一张，放 `G9-impl\shots\`。截图里不能出现歌词全文。
 

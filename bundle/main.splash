@@ -1,5 +1,6 @@
-// 情境 DJ：把「现在的情境 + 一句话意图 + 过去的反馈」变成一组歌，并说明理由。
-// 情境来源只有平台真正提供的：设备时钟、Open-Meteo 天气、用户手动选的活动。
+// 情境 DJ v0.2：把「此刻的情境 + 一句话意图 + 过去的反馈」变成一组歌，并说明理由。
+// 情境来源只用平台真正开放的：GPS（速度 + 你标记的地点）、设备时钟、Open-Meteo 天气、
+// 你说的那句话、你的手动选择。设计与接口见仓库 docs/PLAN.md 第 2 节。
 // 平台没有音频播放 API：播放交给应用内网页（WebReader，需要 web 权限）。
 // AI（model.complete）是可选的：不可用时用本地规则，界面写明用了哪种。
 
@@ -55,16 +56,17 @@ let SEED = [
 ]
 let MOODS = ["平静" "专注" "温暖" "怀旧" "伤感" "振奋" "欢快"]
 
-// ---- 活动：手动选择，target 是目标能量 ----
+// ---- 活动（PLAN 2.2）：target 是目标能量，instr 是纯音乐加分，md 是偏好情绪 ----
 let ACTS = [
     {id: "study" n: "学习" target: 1.5 instr: 1.5 md: "专注"}
     {id: "work" n: "工作" target: 2.5 instr: 0.8 md: "专注"}
     {id: "commute" n: "通勤" target: 3.4 instr: 0.0 md: "欢快"}
+    {id: "walk" n: "散步" target: 3.0 instr: 0.0 md: "温暖"}
     {id: "workout" n: "运动" target: 4.7 instr: 0.0 md: "振奋"}
     {id: "relax" n: "放松" target: 2.0 instr: 0.3 md: "温暖"}
     {id: "sleep" n: "睡前" target: 1.0 instr: 1.5 md: "平静"}
 ]
-let ACT_TTL = 5400   // 手动活动 90 分钟后失效，回到「按时段推测」
+let ACT_TTL = 5400   // 手动活动 90 分钟后失效，回到自动推断
 
 // ---- 城市：Open-Meteo 用经纬度；timezone=auto 返回 UTC 偏移 ----
 let CITIES = [
@@ -77,15 +79,52 @@ let CITIES = [
     {n: "成都" lat: 30.57 lon: 104.07}
 ]
 
+// ---- 感知常量（PLAN 2.3）----
+let GPS_POLL_S = 10       // 采样间隔
+let FIX_KEEP_S = 120      // 内存里保留的定位点时长
+let WIN_S = 60            // 速度估计窗口
+let MIN_FIXES = 4         // 窗口内至少这么多有效点
+let ACC_MAX_M = 50        // 精度差于这个值的点丢掉
+let STILL_FLOOR_M = 20    // 净位移小于 max(20, 1.5×精度中位数) 视为静止
+let HOLD_N = 2            // 连续两次一致才切换移动状态
+let PLACE_R_M = 200       // 离标记地点多近算「在那儿」
+let UNCHANGED_S = 300     // 定位点多久没变就降低可信度
+let PI = 3.14159265
+let PLACE_KINDS = [
+    {k: "home" n: "家"}
+    {k: "school" n: "学校"}
+    {k: "work" n: "公司"}
+    {k: "gym" n: "健身房"}
+]
+let SIMS = [
+    {k: "off" n: "关闭" v: 0.0}
+    {k: "still" n: "静止" v: 0.0}
+    {k: "walk" n: "步行" v: 1.3}
+    {k: "bike" n: "骑行" v: 4.5}
+    {k: "bus" n: "公交" v: 9.0}
+]
+
 // ---- 状态 ----
 let songs = []          // 内置 + 用户添加；每首带 src 与反馈分
-let prefs = {city: 0 act: "" act_until: 0 use_weather: true use_time: true}
-let weather = {state: "loading" temp: 0 code: 0 text: "" offset: 28800 at: 0}
+let prefs = {city: 0 act: "" act_until: 0 use_weather: true use_time: true use_gps: true}
+let weather = {state: "loading" temp: 0 code: 0 text: "" offset: 28800 at: 0 coords: "city"}
+let wx_pos = nil        // 上次查天气用的坐标 {lat lon at}
+let wx_seq = 0          // 只采用最新一次天气请求的结果
+let fixes = []          // [Fix]，只在内存里
+let same_since = 0      // 定位点从什么时候起没变过
+let motion = {state: "unknown" speed: 0.0 conf: 0.0 n: 0 source: "none" note: "还没有定位"}
+let pending = {state: "" count: 0}
+let places = []         // [Place]，存到 places.json
+let sim_places = []     // 模拟模式下标记的地点，只在内存里
+let here = {place: nil dist: -1}
+let sim = {kind: "off" lat: 0.0 lon: 0.0 t: 0}
 let playlist = []       // [{i why}]
+let playlist_act = ""   // 这份歌单生成时的活动 id，反馈按它记
+let last_ctx = nil
 let last_keys = []      // 上一批，用于「换一批」
-let plan_note = ""      // 这次用了什么方式、怎么理解意图
+let plan_note = ""
 let busy = false
-let screen = "home"     // home | library | player
+let screen = "home"     // home | sense | library | player
 let playing = nil
 let source = 0
 let SOURCES = [
@@ -96,37 +135,52 @@ let SOURCES = [
 
 fn key_of(s){ s.t + "|" + s.a }
 
-fn blank_fb(){ {g: 0 study: 0 work: 0 commute: 0 workout: 0 relax: 0 sleep: 0} }
+// 读字段：缺失的字段直接访问会报错并中断整个处理函数（已实测），所以读旧数据一律用它
+fn pick(o, key, dflt){
+    if o == nil { return dflt }
+    for k v in o { if k == key { return v } }
+    dflt
+}
+fn join(list, sep){
+    let text = ""
+    for w in list { if text == "" { text = w } else { text = text + sep + w } }
+    text
+}
+
+fn blank_fb(){ {g: 0 study: 0 work: 0 commute: 0 walk: 0 workout: 0 relax: 0 sleep: 0} }
 
 // 反馈分按活动读写：用固定字段，不用 f[id] = v（运行时会追加重复键而不是覆盖）
 fn fb_get(f, id){
     if id == "study" { return f.study }
     if id == "work" { return f.work }
     if id == "commute" { return f.commute }
+    if id == "walk" { return f.walk }
     if id == "workout" { return f.workout }
     if id == "relax" { return f.relax }
     if id == "sleep" { return f.sleep }
     0
 }
 fn fb_set(f, id, v){
+    if id == "g" { f.g = v }
     if id == "study" { f.study = v }
     if id == "work" { f.work = v }
     if id == "commute" { f.commute = v }
+    if id == "walk" { f.walk = v }
     if id == "workout" { f.workout = v }
     if id == "relax" { f.relax = v }
     if id == "sleep" { f.sleep = v }
 }
+// 旧版数据可能缺 walk 等字段：逐键复制，缺的保持 0
 fn fb_clean(f){
     let out = blank_fb()
     if f == nil { return out }
-    out.g = f.g
-    out.study = f.study
-    out.work = f.work
-    out.commute = f.commute
-    out.workout = f.workout
-    out.relax = f.relax
-    out.sleep = f.sleep
+    for k v in f {
+        if v >= -3 && v <= 3 { fb_set(out, k, v) }
+    }
     out
+}
+fn fb_nonzero(f){
+    f.g != 0 || f.study != 0 || f.work != 0 || f.commute != 0 || f.walk != 0 || f.workout != 0 || f.relax != 0 || f.sleep != 0
 }
 
 fn read_json(name){
@@ -146,34 +200,66 @@ fn load_all(){
     let lib = read_json("library.json")
     if lib != nil {
         for s in lib {
-            songs.push({t: s.t a: s.a en: s.en vo: s.vo md: s.md lg: s.lg src: s.src fb: blank_fb()})
+            let t = pick(s, "t", "")
+            if t != "" {
+                songs.push({t: t a: pick(s, "a", "未知歌手") en: pick(s, "en", nil) vo: pick(s, "vo", nil)
+                    md: pick(s, "md", nil) lg: pick(s, "lg", nil) src: pick(s, "src", "user") fb: blank_fb()})
+            }
         }
     }
     let p = read_json("prefs.json")
-    if p != nil && p.city != nil {
-        prefs = {city: p.city act: p.act act_until: p.act_until use_weather: p.use_weather use_time: p.use_time}
+    if p != nil {
+        let city = pick(p, "city", 0)
+        if city >= 0 && city < CITIES.len() { prefs.city = city }
+        prefs.act = pick(p, "act", "")
+        prefs.act_until = pick(p, "act_until", 0)
+        if act_by_id(prefs.act) == nil {
+            prefs.act = ""
+            prefs.act_until = 0
+        }
+        prefs.use_weather = pick(p, "use_weather", true)
+        prefs.use_time = pick(p, "use_time", true)
+        prefs.use_gps = pick(p, "use_gps", true)
     }
     let fb = read_json("feedback.json")
     if fb != nil {
         for row in fb {
+            let k = pick(row, "k", "")
             for s in songs {
-                if key_of(s) == row.k { s.fb = fb_clean(row.fb) }
+                if key_of(s) == k { s.fb = fb_clean(pick(row, "fb", nil)) }
+            }
+        }
+    }
+    let pl = nil
+    if fs.exists(PLACES_FILE) { pl = fs.read(PLACES_FILE).parse_json() }
+    places = []
+    if pl != nil {
+        for x in pl {
+            let kind = pick(x, "kind", "")
+            if kind_name(kind) != "" {
+                places.push({id: pick(x, "id", kind) kind: kind name: kind_name(kind) lat: pick(x, "lat", 0.0) lon: pick(x, "lon", 0.0)})
             }
         }
     }
     let last = read_json("last.json")
-    if last != nil && last.keys != nil {
+    if last != nil {
+        let keys = pick(last, "keys", [])
+        let whys = pick(last, "whys", [])
         playlist = []
-        for i k in last.keys {
+        for i k in keys {
             for j s in songs {
-                if key_of(s) == k { playlist.push({i: j why: last.whys[i]}) }
+                if key_of(s) == k && i < whys.len() { playlist.push({i: j why: whys[i]}) }
             }
         }
-        plan_note = "上次的歌单（重启后恢复）"
+        playlist_act = pick(last, "act", "")
+        if playlist.len() > 0 { plan_note = "上次的歌单（重启后恢复）" }
     }
 }
 
 fn save_prefs(){ write_json("prefs.json", prefs) }
+// 地点放在存储根目录，不放 accounts/device/：应用助手只能读后者，这样坐标不会经助手发给 AI
+let PLACES_FILE = "places.json"
+fn save_places(){ fs.write(PLACES_FILE, places.to_json()) }
 fn save_library(){
     let out = []
     for s in songs { if s.src != "seed" { out.push({t: s.t a: s.a en: s.en vo: s.vo md: s.md lg: s.lg src: s.src}) } }
@@ -182,21 +268,21 @@ fn save_library(){
 fn save_feedback(){
     let out = []
     for s in songs {
-        let f = s.fb
-        if f.g != 0 || f.study != 0 || f.work != 0 || f.commute != 0 || f.workout != 0 || f.relax != 0 || f.sleep != 0 {
-            out.push({k: key_of(s) fb: f})
-        }
+        if fb_nonzero(s.fb) { out.push({k: key_of(s) fb: s.fb}) }
     }
     write_json("feedback.json", out)
 }
 fn save_last(){
     let keys = []
     let whys = []
-    for p in playlist { keys.push(key_of(songs[p.i])) whys.push(p.why) }
-    write_json("last.json", {keys: keys whys: whys at: time_now()})
+    for p in playlist {
+        keys.push(key_of(songs[p.i]))
+        whys.push(p.why)
+    }
+    write_json("last.json", {keys: keys whys: whys act: playlist_act at: time_now()})
 }
 
-// ---- 情境 ----
+// ---- 时间 ----
 fn local_parts(){
     let t = time_now() + weather.offset
     let day = floor(t / 86400)
@@ -226,9 +312,18 @@ fn slot_act(h){
     if h < 23 { return "relax" }
     "sleep"
 }
+fn day_word(p){
+    if p.weekday == 0 || p.weekday == 6 { return "周末" }
+    "工作日"
+}
 fn act_by_id(id){
     for a in ACTS { if a.id == id { return a } }
     nil
+}
+fn act_name(id){
+    let a = act_by_id(id)
+    if a == nil { return "未知" }
+    a.n
 }
 fn manual_left(){
     if prefs.act == "" { return 0 }
@@ -236,15 +331,8 @@ fn manual_left(){
     if left <= 0 { return 0 }
     left
 }
-// 当前活动：{a, source}
-fn current_act(){
-    if manual_left() > 0 { return {a: act_by_id(prefs.act) source: "manual"} }
-    if prefs.use_time {
-        let h = local_parts().hour
-        return {a: act_by_id(slot_act(h)) source: "time"}
-    }
-    {a: nil source: "none"}
-}
+
+// ---- 天气 ----
 fn weather_usable(){ prefs.use_weather && weather.state == "ok" && time_now() - weather.at < 3600 }
 fn weather_word(code){
     if code == 0 { return "晴" }
@@ -265,30 +353,329 @@ fn weather_mood(){
     if c == 0 && weather.temp >= 15 { return "欢快" }
     ""
 }
-
-fn fetch_weather(){
-    let c = CITIES[prefs.city]
+// coords: "gps" 或 "city"；坐标只保留两位小数（约 1 km）再发出去
+fn fetch_weather_at(lat, lon, coords){
     weather.state = "loading"
-    sync_context()
-    let url = "https://api.open-meteo.com/v1/forecast?latitude=" + c.lat + "&longitude=" + c.lon + "&current=temperature_2m,weather_code&timezone=auto"
-    net.http_request(net.HttpRequest{url: url method: net.HttpMethod.GET headers: {"User-Agent": "ContextDJ/0.1"}}) do net.HttpEvents{
-        on_response: |res| got_weather(res)
-        on_error: |_err| weather_failed()
+    weather.coords = coords
+    wx_pos = {lat: lat lon: lon at: time_now()}
+    wx_seq = wx_seq + 1
+    let seq = wx_seq
+    let la = round(lat * 100) / 100
+    let lo = round(lon * 100) / 100
+    let url = "https://api.open-meteo.com/v1/forecast?latitude=" + la + "&longitude=" + lo + "&current=temperature_2m,weather_code&timezone=auto"
+    net.http_request(net.HttpRequest{url: url method: net.HttpMethod.GET headers: {"User-Agent": "ContextDJ/0.2"}}) do net.HttpEvents{
+        on_response: |res| got_weather(res, coords, seq)
+        on_error: |_err| weather_failed(seq)
     }
 }
-fn got_weather(res){
-    if res.status_code >= 400 { weather_failed() return }
-    let d = res.body.to_string().parse_json()
-    if d == nil || d.current == nil { weather_failed() return }
-    let t = d.current.temperature_2m
-    let wc = d.current.weather_code
-    if !(t >= -90) || !(wc >= 0) { weather_failed() return }
-    weather = {state: "ok" temp: t code: wc text: weather_word(wc) offset: d.utc_offset_seconds at: time_now()}
-    sync_context()
+fn fetch_weather(){
+    let c = CITIES[prefs.city]
+    fetch_weather_at(c.lat, c.lon, "city")
 }
-fn weather_failed(){
+fn got_weather(res, coords, seq){
+    if seq != wx_seq { return }
+    if res.status_code >= 400 { weather_failed(seq) return }
+    let d = res.body.to_string().parse_json()
+    if d == nil { weather_failed(seq) return }
+    let cur = pick(d, "current", nil)
+    if cur == nil { weather_failed(seq) return }
+    let t = pick(cur, "temperature_2m", nil)
+    let wc = pick(cur, "weather_code", nil)
+    if t == nil || wc == nil { weather_failed(seq) return }
+    if !(t >= -90) || !(wc >= 0) { weather_failed(seq) return }
+    weather = {state: "ok" temp: t code: wc text: weather_word(wc) offset: pick(d, "utc_offset_seconds", 28800) at: time_now() coords: coords}
+    refresh_views()
+}
+fn weather_failed(seq){
+    if seq != wx_seq { return }
     weather.state = "fail"
-    sync_context()
+    refresh_views()
+}
+// 有定位时按定位查：第一次、移动超过 5 km、或超过 30 分钟
+fn maybe_refresh_weather(){
+    if !prefs.use_gps || fixes.len() == 0 { return }
+    let f = fixes[fixes.len() - 1]
+    if wx_pos == nil || weather.coords != "gps" {
+        fetch_weather_at(f.lat, f.lon, "gps")
+        return
+    }
+    if dist_m(wx_pos.lat, wx_pos.lon, f.lat, f.lon) > 5000 || time_now() - wx_pos.at > 1800 {
+        fetch_weather_at(f.lat, f.lon, "gps")
+    }
+}
+
+// ---- S 感知（PLAN 2.3）----
+fn dist_m(lat1, lon1, lat2, lon2){
+    let dy = (lat2 - lat1) * 111320.0
+    let dx = (lon2 - lon1) * 111320.0 * cos(lat1 * PI / 180.0)
+    sqrt(dx * dx + dy * dy)
+}
+fn kind_name(kind){
+    for x in PLACE_KINDS { if x.k == kind { return x.n } }
+    ""
+}
+fn motion_name(st){
+    if st == "still" { return "静止" }
+    if st == "walk" { return "步行" }
+    if st == "run_bike" { return "跑步或骑行" }
+    if st == "vehicle" { return "乘车" }
+    "未知"
+}
+fn sim_speed(){
+    for x in SIMS { if x.k == sim.kind { return x.v } }
+    0.0
+}
+// 模拟一个定位点：沿正北前进，叠加 ±8 m 抖动，精度 10 m
+fn sim_next(){
+    let now = time_now()
+    let dt = now - sim.t
+    sim.t = now
+    sim.lat = sim.lat + sim_speed() * dt / 111320.0
+    let jy = (random() - 0.5) * 16.0
+    let jx = (random() - 0.5) * 16.0
+    {t: now lat: sim.lat + jy / 111320.0 lon: sim.lon + jx / (111320.0 * cos(sim.lat * PI / 180.0)) acc: 10.0}
+}
+// 取一个定位点；拿不到时返回 nil，原因写在 gps_note
+let gps_note = "还没有定位"
+fn read_fix(){
+    if sim.kind != "off" { return sim_next() }
+    if !prefs.use_gps { gps_note = "定位已关闭" return nil }
+    if sys.gps("ok") < 1 { gps_note = "没有定位（未授权或还没有信号）" return nil }
+    let acc = sys.gps("acc")
+    if acc < 0 || acc > ACC_MAX_M { gps_note = "定位精度太差（±" + round(acc) + " m）" return nil }
+    gps_note = ""
+    {t: time_now() lat: sys.gps("lat") lon: sys.gps("lon") acc: acc}
+}
+fn median_acc(list){
+    let n = list.len()
+    let want = floor(n / 2)
+    for x in list {
+        let less = 0
+        let equal = 0
+        for y in list {
+            if y.acc < x.acc { less = less + 1 }
+            if y.acc == x.acc { equal = equal + 1 }
+        }
+        if less <= want && want < less + equal { return x.acc }
+    }
+    0.0
+}
+fn estimate_speed(){
+    let now = time_now()
+    let win = []
+    for x in fixes { if now - x.t <= WIN_S { win.push(x) } }
+    if win.len() < MIN_FIXES { return {valid: false n: win.len() speed: 0.0 acc: 0.0} }
+    let a = win[0]
+    let b = win[win.len() - 1]
+    let span = b.t - a.t
+    if span < 30 { return {valid: false n: win.len() speed: 0.0 acc: 0.0} }
+    let accm = median_acc(win)
+    let d = dist_m(a.lat, a.lon, b.lat, b.lon)
+    let speed = 0.0
+    if d >= max(STILL_FLOOR_M, 1.5 * accm) { speed = d / span }
+    {valid: true n: win.len() speed: speed acc: accm}
+}
+fn classify(v){
+    if v < 0.5 { return "still" }
+    if v < 2.2 { return "walk" }
+    if v < 7.0 { return "run_bike" }
+    "vehicle"
+}
+fn update_motion(){
+    let src = "gps"
+    if sim.kind != "off" { src = "sim" }
+    if fixes.len() == 0 {
+        motion = {state: "unknown" speed: 0.0 conf: 0.0 n: 0 source: "none" note: gps_note}
+        pending = {state: "" count: 0}
+        return
+    }
+    let e = estimate_speed()
+    if !e.valid {
+        motion.note = "定位点还不够（" + e.n + "/" + MIN_FIXES + "，需要约 40 秒）"
+        return
+    }
+    let st = classify(e.speed)
+    if pending.state == st { pending.count = pending.count + 1 }
+    else { pending = {state: st count: 1} }
+    let conf = min(1.0, e.n / 6.0)
+    if e.acc > 20 { conf = conf * 0.7 }
+    let stale = false
+    if same_since > 0 && time_now() - same_since >= UNCHANGED_S {
+        conf = conf * 0.5
+        stale = true
+    }
+    let note = "近 1 分钟约 " + round(e.speed * 10) / 10 + " m/s，" + e.n + " 个点，精度约 ±" + round(e.acc) + " m"
+    if stale { note = note + "；位置 5 分钟没变（可能是静止，也可能是信号没更新）" }
+    if motion.state == "unknown" || motion.state == st || pending.count >= HOLD_N {
+        motion = {state: st speed: e.speed conf: conf n: e.n source: src note: note}
+    } else {
+        motion.note = note + "；可能变成「" + motion_name(st) + "」，再确认一次"
+    }
+}
+fn update_here(){
+    let list = places
+    if sim.kind != "off" { list = sim_places }
+    here = {place: nil dist: -1}
+    if fixes.len() == 0 { return }
+    let f = fixes[fixes.len() - 1]
+    let best = nil
+    let bd = 1000000000.0
+    for p in list {
+        let d = dist_m(f.lat, f.lon, p.lat, p.lon)
+        if d < bd {
+            bd = d
+            best = p
+        }
+    }
+    if best != nil && bd <= PLACE_R_M { here = {place: best dist: bd} }
+}
+fn gps_poll(){
+    let f = read_fix()
+    let now = time_now()
+    if f != nil {
+        if fixes.len() > 0 {
+            let prev = fixes[fixes.len() - 1]
+            if prev.lat == f.lat && prev.lon == f.lon {
+                if same_since == 0 { same_since = prev.t }
+            } else { same_since = 0 }
+        }
+        fixes.push(f)
+    }
+    let kept = []
+    for x in fixes { if now - x.t <= FIX_KEEP_S { kept.push(x) } }
+    fixes = kept
+    update_motion()
+    update_here()
+    maybe_refresh_weather()
+    refresh_views()
+}
+fn mark_place(kind){
+    if fixes.len() == 0 { ui.sense_status.set_text("还没有定位，标记不了地点") return }
+    let f = fixes[fixes.len() - 1]
+    let item = {id: kind kind: kind name: kind_name(kind) lat: f.lat lon: f.lon}
+    if sim.kind != "off" {
+        let kept = []
+        for p in sim_places { if p.kind != kind { kept.push(p) } }
+        kept.push(item)
+        sim_places = kept
+        ui.sense_status.set_text("已在模拟位置标记「" + item.name + "」（只在模拟模式里有效，不保存）")
+    } else {
+        let kept = []
+        for p in places { if p.kind != kind { kept.push(p) } }
+        kept.push(item)
+        places = kept
+        save_places()
+        ui.sense_status.set_text("已把当前位置标记为「" + item.name + "」（只存在本机）")
+    }
+    update_here()
+    refresh_views()
+}
+fn remove_place(kind){
+    let kept = []
+    if sim.kind != "off" {
+        for p in sim_places { if p.kind != kind { kept.push(p) } }
+        sim_places = kept
+    } else {
+        for p in places { if p.kind != kind { kept.push(p) } }
+        places = kept
+        save_places()
+    }
+    ui.sense_status.set_text("已删除「" + kind_name(kind) + "」")
+    update_here()
+    refresh_views()
+}
+fn sim_set(kind){
+    let was = sim.kind
+    if kind == "off" {
+        sim = {kind: "off" lat: 0.0 lon: 0.0 t: 0}
+        sim_places = []
+    } else {
+        if was == "off" {
+            let lat = 39.9042
+            let lon = 116.4074
+            if sys.gps("ok") >= 1 {
+                lat = sys.gps("lat")
+                lon = sys.gps("lon")
+            }
+            sim = {kind: kind lat: lat lon: lon t: time_now()}
+        } else {
+            sim.kind = kind
+        }
+    }
+    if was == "off" || kind == "off" {
+        fixes = []
+        same_since = 0
+        motion = {state: "unknown" speed: 0.0 conf: 0.0 n: 0 source: "none" note: "重新开始采样"}
+        pending = {state: "" count: 0}
+    }
+    gps_poll()
+}
+
+// ---- C 情境融合（PLAN 2.4）----
+fn act_result(id, src, conf, why){ {id: id source: src conf: conf why: why} }
+fn infer_activity(it){
+    if manual_left() > 0 {
+        return act_result(prefs.act, "manual", 1.0, ["你手动选了「" + act_name(prefs.act) + "」，还剩 " + ceil(manual_left() / 60) + " 分钟"])
+    }
+    if it != nil && it.act != "" {
+        return act_result(it.act, "intent", 0.9, ["你说了「" + it.act_word + "」"])
+    }
+    let p = local_parts()
+    let rush = p.weekday >= 1 && p.weekday <= 5 && ((p.hour >= 7 && p.hour < 9) || (p.hour >= 17 && p.hour < 19))
+    let m = motion
+    let mline = "GPS：" + motion_name(m.state) + "，约 " + round(m.speed * 10) / 10 + " m/s"
+    if m.source == "sim" { mline = "模拟定位：" + motion_name(m.state) + "，约 " + round(m.speed * 10) / 10 + " m/s" }
+    if m.state == "still" && here.place != nil {
+        let k = here.place.kind
+        let w = ["位置：距「" + here.place.name + "」" + round(here.dist) + " m，静止"]
+        if k == "gym" { return act_result("workout", "place", 0.8, w) }
+        if k == "school" { return act_result("study", "place", 0.8, w) }
+        if k == "work" { return act_result("work", "place", 0.8, w) }
+        if p.hour >= 23 || p.hour < 6 { return act_result("sleep", "place", 0.8, w) }
+        return act_result("relax", "place", 0.8, w)
+    }
+    if m.state == "vehicle" { return act_result("commute", "motion", 0.75 * m.conf, [mline + " → 乘车"]) }
+    if m.state == "run_bike" {
+        let at_gym = here.place != nil && here.place.kind == "gym"
+        if rush && !at_gym { return act_result("commute", "motion", 0.6 * m.conf, [mline, "工作日通勤时段 → 通勤"]) }
+        return act_result("workout", "motion", 0.6 * m.conf, [mline + " → 运动"])
+    }
+    if m.state == "walk" {
+        if rush { return act_result("commute", "motion", 0.65 * m.conf, [mline, "工作日通勤时段 → 通勤"]) }
+        return act_result("walk", "motion", 0.65 * m.conf, [mline + " → 散步"])
+    }
+    if prefs.use_time {
+        let w = ["时段：" + day_word(p) + slot_name(p.hour)]
+        if m.state == "still" { w.push(mline) }
+        return act_result(slot_act(p.hour), "time", 0.35, w)
+    }
+    act_result("", "none", 0.0, ["没有可用的情境信号"])
+}
+fn build_ctx(it){
+    let p = local_parts()
+    {at: time_now() hour: p.hour minute: p.minute weekday: p.weekday slot: slot_name(p.hour)
+        weekend: p.weekday == 0 || p.weekday == 6
+        weather: weather motion: motion here: here activity: infer_activity(it)}
+}
+fn source_word(src){
+    if src == "manual" { return "手动" }
+    if src == "intent" { return "你说的" }
+    if src == "ai" { return "AI 推断" }
+    if src == "place" { return "地点推断" }
+    if src == "motion" { return "移动推断" }
+    if src == "time" { return "时段推测" }
+    "无"
+}
+fn act_line(a){
+    if a.id == "" { return "未知 · 不参与" }
+    act_name(a.id) + " · " + source_word(a.source) + " · 可信度 " + round(a.conf * 100) / 100
+}
+fn here_text(){
+    if here.place == nil {
+        if fixes.len() == 0 { return "未知" }
+        return "不在已标记的地点"
+    }
+    "「" + here.place.name + "」附近 " + round(here.dist) + " m"
 }
 
 // ---- 意图：本地能理解的部分（AI 不可用时也有效） ----
@@ -296,24 +683,49 @@ fn has(text, words){
     for w in words { if text.search(w) >= 0 { return true } }
     false
 }
+fn first_hit(text, words){
+    for w in words { if text.search(w) >= 0 { return w } }
+    ""
+}
+// 情境词（PLAN 2.5）：按顺序匹配，第一个命中的生效；「上班路上」要先于「上班」
+let ACT_WORDS = [
+    {id: "commute" w: ["上班路上" "下班路上" "地铁" "公交" "开车" "打车" "通勤"]}
+    {id: "workout" w: ["跑步" "健身" "撸铁" "骑车" "锻炼"]}
+    {id: "walk" w: ["散步" "遛弯" "溜达"]}
+    {id: "sleep" w: ["睡觉" "失眠" "助眠" "入睡"]}
+    {id: "study" w: ["学习" "复习" "写作业" "刷题" "看书" "背单词"]}
+    {id: "work" w: ["上班" "开会" "写代码" "加班" "干活"]}
+    {id: "relax" w: ["休息" "放空" "躺着" "发呆"]}
+]
 fn parse_intent(raw){
     let x = ("" + raw).trim()
-    let it = {instr: 0 energy: 0.0 mood: "" lang: "" fresh: false words: []}
+    let it = {instr: 0 energy: 0.0 mood: "" lang: "" fresh: false words: [] act: "" act_word: ""}
+    for g in ACT_WORDS {
+        if it.act == "" {
+            let w = first_hit(x, g.w)
+            if w != "" {
+                it.act = g.id
+                it.act_word = w
+                it.words.push("情境：" + act_name(g.id))
+            }
+        }
+    }
     // 先判断「要人声」，再让「不要人声」覆盖它（后者包含前者）
+    let vocal_word = ""
     if has(x, ["要人声" "想听唱" "有歌词"]) {
         it.instr = -1
-        it.words.push("要人声")
+        vocal_word = "要人声"
     }
     if has(x, ["纯音乐" "不要人声" "无人声" "别唱" "没有歌词"]) {
         it.instr = 1
-        if it.words.len() > 0 { it.words = [] }
-        it.words.push("偏纯音乐")
+        vocal_word = "偏纯音乐"
     }
-    if has(x, ["嗨" "燃" "动感" "提神" "节奏快" "带劲" "打鸡血"]) {
+    if vocal_word != "" { it.words.push(vocal_word) }
+    if has(x, ["嗨" "燃" "动感" "提神" "节奏快" "带劲" "有劲" "劲爆" "打鸡血" "来劲"]) {
         it.energy = 1.3
         it.words.push("能量高一点")
     }
-    if has(x, ["安静" "舒缓" "轻一点" "慢一点" "助眠" "别太吵" "放空"]) {
+    if has(x, ["安静" "舒缓" "柔和" "轻一点" "慢一点" "助眠" "别太吵" "放空"]) {
         it.energy = -1.2
         it.words.push("能量低一点")
     }
@@ -351,11 +763,11 @@ fn parse_intent(raw){
     it
 }
 
-// ---- 本地规则：可解释的打分 ----
+// ---- R 选曲：可解释的本地打分（PLAN 2.5）----
 fn score_song(s, ctx, it){
     let sc = 0.0
     let why = []
-    let a = ctx.a
+    let a = act_by_id(ctx.activity.id)
     let target = 2.8
     if a != nil { target = a.target }
     target = target + it.energy
@@ -366,7 +778,10 @@ fn score_song(s, ctx, it){
     } else { sc = sc - 0.9 }
     if s.vo != nil {
         if !s.vo {
-            if it.instr == 1 { sc = sc + 2.0 why.push("纯音乐") }
+            if it.instr == 1 {
+                sc = sc + 2.0
+                why.push("纯音乐")
+            }
             if a != nil { sc = sc + a.instr }
             if it.instr == -1 { sc = sc - 2.5 }
         } else {
@@ -375,10 +790,16 @@ fn score_song(s, ctx, it){
         }
     }
     if s.md != nil {
-        if it.mood != "" && s.md == it.mood { sc = sc + 1.6 why.push("情绪：" + s.md) }
+        if it.mood != "" && s.md == it.mood {
+            sc = sc + 1.6
+            why.push("情绪：" + s.md)
+        }
         if a != nil && s.md == a.md { sc = sc + 0.6 }
         let wm = weather_mood()
-        if wm != "" && s.md == wm { sc = sc + 0.5 why.push(weather.text + "天配" + s.md) }
+        if wm != "" && s.md == wm {
+            sc = sc + 0.5
+            why.push(weather.text + "天配" + s.md)
+        }
     }
     if it.lang != "" && s.lg != nil {
         if s.lg == it.lang { sc = sc + 1.0 } else { sc = sc - 1.5 }
@@ -386,17 +807,22 @@ fn score_song(s, ctx, it){
     let g = s.fb.g
     if a != nil {
         let ca = fb_get(s.fb, a.id)
-        if ca > 0 { sc = sc + 1.4 * ca why.push("你在「" + a.n + "」时喜欢过") }
+        if ca > 0 {
+            sc = sc + 1.4 * ca
+            why.push("你在「" + a.n + "」时喜欢过")
+        }
         if ca < 0 { sc = sc - 4.0 }
     }
-    if g > 0 { sc = sc + 0.6 * g if why.len() < 2 { why.push("你喜欢过") } }
+    if g > 0 {
+        sc = sc + 0.6 * g
+        if why.len() < 2 { why.push("你喜欢过") }
+    }
     if g < 0 { sc = sc - 1.5 }
     if it.fresh {
         for k in last_keys { if k == key_of(s) { sc = sc - 6.0 } }
     }
     sc = sc + random() * 0.35
-    let text = ""
-    for w in why { if text == "" { text = w } else { text = text + " · " + w } }
+    let text = join(why, " · ")
     if text == "" { text = "综合情境的折中选择" }
     {sc: sc why: text}
 }
@@ -412,7 +838,10 @@ fn local_pick(ctx, it){
         let best = -1
         let bv = -1000000.0
         for j r in scored {
-            if r.sc > bv { bv = r.sc best = j }
+            if r.sc > bv {
+                bv = r.sc
+                best = j
+            }
         }
         if best < 0 { break }
         out.push({i: scored[best].i why: scored[best].why})
@@ -421,21 +850,15 @@ fn local_pick(ctx, it){
     out
 }
 
-// ---- 推荐入口：先试 AI，失败就用本地规则 ----
+// 一句话描述情境（界面状态行、历史、AI 输入共用）
 fn ctx_text(ctx){
     let parts = []
-    if prefs.use_time {
-        let p = local_parts()
-        let wk = "工作日"
-        if p.weekday == 0 || p.weekday == 6 { wk = "周末" }
-        parts.push(wk + slot_name(p.hour))
-    }
+    if prefs.use_time { parts.push(day_word(ctx) + ctx.slot) }
     if weather_usable() { parts.push(weather.text + " " + round(weather.temp) + "°C") }
-    if ctx.a != nil {
-        if ctx.source == "manual" { parts.push(ctx.a.n) } else { parts.push(ctx.a.n + "（推测）") }
-    }
-    let text = ""
-    for w in parts { if text == "" { text = w } else { text = text + " · " + w } }
+    if ctx.motion.state != "unknown" { parts.push(motion_name(ctx.motion.state)) }
+    if ctx.here.place != nil { parts.push("在" + ctx.here.place.name + "附近") }
+    if ctx.activity.id != "" { parts.push(act_name(ctx.activity.id) + "（" + source_word(ctx.activity.source) + "）") }
+    let text = join(parts, " · ")
     if text == "" { text = "无情境" }
     text
 }
@@ -444,14 +867,14 @@ fn recommend(){
     if busy { return }
     let raw = ui.intent.text()
     let it = parse_intent(raw)
-    let ctx = current_act()
+    let ctx = build_ctx(it)
     if playlist.len() > 0 {
         last_keys = []
         for p in playlist { last_keys.push(key_of(songs[p.i])) }
     }
     if host.has("model") {
         busy = true
-        plan_note = "AI 正在选歌…"
+        plan_note = "AI 正在理解情境并选歌…"
         ui.plan.set_text(plan_note)
         ask_model(raw, it, ctx)
     } else {
@@ -459,19 +882,35 @@ fn recommend(){
     }
 }
 
+// AI 的输入：只发描述，不发坐标（PLAN 2.5）
+fn signals_for_ai(ctx){
+    let mt = "未知"
+    if ctx.motion.state != "unknown" {
+        mt = motion_name(ctx.motion.state) + " " + round(ctx.motion.speed * 10) / 10 + " m/s（" + ctx.motion.source + "，可信度 " + round(ctx.motion.conf * 100) / 100 + "）"
+    }
+    let wx = "未知"
+    if weather_usable() { wx = weather.text + " " + round(weather.temp) + "°C" }
+    let manual = ""
+    if ctx.activity.source == "manual" { manual = ctx.activity.id }
+    {time: day_word(ctx) + ctx.slot + " " + ctx.hour + "点" weather: wx motion: mt place: here_text()
+        rule_activity: ctx.activity.id + "（" + source_word(ctx.activity.source) + "：" + join(ctx.activity.why, "；") + "）"
+        manual: manual}
+}
 fn ask_model(raw, it, ctx){
     let cands = []
     for i s in songs {
         let like = s.fb.g
-        if ctx.a != nil { like = like + fb_get(s.fb, ctx.a.id) }
+        if ctx.activity.id != "" { like = like + fb_get(s.fb, ctx.activity.id) }
         cands.push({i: i title: s.t artist: s.a energy: s.en vocal: s.vo mood: s.md lang: s.lg like: like})
     }
     let n = songs.len() - 1
     host.request("model.complete", {
-        task: "你是一个音乐 DJ。根据用户此刻的情境（时段、天气、活动）和一句话意图，从候选歌曲里挑 6 首，按播放顺序排列。like 为正表示用户在这个情境或总体上喜欢过，负的尽量不选。recent 是上一批，用户说换一批时避开。为每首写一句不超过 30 字的中文理由，要具体到情境或意图。understood 用一句话写你如何理解用户的意图。只能从 songs 的 i 里选。"
-        input: {context: ctx_text(ctx) intent: raw recent: last_keys songs: cands}
-        schema: {type: "object" required: ["understood" "picks"] additionalProperties: false
+        task: "你是一个懂情境的音乐 DJ。第一步，判断用户此刻在做什么：signals 是传感器和规则给出的情境（manual 非空表示用户手动选定，必须照用），intent 是用户的原话；用户原话里说明的情境优先于传感器推断。activity 从给定的 8 个值里选一个，判断不了就选 unknown，activity_why 用一句中文说明依据。第二步，从 songs 里挑 6 首按播放顺序排列：能量、是否人声、情绪要贴合你判断的活动和用户的意图；like 为正表示用户喜欢过，为负尽量不选；recent 是上一批，用户说换一批时避开。每首的 why 用不超过 30 字的中文说明它为什么适合此刻。understood 用一句话写你对用户意图的理解。只能从 songs 的 i 里选。"
+        input: {signals: signals_for_ai(ctx) intent: raw recent: last_keys songs: cands}
+        schema: {type: "object" required: ["understood" "activity" "activity_why" "picks"] additionalProperties: false
             properties: {understood: {type: "string" maxLength: 80}
+                activity: {type: "string" enum: ["study" "work" "commute" "walk" "workout" "relax" "sleep" "unknown"]}
+                activity_why: {type: "string" maxLength: 40}
                 picks: {type: "array" minItems: 3 maxItems: 8
                     items: {type: "object" required: ["i" "why"] additionalProperties: false
                         properties: {i: {type: "integer" minimum: 0 maximum: n} why: {type: "string" maxLength: 40}}}}}}
@@ -485,31 +924,40 @@ fn model_answer(r, raw, it, ctx){
         finish(local_pick(ctx, it), "本地规则", raw, it, ctx, "AI 不可用：" + r.error)
         return
     }
+    let o = pick(r.data, "output", nil)
+    let picks = pick(o, "picks", [])
     let out = []
     let seen = []
-    for p in r.data.output.picks {
-        let ok_i = p.i >= 0 && p.i < songs.len()
-        for x in seen { if x == p.i { ok_i = false } }
-        if ok_i { out.push({i: p.i why: p.why}) seen.push(p.i) }
+    for p in picks {
+        let i = pick(p, "i", -1)
+        let ok_i = i >= 0 && i < songs.len()
+        for x in seen { if x == i { ok_i = false } }
+        if ok_i {
+            out.push({i: i why: pick(p, "why", "")})
+            seen.push(i)
+        }
     }
     if out.len() < 3 {
-        finish(local_pick(ctx, it), "本地规则", raw, it, ctx, "AI 返回的歌不足 3 首")
+        finish(local_pick(ctx, it), "本地规则", raw, it, ctx, "AI 返回的歌不足 3 首，改用本地规则")
         return
     }
-    finish(out, "AI", raw, it, ctx, "AI 理解：" + r.data.output.understood)
+    // PLAN 2.4：手动和原话里的明确情境优先；否则采用 AI 的判断
+    let act = pick(o, "activity", "unknown")
+    if ctx.activity.source != "manual" && ctx.activity.source != "intent" && act != "unknown" && act_by_id(act) != nil {
+        ctx.activity = act_result(act, "ai", 0.85, ["AI：" + pick(o, "activity_why", "")])
+    }
+    finish(out, "AI", raw, it, ctx, "AI 理解：" + pick(o, "understood", ""))
 }
 
 fn finish(picks, how, raw, it, ctx, note){
     playlist = picks
+    playlist_act = ctx.activity.id
+    last_ctx = ctx
     let summary = how + " · " + ctx_text(ctx)
-    if note != "" {
-        summary = summary + "\n" + note
-    }
+    if note != "" { summary = summary + "\n" + note }
     if how != "AI" {
         if it.words.len() > 0 {
-            let w = ""
-            for x in it.words { if w == "" { w = x } else { w = w + "、" + x } }
-            summary = summary + "\n本地规则听懂了：" + w
+            summary = summary + "\n本地规则听懂了：" + join(it.words, "、")
         } else if ("" + raw).trim() != "" {
             summary = summary + "\n这句话本地规则没认出关键词，只按情境选"
         }
@@ -520,27 +968,28 @@ fn finish(picks, how, raw, it, ctx, note){
     sync_home()
 }
 
+// 历史不存坐标（PLAN 2.7）
 fn log_history(how, raw, ctx){
     let h = read_json("history.json")
     if h == nil { h = [] }
     let keys = []
     for p in playlist { keys.push(key_of(songs[p.i])) }
-    let act = ""
-    if ctx.a != nil { act = ctx.a.id }
-    let next = [{at: time_now() how: how intent: raw context: ctx_text(ctx) act: act act_source: ctx.source picks: keys}]
+    let pk = ""
+    if ctx.here.place != nil { pk = ctx.here.place.kind }
+    let next = [{at: time_now() how: how intent: raw ctx_text: ctx_text(ctx) act: ctx.activity.id act_source: ctx.activity.source
+        motion: ctx.motion.state place_kind: pk sim: sim.kind != "off" picks: keys}]
     for x in h { if next.len() < 30 { next.push(x) } }
     write_json("history.json", next)
 }
 
-// ---- 反馈：总体分 + 当前活动下的分 ----
+// ---- F 反馈：总体分 + 歌单生成时那个活动下的分 ----
 fn feedback(i, v){
     let s = songs[i]
-    let ctx = current_act()
     s.fb.g = clamp(s.fb.g + v, -3, 3)
-    if ctx.a != nil { fb_set(s.fb, ctx.a.id, clamp(fb_get(s.fb, ctx.a.id) + v, -3, 3)) }
+    if playlist_act != "" { fb_set(s.fb, playlist_act, clamp(fb_get(s.fb, playlist_act) + v, -3, 3)) }
     save_feedback()
     let where = "总体"
-    if ctx.a != nil { where = "「" + ctx.a.n + "」和总体" }
+    if playlist_act != "" { where = "「" + act_name(playlist_act) + "」和总体" }
     if v > 0 { ui.plan.set_text("记下了：在" + where + "里更常推荐《" + s.t + "》") }
     else { ui.plan.set_text("记下了：在" + where + "里少推《" + s.t + "》") }
     ui.list.render()
@@ -628,42 +1077,118 @@ fn tag_line(s){
 
 // ---- 情境控制 ----
 fn set_act(id){
-    if prefs.act == id && manual_left() > 0 { prefs.act = "" prefs.act_until = 0 }
-    else { prefs.act = id prefs.act_until = time_now() + ACT_TTL }
+    if prefs.act == id && manual_left() > 0 {
+        prefs.act = ""
+        prefs.act_until = 0
+    } else {
+        prefs.act = id
+        prefs.act_until = time_now() + ACT_TTL
+    }
     save_prefs()
-    sync_context()
+    refresh_views()
 }
 fn set_city(i){
     prefs.city = i
     save_prefs()
     ui.cities.render()
-    fetch_weather()
+    if weather.coords != "gps" || fixes.len() == 0 { fetch_weather() }
 }
-fn toggle_weather(){ prefs.use_weather = !prefs.use_weather save_prefs() sync_context() }
-fn toggle_time(){ prefs.use_time = !prefs.use_time save_prefs() sync_context() }
+fn toggle_weather(){
+    prefs.use_weather = !prefs.use_weather
+    save_prefs()
+    refresh_views()
+}
+fn toggle_time(){
+    prefs.use_time = !prefs.use_time
+    save_prefs()
+    refresh_views()
+}
+fn toggle_gps(){
+    prefs.use_gps = !prefs.use_gps
+    save_prefs()
+    if !prefs.use_gps && sim.kind == "off" {
+        fixes = []
+        same_since = 0
+        if weather.coords == "gps" { fetch_weather() }
+    }
+    gps_poll()
+}
 
-fn sync_context(){
+fn time_line(){
     let p = local_parts()
     let mm = "" + p.minute
     if p.minute < 10 { mm = "0" + mm }
-    let tl = slot_name(p.hour) + " " + p.hour + ":" + mm
+    let tl = day_word(p) + slot_name(p.hour) + " " + p.hour + ":" + mm
     if weather.state != "ok" { tl = tl + "（按 UTC+8）" }
     if !prefs.use_time { tl = tl + " · 不参与" }
-    ui.ctx_time.set_text(tl)
-    let wl = "加载中…"
-    if weather.state == "fail" { wl = "不可用（网络或服务出错）· 不参与" }
-    if weather.state == "ok" {
-        wl = CITIES[prefs.city].n + " " + weather.text + " " + round(weather.temp) + "°C · Open-Meteo"
-        if !prefs.use_weather { wl = wl + " · 不参与" }
+    tl
+}
+fn weather_line(){
+    if weather.state == "loading" { return "加载中…" }
+    if weather.state == "fail" { return "不可用（网络或服务出错）· 不参与" }
+    let where = CITIES[prefs.city].n
+    if weather.coords == "gps" { where = "当前位置" }
+    if weather.coords == "gps" && sim.kind != "off" { where = "模拟位置" }
+    let wl = where + " " + weather.text + " " + round(weather.temp) + "°C · Open-Meteo"
+    if !prefs.use_weather { wl = wl + " · 不参与" }
+    wl
+}
+fn motion_line(){
+    if motion.state == "unknown" {
+        if motion.note != "" { return motion.note }
+        return "未知"
     }
-    ui.ctx_weather.set_text(wl)
-    let c = current_act()
-    let al = "未设置 · 不参与"
-    if c.source == "manual" { al = c.a.n + " · 手动 · 还剩 " + ceil(manual_left() / 60) + " 分钟" }
-    if c.source == "time" { al = c.a.n + " · 按时段推测" }
-    ui.ctx_act.set_text(al)
+    let src = "GPS"
+    if motion.source == "sim" { src = "模拟" }
+    motion_name(motion.state) + " · 约 " + round(motion.speed * 36) / 10 + " km/h · " + src + " · 可信度 " + round(motion.conf * 100) / 100
+}
+fn sync_context(){
+    let c = build_ctx(nil)
+    ui.ctx_time.set_text(time_line())
+    ui.ctx_weather.set_text(weather_line())
+    ui.ctx_motion.set_text(motion_line())
+    ui.ctx_place.set_text(here_text())
+    ui.ctx_act.set_text(act_line(c.activity))
+    ui.ctx_why.set_text("依据：" + join(c.activity.why, "；"))
+    ui.sim_banner.set_visible(sim.kind != "off")
     ui.acts.render()
     ui.toggles.render()
+}
+fn fix_lines(){
+    let out = []
+    let now = time_now()
+    let n = fixes.len()
+    for k in 6 {
+        let j = n - 1 - k
+        if j >= 0 {
+            let f = fixes[j]
+            let line = round(now - f.t) + " 秒前 · 精度 ±" + round(f.acc) + " m"
+            if j > 0 { line = line + " · 距上一点 " + round(dist_m(fixes[j - 1].lat, fixes[j - 1].lon, f.lat, f.lon)) + " m" }
+            out.push(line)
+        }
+    }
+    out
+}
+fn shown_places(){
+    if sim.kind != "off" { return sim_places }
+    places
+}
+fn sync_sense(){
+    ui.sense_motion.set_text(motion_line())
+    ui.sense_note.set_text(motion.note)
+    ui.sense_here.set_text("地点：" + here_text())
+    let lines = fix_lines()
+    let t = join(lines, "\n")
+    if t == "" { t = "还没有定位点。" + gps_note }
+    ui.sense_fixes.set_text(t)
+    ui.sense_banner.set_visible(sim.kind != "off")
+    ui.sims.render()
+    ui.kinds.render()
+    ui.place_list.render()
+}
+fn refresh_views(){
+    if screen == "home" { sync_context() }
+    if screen == "sense" { sync_sense() }
 }
 fn sync_home(){
     ui.plan.set_text(plan_note)
@@ -674,9 +1199,14 @@ fn sync_home(){
 fn show(name){
     screen = name
     ui.home.set_visible(name == "home")
+    ui.sense.set_visible(name == "sense")
     ui.library.set_visible(name == "library")
     ui.player_pane.set_visible(name == "player")
-    if name == "home" { sync_context() sync_home() }
+    if name == "home" {
+        sync_context()
+        sync_home()
+    }
+    if name == "sense" { sync_sense() }
     if name == "library" { ui.lib_list.render() }
 }
 fn play(i){
@@ -695,18 +1225,25 @@ fn open_source(){
     let ok_open = ui.reader.open(url)
     if !ok_open { ui.player_fail.set_text("打不开这个页面：这台设备可能没给本应用打开网页的权限") }
 }
-fn pick_source(i){ source = i open_source() }
-fn close_player(){ ui.reader.close() playing = nil show("home") }
+fn pick_source(i){
+    source = i
+    open_source()
+}
+fn close_player(){
+    ui.reader.close()
+    playing = nil
+    show("home")
+}
 
 fn boot(){
     load_all()
-    sync_context()
+    fetch_weather()
     sync_home()
     ui.cities.render()
-    fetch_weather()
+    gps_poll()
 }
 start_timeout(0.05, || boot())
-start_interval(60, || sync_context())
+start_interval(GPS_POLL_S, || gps_poll())
 
 // ---- 外观 ----
 let ground = #x14161a
@@ -743,13 +1280,16 @@ let Field = TextInput{width: Fill height: 40
     draw_text +: {color: ink color_hover: ink color_focus: ink color_empty: secondary color_empty_hover: secondary}
 }
 
+
 SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
-    home := SolidView{width: Fill height: Fill flow: Down spacing: 10 padding: Inset{left: 14 right: 14 top: 12 bottom: 8} draw_bg.color: ground
+    home := SolidView{width: Fill height: Fill flow: Down spacing: 8 padding: Inset{left: 14 right: 14 top: 10 bottom: 8} draw_bg.color: ground
         View{width: Fill height: Fit flow: Right align: Align{y: 0.5}
             Label{width: Fill text: "情境 DJ" draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 24}}
+            Bar{text: "感知" on_click: || show("sense")}
             Bar{text: "曲库" on_click: || show("library")}
         }
-        RoundedView{width: Fill height: Fit flow: Down spacing: 6 padding: 12 draw_bg.color: card draw_bg.border_radius: 12.0
+        sim_banner := Label{visible: false width: Fill text: "模拟定位中：移动和地点来自模拟数据，不是真实感知" draw_text.color: accent draw_text.text_style.font_size: 12}
+        RoundedView{width: Fill height: Fit flow: Down spacing: 5 padding: 12 draw_bg.color: card draw_bg.border_radius: 12.0
             Label{text: "此刻的情境（都可以改）" draw_text.color: accent draw_text.text_style: theme.font_bold{font_size: 13}}
             View{width: Fill height: Fit flow: Right spacing: 8
                 Label{width: 40 text: "时段" draw_text.color: secondary draw_text.text_style.font_size: 12}
@@ -760,10 +1300,19 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
                 ctx_weather := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style.font_size: 13}
             }
             View{width: Fill height: Fit flow: Right spacing: 8
-                Label{width: 40 text: "活动" draw_text.color: secondary draw_text.text_style.font_size: 12}
-                ctx_act := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style.font_size: 13}
+                Label{width: 40 text: "移动" draw_text.color: secondary draw_text.text_style.font_size: 12}
+                ctx_motion := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style.font_size: 13}
             }
-            acts := ScrollXView{width: Fill height: 40 flow: Right spacing: 6 padding: Inset{top: 4}
+            View{width: Fill height: Fit flow: Right spacing: 8
+                Label{width: 40 text: "地点" draw_text.color: secondary draw_text.text_style.font_size: 12}
+                ctx_place := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style.font_size: 13}
+            }
+            View{width: Fill height: Fit flow: Right spacing: 8
+                Label{width: 40 text: "活动" draw_text.color: secondary draw_text.text_style.font_size: 12}
+                ctx_act := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 13}}
+            }
+            ctx_why := Label{width: Fill text: "" draw_text.color: secondary draw_text.text_style.font_size: 11}
+            acts := ScrollXView{width: Fill height: 38 flow: Right spacing: 6 padding: Inset{top: 2}
                 on_render: || {
                     for a in ACTS {
                         if prefs.act == a.id && manual_left() > 0 { ChipOn{text: a.n on_click: || set_act(a.id)} }
@@ -773,6 +1322,8 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
             }
             toggles := View{width: Fill height: Fit flow: Right spacing: 6
                 on_render: || {
+                    if prefs.use_gps { ChipOn{text: "用定位" on_click: || toggle_gps()} }
+                    else { Chip{text: "用定位" on_click: || toggle_gps()} }
                     if prefs.use_time { ChipOn{text: "用时段" on_click: || toggle_time()} }
                     else { Chip{text: "用时段" on_click: || toggle_time()} }
                     if prefs.use_weather { ChipOn{text: "用天气" on_click: || toggle_weather()} }
@@ -789,15 +1340,15 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
             }
         }
         View{width: Fill height: Fit flow: Right spacing: 8 align: Align{y: 0.5}
-            intent := Field{empty_text: "想听什么？例：写代码，不要人声" on_return: |text| recommend()}
+            intent := Field{empty_text: "想听什么？例：在地铁上，有点困" on_return: |text| recommend()}
             Primary{text: "推荐" on_click: || recommend()}
         }
         plan := Label{width: Fill text: "" draw_text.color: secondary draw_text.text_style.font_size: 12}
         list := ScrollYView{width: Fill height: Fill flow: Down spacing: 8
             on_render: || {
                 if playlist.len() == 0 {
-                    View{width: Fill height: 160 align: Align{x: 0.5 y: 0.5}
-                        Label{text: "选一下活动、说一句想听什么，再点「推荐」" draw_text.color: secondary draw_text.text_style.font_size: 13}
+                    View{width: Fill height: 120 align: Align{x: 0.5 y: 0.5}
+                        Label{width: Fill align: Align{x: 0.5} text: "说一句想听什么，再点「推荐」" draw_text.color: secondary draw_text.text_style.font_size: 13}
                     }
                 }
                 for n p in playlist {
@@ -814,6 +1365,54 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
                 }
             }
         }
+    }
+    sense := SolidView{visible: false width: Fill height: Fill flow: Down spacing: 10 padding: Inset{left: 14 right: 14 top: 12 bottom: 8} draw_bg.color: ground
+        View{width: Fill height: Fit flow: Right align: Align{y: 0.5}
+            Bar{text: "‹ 返回" on_click: || show("home")}
+            Label{width: Fill text: "感知" draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 20}}
+        }
+        sense_banner := Label{visible: false width: Fill text: "模拟定位中：下面的数据是模拟的，不是真实感知" draw_text.color: accent draw_text.text_style.font_size: 12}
+        RoundedView{width: Fill height: Fit flow: Down spacing: 6 padding: 12 draw_bg.color: card draw_bg.border_radius: 12.0
+            Label{text: "移动状态（GPS 每 10 秒采样一次）" draw_text.color: accent draw_text.text_style: theme.font_bold{font_size: 13}}
+            sense_motion := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 14}}
+            sense_note := Label{width: Fill text: "" draw_text.color: secondary draw_text.text_style.font_size: 11}
+            sense_here := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style.font_size: 13}
+            Label{text: "最近的定位点（只在内存里，不保存）" draw_text.color: secondary draw_text.text_style.font_size: 11}
+            sense_fixes := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style.font_size: 11}
+        }
+        RoundedView{width: Fill height: Fit flow: Down spacing: 6 padding: 12 draw_bg.color: card draw_bg.border_radius: 12.0
+            Label{text: "把当前位置标记为" draw_text.color: accent draw_text.text_style: theme.font_bold{font_size: 13}}
+            kinds := View{width: Fill height: Fit flow: Right spacing: 6
+                on_render: || {
+                    for x in PLACE_KINDS { Chip{text: x.n on_click: || mark_place(x.k)} }
+                }
+            }
+            place_list := View{width: Fill height: Fit flow: Down spacing: 4
+                on_render: || {
+                    if shown_places().len() == 0 {
+                        Label{width: Fill text: "还没有标记地点。静止在家、学校、公司或健身房时点上面的按钮。" draw_text.color: secondary draw_text.text_style.font_size: 11}
+                    }
+                    for p in shown_places() {
+                        View{width: Fill height: Fit flow: Right spacing: 8 align: Align{y: 0.5}
+                            Label{width: Fill text: p.name + " · " + round(p.lat * 10000) / 10000 + ", " + round(p.lon * 10000) / 10000 draw_text.color: ink draw_text.text_style.font_size: 12}
+                            Small{text: "删除" on_click: || remove_place(p.kind)}
+                        }
+                    }
+                }
+            }
+        }
+        RoundedView{width: Fill height: Fit flow: Down spacing: 6 padding: 12 draw_bg.color: card draw_bg.border_radius: 12.0
+            Label{text: "模拟定位（测试和演示用，重启后自动关闭）" draw_text.color: accent draw_text.text_style: theme.font_bold{font_size: 13}}
+            sims := View{width: Fill height: Fit flow: Right spacing: 6
+                on_render: || {
+                    for x in SIMS {
+                        if sim.kind == x.k { ChipOn{text: x.n on_click: || sim_set(x.k)} }
+                        else { Chip{text: x.n on_click: || sim_set(x.k)} }
+                    }
+                }
+            }
+        }
+        sense_status := Label{width: Fill text: "" draw_text.color: secondary draw_text.text_style.font_size: 12}
     }
     library := SolidView{visible: false width: Fill height: Fill flow: Down spacing: 10 padding: Inset{left: 14 right: 14 top: 12 bottom: 8} draw_bg.color: ground
         View{width: Fill height: Fit flow: Right align: Align{y: 0.5}

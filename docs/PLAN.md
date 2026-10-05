@@ -126,7 +126,7 @@ Here   = {place: Place|nil  dist: number(米，没有地点时为 -1)}
 | `estimate_speed()` | → `{ok, speed, n, acc_med}` | 取窗口内的点；点数少于 `MIN_FIXES` 或时间跨度小于 30 s 时 `ok: false`；净位移 d 小于 `STILL_FLOOR_M` 规则时速度记为 0，否则速度 = d ÷ 时间跨度 |
 | `classify(speed)` | → state | 按上面的速度分档 |
 | `update_motion()` | 无 | 新状态连续 `HOLD_N` 次一致才写入 `motion`；没有定位时 state 为 `unknown`，note 写"没有定位"；可信度 = min(1, n/6) × (精度中位数 ≤ 20 m ? 1 : 0.7)，点位 5 分钟没变时再 × 0.5 |
-| `mark_place(kind)` | 无 | 用当前点保存地点，最多 10 个；同类型的旧地点被覆盖；没有定位时提示，不保存 |
+| `mark_place(kind)` | 无 | 用当前点保存地点。每种类型只保留一个（新的覆盖旧的），所以最多 4 个；没有定位时提示，不保存。模拟模式下标记的地点只保存在内存里 |
 | `remove_place(id)` | 无 | 删除一个地点 |
 | `update_here()` | 无 | 找最近的地点，在 `PLACE_R_M` 以内就记下 |
 | `sim_set(kind)` | kind ∈ `off`/`still`/`walk`/`bike`/`bus` | 模拟模式：从基准点（有真实定位时用真实定位，否则用北京 39.9042, 116.4074）出发，分别以 0 / 1.3 / 4.5 / 9 m/s 前进，加 ±8 m 抖动，精度 10 m |
@@ -158,7 +158,7 @@ Ctx = {at: number  hour: int  minute: int  weekday: int(0 = 周日)  slot: strin
 
 `why` 每条写一句给人看的理由，例如：`GPS：近 1 分钟约 1.3 m/s → 步行`、`位置：距「学校」80 m`、`你说「在地铁上」`。
 
-**AI 的情境判断**：R2 返回的 `activity` 只在两种情况下采用——优先级 1 和 2 都不成立，并且 AI 给的不是 `unknown`；采用时 `source` 记为 `"intent"`、可信度 0.85，理由写 AI 给的 `activity_why`。这样**手动选择永远最优先**，传感器推断可以被你的原话纠正。
+**AI 的情境判断**：R2 返回的 `activity` 只在两种情况下采用——优先级 1 和 2 都不成立，并且 AI 给的不是 `unknown`；采用时 `source` 记为 `"ai"`（实现时从初稿的 `"intent"` 改过来：AI 也会参考传感器信号，标成"你说的"会误导）、可信度 0.85，理由写 AI 给的 `activity_why`。这样**手动选择永远最优先**，传感器推断可以被你的原话纠正。
 
 ### 2.5 R：选曲
 
@@ -205,7 +205,7 @@ Ctx = {at: number  hour: int  minute: int  weekday: int(0 = 周日)  slot: strin
 | 文件 | 内容 | 变化 |
 |---|---|---|
 | `prefs.json` | `{city act act_until use_weather use_time use_gps sim}` | 新增 `use_gps`（默认 true）和 `sim`（默认 "off"，**不持久化为开启**：重启后自动回到 off） |
-| `places.json` | `[Place]` | 新文件。只存你自己标记的地点 |
+| `places.json` | `[Place]` | 新文件。只存你自己标记的地点。**放在存储根目录，不放在 `accounts/device/`**（实现时发现：应用助手能读 `accounts/device/`，放在那里坐标可能经助手发给 AI） |
 | `feedback.json` | `[{k fb}]` | `fb` 增加 `walk` 字段 |
 | `library.json` / `last.json` | 同 v0.1 | — |
 | `history.json` | 最近 30 条 `{at how intent ctx_text act act_source motion place_kind picks sim}` | **不存坐标** |
@@ -337,3 +337,15 @@ Ctx = {at: number  hour: int  minute: int  weekday: int(0 = 周日)  slot: strin
 13. **时间太紧，GPT 可能在手机上耗掉整个晚上。** → G2 限时 90 分钟，只调查、不编译。
 
 **仍未解决的问题**（如实列出）：P40 上 OctoSense 的定位权限是否会弹窗、弹窗是什么样，要等 G2 报告；`hub publish` 做本地发布在 Windows 版桌面上是否被识别，要等 G1 报告。
+
+---
+
+## 8. C1–C2 实施记录（2026-10-05 晚）
+
+- **完成**：第 2 节全部实现，v0.2.0。T1–T10 全部通过（电脑上用 card-host 和模拟定位），另加两项：v0.1 数据迁移（旧反馈缺 `walk`、旧偏好缺 `use_gps`）正常；`places.json` 读取、跳过非法条目、删除后持久化正常。`tools/octo check` 显示 `context-dj 0.2.0 — PASSED`。
+- **实测发现**：
+  - 直接访问缺失字段会报错，并中断整个处理函数；改用 `pick()`。
+  - `ok` 是保留字，不能当对象的键。
+  - 每个处理函数的指令上限确实生效（30 万次的循环被拦下）。0.1 秒一次的压力测试跑了约 2400 次采样，没有触发会话级预算，按真实的 10 秒间隔折算约 6–7 小时。
+- **已知行为**：从步行切到公交时，60 秒窗口会先经过约 20 秒的"跑步或骑行"，再变成"乘车"。工作日通勤时段内，两者都推断为通勤，不影响结果；其他时段会被短暂推断为运动。
+- **仍未验证**：真机 GPS（要等手机能装上应用）、AI 推断情境（要等 G1）、天气请求成功时的显示（本环境访问不到 Open-Meteo）。

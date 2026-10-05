@@ -16,11 +16,12 @@
     "storage",
     "net",
     "web",
-    "model"
+    "model",
+    "location"
   ],
   "id": "context-dj",
   "integrity": {
-    "bundle_blake3": "e336ee422b2e56e7cf7924c3c3db16714b68a729588f2d3e22e2b47d8e0ee2cd"
+    "bundle_blake3": "d9b7a6132ac1bcde9b2cdc8c997bb25cca9d226d82017c62ade9980819f803a7"
   },
   "name": "情境 DJ",
   "network": {
@@ -29,5 +30,5 @@
     ]
   },
   "schema": 1,
-  "version": "0.1.0"
+  "version": "0.2.0"
 }

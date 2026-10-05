@@ -33,7 +33,11 @@ Add this app's own requirements, data sources and tests below.
 
 ## 本应用
 
-- 需求：`BRIEF.md`。数据存放在 `accounts/device/`（prefs、library、feedback、history、last）。
+- 设计、接口、阈值：`docs/PLAN.md` 第 2 节（v0.2）。数据存放在 `accounts/device/`（prefs、library、feedback、history、last）；地点 `places.json` 放在存储根目录，应用助手读不到。
 - 反馈分按活动读写时，必须用 `fb_get` / `fb_set` 访问固定字段。不要写 `f[id] = v`：运行时会追加一个重复键，而不是覆盖原来的值（已实测）。
 - 判断意图时，"不要人声"包含"要人声"：先匹配"要人声"，再用"不要人声"覆盖。
 - `card-host` 中没有 `model` 服务，也没有 Linux 上的内置网页，这两条路径必须在 Shell 或真机上验证。
+- 读取已保存的数据时一律用 `pick(o, key, 默认值)`：直接访问不存在的字段会报错，并中断整个处理函数（已实测）。
+- `ok` 是保留字，不能用作对象的键（`{ok: true}` 会解析失败），本应用改用 `valid`。
+- `card-host` 中没有 GPS：用"感知"页的模拟定位测试，界面会一直显示模拟提示，历史里也记 `sim: true`。
+- 每个处理函数最多执行 20 万条指令（已实测会触发）。定位轮询的计算量随窗口内的点数增长，修改 `GPS_POLL_S` 或 `WIN_S` 之前，先算一下最坏情况的点数。

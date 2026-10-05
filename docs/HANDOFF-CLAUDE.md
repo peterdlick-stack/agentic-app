@@ -31,6 +31,13 @@
 - GPT-A 已排好 10-07 09:00 续做 G9。Fano 给的标签："能量去掉、人声女声、情绪去掉、语种中文"。
 - GPT-B 自判 **blocked**，等 D4 提交号、AI 封面和歌词；G5 的旧定时任务 `g5-dj` 指向别的会话、脚本不存在、`STOP_DISK` 记录没有解除，需要 Fano 决定。
 
+## ③-补2　🔴 阻塞：main（d88f706）在 GPT-B 的测试环境里启动就超时（10-05 深夜）
+- 证据：F:\context-dj-work\evidence\T-main-2026-10-05\REPORT.md。`octo check` 是 PASSED，但冷启动、推荐、重启都报 `script time budget exceeded`（**64 ms 墙钟上限，不是 20 万条指令的上限**），界面一直停在"正在加载…"，没生成 encounters.json。T11–T13 全部 BLOCKED。
+- 报错行号减 4（授予了 net）后对应 437、398、164、231 行，都是很轻的代码，说明时间不是花在这几行，只是刚好在这里撞上了截止时间。
+- **最可能的原因（未证实）**：这次的测试数据目录在 `/mnt/f/...`，WSL 访问 Windows 磁盘走 9P，每次 fs 读写都很慢，再加上内存压力（G1 时曾到 96%）。之前 T1–T10 能通过，很可能是因为数据放在 WSL 自己的 ext4 上。
+- **代码层面确实有个脆弱点**：启动是一条链（load_all → step2 → step3 → step3b → step4），中间任何一步超时，`booted` 就永远是 false，界面卡死在"正在加载…"。另外 `load_all` 一次要读 prefs、places、library 三个文件，`finish()` 一次要写 last、读写 history、写 encounters，单个处理函数里 I/O 太多。
+- 下一步：先让 GPT-B 做 A/B 对照定位原因（见对话里的指令），**再决定改不改代码**。建议的加固方向：每次文件读写拆进单独的 `start_timeout`；`finish()` 里的写文件延后执行；启动链加看门狗，超时就重试那一步，或者显示错误而不是永远"正在加载…"。
+
 ## ④ 下一步行动（新对话的起点）
 1. **D4（10-06，`main`）**：在 `bundle/main.splash` 实现 `encounters.json`，规格见 DEMO-ILOVEU §4.2。挂载点：`finish()` 里 `log_history()` 之后记 `seen`；`play(i)` 记 `heard`；`feedback(i, v)` 在 v>0 时记 `liked`。启动时在 `load_step3` 和 `load_step4` 之间插一步，用 `run_chunks` 分批读取。同步更新 `bundle/AGENT.md` 的文件说明，在 PLAN 里补测试用例，通知 GPT-B 跑 T11–T13。
 2. **README 和版本号同步（10-06，`main`）**：改成 0.3.0，说明候选卡和 `labels.json`。改完要 `octo check` 重新盖戳，这一步需要 GPT-B 在本机跑。

@@ -1,1 +1,0 @@
-{"command":"WSL python3 -B activity/run.py","exit_code":0,"checks":22,"algorithm_iterations":1,"status":"ACCURACY_UNVERIFIED","candidate_enabled":false,"baseline_retained":true}

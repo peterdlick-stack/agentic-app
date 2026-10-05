@@ -1,8 +1,0 @@
-{"event":"cancel"}
-{"event":"plugin_run","generation":1,"plugin":"queue-summary"}
-{"event":"stale_plugin_result_discarded","generation":1}
-{"event":"plugin_run","generation":3,"plugin":"queue-summary"}
-{"event":"{cancel"}
-"event":"plugin_run","generation":1,"plugin":"queue-summary"}
-{"event":"stale_plugin_result_discarded","generation":1}
-{"event":"plugin_run","generation":3,"plugin":"queue-summary"}

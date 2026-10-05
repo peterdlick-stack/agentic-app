@@ -1,0 +1,33 @@
+{
+  "agent": {
+    "instructions": "AGENT.md",
+    "model": {
+      "needs": [
+        "tool_calling",
+        "multilingual"
+      ]
+    },
+    "profile": "read-only",
+    "tools": [
+      "ask_user_question"
+    ]
+  },
+  "capabilities": [
+    "storage",
+    "net",
+    "web",
+    "model"
+  ],
+  "id": "context-dj",
+  "integrity": {
+    "bundle_blake3": "e336ee422b2e56e7cf7924c3c3db16714b68a729588f2d3e22e2b47d8e0ee2cd"
+  },
+  "name": "情境 DJ",
+  "network": {
+    "hosts": [
+      "api.open-meteo.com"
+    ]
+  },
+  "schema": 1,
+  "version": "0.1.0"
+}

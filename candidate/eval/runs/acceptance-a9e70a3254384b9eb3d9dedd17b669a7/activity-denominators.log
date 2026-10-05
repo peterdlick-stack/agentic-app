@@ -1,3 +1,0 @@
-baseline {"stationary": {"stationary": 11, "walking": 0, "unknown": 18}, "walking": {"stationary": 0, "walking": 0, "unknown": 33}} walking recall 0.0
-candidate {"stationary": {"stationary": 11, "walking": 8, "unknown": 10}, "walking": {"stationary": 0, "walking": 4, "unknown": 29}} walking recall 0.12121212121212122
-C read-only metric recomputation PASS; no files written in activity

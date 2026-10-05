@@ -1,0 +1,30 @@
+{
+  "schema": 1,
+  "subtitle": "看情境、听意图、按你的反馈选歌",
+  "description": "说一句你现在想听什么，比如“写代码，不要人声”“下雨天有点丧”。情境 DJ 会结合此刻的情境挑一组歌，并逐首说明为什么选它。情境包括时段、天气（Open-Meteo）和你手动选的活动：学习、工作、通勤、运动、放松、睡前。每一项都标明来源，可以分别关掉；手动选的活动 90 分钟后自动失效，之后改为按时段推测，界面会写明是推测。设备开放 AI 时由 AI 选歌并写理由；没有 AI 时用本地规则选，界面会说明这次用的是哪种。点“喜欢”或“不喜欢”，下次在同一个活动下就会多推或少推这首歌。内置 45 首人工粗标注的歌，也可以添加自己的歌，并让 AI 估计它们的能量、是否有人声、情绪和语种。应用本身不播放音频：点“去听”会在应用内打开网易云音乐、QQ 音乐或 B 站对这首歌的搜索页，在那里播放。偏好、反馈和推荐历史只保存在本机，应用的助手只能读取这些记录。",
+  "category": "entertainment",
+  "keywords": [
+    "音乐",
+    "情境感知",
+    "推荐",
+    "AI DJ",
+    "context-aware",
+    "music"
+  ],
+  "screenshots": [
+    "screenshots/01-main.png",
+    "screenshots/02-library.png"
+  ],
+  "icon": "assets/icon.svg",
+  "platforms": [
+    "linux"
+  ],
+  "publisher": {
+    "name": "peterdlick-stack",
+    "support": "https://github.com/peterdlick-stack/agentic-app/issues",
+    "privacy_policy_url": "https://github.com/peterdlick-stack/agentic-app/blob/main/PRIVACY.md"
+  },
+  "release_notes": "首个版本：情境卡（时段、天气、手动活动）、意图输入、AI 或本地规则推荐、逐首理由、按活动记忆的喜欢/不喜欢、曲库与 AI 补标签、应用内网页播放。",
+  "age_rating": "all",
+  "license": "Apache-2.0"
+}

@@ -1,5 +1,0 @@
-{
-  "scope": "launch prompt then immediate q; no feedback collected",
-  "START_q_exit": 0,
-  "STOP_idle_exit": 0
-}

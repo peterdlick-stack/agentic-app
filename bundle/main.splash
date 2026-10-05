@@ -1,0 +1,873 @@
+// 情境 DJ：把「现在的情境 + 一句话意图 + 过去的反馈」变成一组歌，并说明理由。
+// 情境来源只有平台真正提供的：设备时钟、Open-Meteo 天气、用户手动选的活动。
+// 平台没有音频播放 API：播放交给应用内网页（WebReader，需要 web 权限）。
+// AI（model.complete）是可选的：不可用时用本地规则，界面写明用了哪种。
+
+let DATA = "accounts/device/"
+
+// ---- 内置曲库：人工粗标注。en 能量 1-5，vo 是否人声，md 情绪，lg 语种 ----
+let SEED = [
+    {t: "Summer" a: "久石让" en: 3 vo: false md: "欢快" lg: "instr"}
+    {t: "One Summer's Day" a: "久石让" en: 1 vo: false md: "怀旧" lg: "instr"}
+    {t: "Nuvole Bianche" a: "Ludovico Einaudi" en: 2 vo: false md: "平静" lg: "instr"}
+    {t: "Experience" a: "Ludovico Einaudi" en: 3 vo: false md: "振奋" lg: "instr"}
+    {t: "River Flows in You" a: "Yiruma" en: 1 vo: false md: "平静" lg: "instr"}
+    {t: "Gymnopédie No.1" a: "Erik Satie" en: 1 vo: false md: "平静" lg: "instr"}
+    {t: "Clair de Lune" a: "Debussy" en: 1 vo: false md: "平静" lg: "instr"}
+    {t: "Cello Suite No.1 Prelude" a: "J.S. Bach" en: 2 vo: false md: "专注" lg: "instr"}
+    {t: "On the Nature of Daylight" a: "Max Richter" en: 1 vo: false md: "伤感" lg: "instr"}
+    {t: "Aruarian Dance" a: "Nujabes" en: 2 vo: false md: "专注" lg: "instr"}
+    {t: "An Ending (Ascent)" a: "Brian Eno" en: 1 vo: false md: "平静" lg: "instr"}
+    {t: "Time" a: "Hans Zimmer" en: 3 vo: false md: "振奋" lg: "instr"}
+    {t: "Merry Christmas Mr. Lawrence" a: "坂本龙一" en: 2 vo: false md: "怀旧" lg: "instr"}
+    {t: "琵琶语" a: "林海" en: 1 vo: false md: "平静" lg: "instr"}
+    {t: "Waltz for Debby" a: "Bill Evans" en: 2 vo: false md: "温暖" lg: "instr"}
+    {t: "晴天" a: "周杰伦" en: 3 vo: true md: "怀旧" lg: "zh"}
+    {t: "稻香" a: "周杰伦" en: 3 vo: true md: "温暖" lg: "zh"}
+    {t: "双截棍" a: "周杰伦" en: 5 vo: true md: "振奋" lg: "zh"}
+    {t: "十年" a: "陈奕迅" en: 2 vo: true md: "伤感" lg: "zh"}
+    {t: "孤勇者" a: "陈奕迅" en: 4 vo: true md: "振奋" lg: "zh"}
+    {t: "倔强" a: "五月天" en: 4 vo: true md: "振奋" lg: "zh"}
+    {t: "突然好想你" a: "五月天" en: 3 vo: true md: "伤感" lg: "zh"}
+    {t: "消愁" a: "毛不易" en: 2 vo: true md: "伤感" lg: "zh"}
+    {t: "平凡之路" a: "朴树" en: 3 vo: true md: "怀旧" lg: "zh"}
+    {t: "成都" a: "赵雷" en: 2 vo: true md: "温暖" lg: "zh"}
+    {t: "贝加尔湖畔" a: "李健" en: 1 vo: true md: "平静" lg: "zh"}
+    {t: "光年之外" a: "邓紫棋" en: 3 vo: true md: "振奋" lg: "zh"}
+    {t: "江南" a: "林俊杰" en: 3 vo: true md: "温暖" lg: "zh"}
+    {t: "红豆" a: "王菲" en: 2 vo: true md: "温暖" lg: "zh"}
+    {t: "有何不可" a: "许嵩" en: 3 vo: true md: "欢快" lg: "zh"}
+    {t: "云烟成雨" a: "房东的猫" en: 2 vo: true md: "平静" lg: "zh"}
+    {t: "演员" a: "薛之谦" en: 2 vo: true md: "伤感" lg: "zh"}
+    {t: "爱人错过" a: "告五人" en: 4 vo: true md: "欢快" lg: "zh"}
+    {t: "Don't Stop Me Now" a: "Queen" en: 5 vo: true md: "欢快" lg: "en"}
+    {t: "Eye of the Tiger" a: "Survivor" en: 5 vo: true md: "振奋" lg: "en"}
+    {t: "Believer" a: "Imagine Dragons" en: 5 vo: true md: "振奋" lg: "en"}
+    {t: "Get Lucky" a: "Daft Punk" en: 4 vo: true md: "欢快" lg: "en"}
+    {t: "Viva la Vida" a: "Coldplay" en: 4 vo: true md: "振奋" lg: "en"}
+    {t: "Shake It Off" a: "Taylor Swift" en: 4 vo: true md: "欢快" lg: "en"}
+    {t: "Don't Know Why" a: "Norah Jones" en: 1 vo: true md: "温暖" lg: "en"}
+    {t: "Paris in the Rain" a: "Lauv" en: 2 vo: true md: "温暖" lg: "en"}
+    {t: "Wake Me Up" a: "Avicii" en: 4 vo: true md: "振奋" lg: "en"}
+    {t: "Blinding Lights" a: "The Weeknd" en: 5 vo: true md: "欢快" lg: "en"}
+    {t: "Happy" a: "Pharrell Williams" en: 4 vo: true md: "欢快" lg: "en"}
+    {t: "My Funny Valentine" a: "Chet Baker" en: 1 vo: true md: "伤感" lg: "en"}
+]
+let MOODS = ["平静" "专注" "温暖" "怀旧" "伤感" "振奋" "欢快"]
+
+// ---- 活动：手动选择，target 是目标能量 ----
+let ACTS = [
+    {id: "study" n: "学习" target: 1.5 instr: 1.5 md: "专注"}
+    {id: "work" n: "工作" target: 2.5 instr: 0.8 md: "专注"}
+    {id: "commute" n: "通勤" target: 3.4 instr: 0.0 md: "欢快"}
+    {id: "workout" n: "运动" target: 4.7 instr: 0.0 md: "振奋"}
+    {id: "relax" n: "放松" target: 2.0 instr: 0.3 md: "温暖"}
+    {id: "sleep" n: "睡前" target: 1.0 instr: 1.5 md: "平静"}
+]
+let ACT_TTL = 5400   // 手动活动 90 分钟后失效，回到「按时段推测」
+
+// ---- 城市：Open-Meteo 用经纬度；timezone=auto 返回 UTC 偏移 ----
+let CITIES = [
+    {n: "北京" lat: 39.90 lon: 116.40}
+    {n: "上海" lat: 31.23 lon: 121.47}
+    {n: "合肥" lat: 31.82 lon: 117.23}
+    {n: "杭州" lat: 30.27 lon: 120.16}
+    {n: "广州" lat: 23.13 lon: 113.26}
+    {n: "深圳" lat: 22.54 lon: 114.06}
+    {n: "成都" lat: 30.57 lon: 104.07}
+]
+
+// ---- 状态 ----
+let songs = []          // 内置 + 用户添加；每首带 src 与反馈分
+let prefs = {city: 0 act: "" act_until: 0 use_weather: true use_time: true}
+let weather = {state: "loading" temp: 0 code: 0 text: "" offset: 28800 at: 0}
+let playlist = []       // [{i why}]
+let last_keys = []      // 上一批，用于「换一批」
+let plan_note = ""      // 这次用了什么方式、怎么理解意图
+let busy = false
+let screen = "home"     // home | library | player
+let playing = nil
+let source = 0
+let SOURCES = [
+    {n: "网易云" url: "https://music.163.com/#/search/m/?type=1&s="}
+    {n: "QQ音乐" url: "https://y.qq.com/n/ryqq/search?w="}
+    {n: "B站" url: "https://search.bilibili.com/all?keyword="}
+]
+
+fn key_of(s){ s.t + "|" + s.a }
+
+fn blank_fb(){ {g: 0 study: 0 work: 0 commute: 0 workout: 0 relax: 0 sleep: 0} }
+
+// 反馈分按活动读写：用固定字段，不用 f[id] = v（运行时会追加重复键而不是覆盖）
+fn fb_get(f, id){
+    if id == "study" { return f.study }
+    if id == "work" { return f.work }
+    if id == "commute" { return f.commute }
+    if id == "workout" { return f.workout }
+    if id == "relax" { return f.relax }
+    if id == "sleep" { return f.sleep }
+    0
+}
+fn fb_set(f, id, v){
+    if id == "study" { f.study = v }
+    if id == "work" { f.work = v }
+    if id == "commute" { f.commute = v }
+    if id == "workout" { f.workout = v }
+    if id == "relax" { f.relax = v }
+    if id == "sleep" { f.sleep = v }
+}
+fn fb_clean(f){
+    let out = blank_fb()
+    if f == nil { return out }
+    out.g = f.g
+    out.study = f.study
+    out.work = f.work
+    out.commute = f.commute
+    out.workout = f.workout
+    out.relax = f.relax
+    out.sleep = f.sleep
+    out
+}
+
+fn read_json(name){
+    let path = DATA + name
+    if !fs.exists(path) { return nil }
+    let v = fs.read(path).parse_json()
+    v
+}
+fn write_json(name, v){ fs.write(DATA + name, v.to_json()) }
+
+fn load_all(){
+    fs.mkdir(DATA)
+    songs = []
+    for s in SEED {
+        songs.push({t: s.t a: s.a en: s.en vo: s.vo md: s.md lg: s.lg src: "seed" fb: blank_fb()})
+    }
+    let lib = read_json("library.json")
+    if lib != nil {
+        for s in lib {
+            songs.push({t: s.t a: s.a en: s.en vo: s.vo md: s.md lg: s.lg src: s.src fb: blank_fb()})
+        }
+    }
+    let p = read_json("prefs.json")
+    if p != nil && p.city != nil {
+        prefs = {city: p.city act: p.act act_until: p.act_until use_weather: p.use_weather use_time: p.use_time}
+    }
+    let fb = read_json("feedback.json")
+    if fb != nil {
+        for row in fb {
+            for s in songs {
+                if key_of(s) == row.k { s.fb = fb_clean(row.fb) }
+            }
+        }
+    }
+    let last = read_json("last.json")
+    if last != nil && last.keys != nil {
+        playlist = []
+        for i k in last.keys {
+            for j s in songs {
+                if key_of(s) == k { playlist.push({i: j why: last.whys[i]}) }
+            }
+        }
+        plan_note = "上次的歌单（重启后恢复）"
+    }
+}
+
+fn save_prefs(){ write_json("prefs.json", prefs) }
+fn save_library(){
+    let out = []
+    for s in songs { if s.src != "seed" { out.push({t: s.t a: s.a en: s.en vo: s.vo md: s.md lg: s.lg src: s.src}) } }
+    write_json("library.json", out)
+}
+fn save_feedback(){
+    let out = []
+    for s in songs {
+        let f = s.fb
+        if f.g != 0 || f.study != 0 || f.work != 0 || f.commute != 0 || f.workout != 0 || f.relax != 0 || f.sleep != 0 {
+            out.push({k: key_of(s) fb: f})
+        }
+    }
+    write_json("feedback.json", out)
+}
+fn save_last(){
+    let keys = []
+    let whys = []
+    for p in playlist { keys.push(key_of(songs[p.i])) whys.push(p.why) }
+    write_json("last.json", {keys: keys whys: whys at: time_now()})
+}
+
+// ---- 情境 ----
+fn local_parts(){
+    let t = time_now() + weather.offset
+    let day = floor(t / 86400)
+    let sec = t - day * 86400
+    let hour = floor(sec / 3600)
+    let minute = floor((sec - hour * 3600) / 60)
+    let wd = day + 4 - floor((day + 4) / 7) * 7   // 1970-01-01 是周四；0 = 周日
+    {hour: hour minute: minute weekday: wd}
+}
+fn slot_name(h){
+    if h < 5 { return "深夜" }
+    if h < 9 { return "早晨" }
+    if h < 12 { return "上午" }
+    if h < 14 { return "中午" }
+    if h < 17 { return "下午" }
+    if h < 19 { return "傍晚" }
+    if h < 23 { return "晚上" }
+    "深夜"
+}
+fn slot_act(h){
+    if h < 6 { return "sleep" }
+    if h < 9 { return "commute" }
+    if h < 12 { return "work" }
+    if h < 14 { return "relax" }
+    if h < 17 { return "work" }
+    if h < 19 { return "commute" }
+    if h < 23 { return "relax" }
+    "sleep"
+}
+fn act_by_id(id){
+    for a in ACTS { if a.id == id { return a } }
+    nil
+}
+fn manual_left(){
+    if prefs.act == "" { return 0 }
+    let left = prefs.act_until - time_now()
+    if left <= 0 { return 0 }
+    left
+}
+// 当前活动：{a, source}
+fn current_act(){
+    if manual_left() > 0 { return {a: act_by_id(prefs.act) source: "manual"} }
+    if prefs.use_time {
+        let h = local_parts().hour
+        return {a: act_by_id(slot_act(h)) source: "time"}
+    }
+    {a: nil source: "none"}
+}
+fn weather_usable(){ prefs.use_weather && weather.state == "ok" && time_now() - weather.at < 3600 }
+fn weather_word(code){
+    if code == 0 { return "晴" }
+    if code <= 3 { return "多云" }
+    if code <= 48 { return "雾" }
+    if code <= 67 { return "雨" }
+    if code <= 77 { return "雪" }
+    if code <= 82 { return "阵雨" }
+    if code <= 86 { return "阵雪" }
+    "雷雨"
+}
+fn weather_mood(){
+    if !weather_usable() { return "" }
+    let c = weather.code
+    if c >= 51 && c <= 67 { return "平静" }
+    if c >= 80 && c <= 82 { return "平静" }
+    if weather.temp <= 5 { return "温暖" }
+    if c == 0 && weather.temp >= 15 { return "欢快" }
+    ""
+}
+
+fn fetch_weather(){
+    let c = CITIES[prefs.city]
+    weather.state = "loading"
+    sync_context()
+    let url = "https://api.open-meteo.com/v1/forecast?latitude=" + c.lat + "&longitude=" + c.lon + "&current=temperature_2m,weather_code&timezone=auto"
+    net.http_request(net.HttpRequest{url: url method: net.HttpMethod.GET headers: {"User-Agent": "ContextDJ/0.1"}}) do net.HttpEvents{
+        on_response: |res| got_weather(res)
+        on_error: |_err| weather_failed()
+    }
+}
+fn got_weather(res){
+    if res.status_code >= 400 { weather_failed() return }
+    let d = res.body.to_string().parse_json()
+    if d == nil || d.current == nil { weather_failed() return }
+    let t = d.current.temperature_2m
+    let wc = d.current.weather_code
+    if !(t >= -90) || !(wc >= 0) { weather_failed() return }
+    weather = {state: "ok" temp: t code: wc text: weather_word(wc) offset: d.utc_offset_seconds at: time_now()}
+    sync_context()
+}
+fn weather_failed(){
+    weather.state = "fail"
+    sync_context()
+}
+
+// ---- 意图：本地能理解的部分（AI 不可用时也有效） ----
+fn has(text, words){
+    for w in words { if text.search(w) >= 0 { return true } }
+    false
+}
+fn parse_intent(raw){
+    let x = ("" + raw).trim()
+    let it = {instr: 0 energy: 0.0 mood: "" lang: "" fresh: false words: []}
+    // 先判断「要人声」，再让「不要人声」覆盖它（后者包含前者）
+    if has(x, ["要人声" "想听唱" "有歌词"]) {
+        it.instr = -1
+        it.words.push("要人声")
+    }
+    if has(x, ["纯音乐" "不要人声" "无人声" "别唱" "没有歌词"]) {
+        it.instr = 1
+        if it.words.len() > 0 { it.words = [] }
+        it.words.push("偏纯音乐")
+    }
+    if has(x, ["嗨" "燃" "动感" "提神" "节奏快" "带劲" "打鸡血"]) {
+        it.energy = 1.3
+        it.words.push("能量高一点")
+    }
+    if has(x, ["安静" "舒缓" "轻一点" "慢一点" "助眠" "别太吵" "放空"]) {
+        it.energy = -1.2
+        it.words.push("能量低一点")
+    }
+    if has(x, ["伤感" "难过" "丧" "emo" "失恋"]) {
+        it.mood = "伤感"
+    }
+    if has(x, ["开心" "快乐" "高兴" "欢快"]) {
+        it.mood = "欢快"
+    }
+    if has(x, ["怀旧" "回忆" "小时候" "青春"]) {
+        it.mood = "怀旧"
+    }
+    if has(x, ["专注" "写代码" "看书" "复习" "刷题" "论文"]) {
+        it.mood = "专注"
+    }
+    if has(x, ["温暖" "治愈" "暖"]) {
+        it.mood = "温暖"
+    }
+    if has(x, ["励志" "振奋" "冲" "加油"]) {
+        it.mood = "振奋"
+    }
+    if it.mood != "" { it.words.push("情绪：" + it.mood) }
+    if has(x, ["中文" "华语" "国语"]) {
+        it.lang = "zh"
+        it.words.push("中文歌")
+    }
+    if has(x, ["英文" "欧美" "英语"]) {
+        it.lang = "en"
+        it.words.push("英文歌")
+    }
+    if has(x, ["换一批" "换一组" "换些" "别的"]) {
+        it.fresh = true
+        it.words.push("换一批")
+    }
+    it
+}
+
+// ---- 本地规则：可解释的打分 ----
+fn score_song(s, ctx, it){
+    let sc = 0.0
+    let why = []
+    let a = ctx.a
+    let target = 2.8
+    if a != nil { target = a.target }
+    target = target + it.energy
+    if s.en != nil {
+        let d = abs(s.en - target)
+        sc = sc - d * 1.2
+        if d <= 0.8 && a != nil { why.push("能量" + s.en + "/5 合「" + a.n + "」") }
+    } else { sc = sc - 0.9 }
+    if s.vo != nil {
+        if !s.vo {
+            if it.instr == 1 { sc = sc + 2.0 why.push("纯音乐") }
+            if a != nil { sc = sc + a.instr }
+            if it.instr == -1 { sc = sc - 2.5 }
+        } else {
+            if it.instr == 1 { sc = sc - 3.0 }
+            if it.instr == -1 { sc = sc + 1.0 }
+        }
+    }
+    if s.md != nil {
+        if it.mood != "" && s.md == it.mood { sc = sc + 1.6 why.push("情绪：" + s.md) }
+        if a != nil && s.md == a.md { sc = sc + 0.6 }
+        let wm = weather_mood()
+        if wm != "" && s.md == wm { sc = sc + 0.5 why.push(weather.text + "天配" + s.md) }
+    }
+    if it.lang != "" && s.lg != nil {
+        if s.lg == it.lang { sc = sc + 1.0 } else { sc = sc - 1.5 }
+    }
+    let g = s.fb.g
+    if a != nil {
+        let ca = fb_get(s.fb, a.id)
+        if ca > 0 { sc = sc + 1.4 * ca why.push("你在「" + a.n + "」时喜欢过") }
+        if ca < 0 { sc = sc - 4.0 }
+    }
+    if g > 0 { sc = sc + 0.6 * g if why.len() < 2 { why.push("你喜欢过") } }
+    if g < 0 { sc = sc - 1.5 }
+    if it.fresh {
+        for k in last_keys { if k == key_of(s) { sc = sc - 6.0 } }
+    }
+    sc = sc + random() * 0.35
+    let text = ""
+    for w in why { if text == "" { text = w } else { text = text + " · " + w } }
+    if text == "" { text = "综合情境的折中选择" }
+    {sc: sc why: text}
+}
+
+fn local_pick(ctx, it){
+    let scored = []
+    for i s in songs {
+        let r = score_song(s, ctx, it)
+        scored.push({i: i sc: r.sc why: r.why})
+    }
+    let out = []
+    for n in 8 {
+        let best = -1
+        let bv = -1000000.0
+        for j r in scored {
+            if r.sc > bv { bv = r.sc best = j }
+        }
+        if best < 0 { break }
+        out.push({i: scored[best].i why: scored[best].why})
+        scored[best].sc = -1000000.0
+    }
+    out
+}
+
+// ---- 推荐入口：先试 AI，失败就用本地规则 ----
+fn ctx_text(ctx){
+    let parts = []
+    if prefs.use_time {
+        let p = local_parts()
+        let wk = "工作日"
+        if p.weekday == 0 || p.weekday == 6 { wk = "周末" }
+        parts.push(wk + slot_name(p.hour))
+    }
+    if weather_usable() { parts.push(weather.text + " " + round(weather.temp) + "°C") }
+    if ctx.a != nil {
+        if ctx.source == "manual" { parts.push(ctx.a.n) } else { parts.push(ctx.a.n + "（推测）") }
+    }
+    let text = ""
+    for w in parts { if text == "" { text = w } else { text = text + " · " + w } }
+    if text == "" { text = "无情境" }
+    text
+}
+
+fn recommend(){
+    if busy { return }
+    let raw = ui.intent.text()
+    let it = parse_intent(raw)
+    let ctx = current_act()
+    if playlist.len() > 0 {
+        last_keys = []
+        for p in playlist { last_keys.push(key_of(songs[p.i])) }
+    }
+    if host.has("model") {
+        busy = true
+        plan_note = "AI 正在选歌…"
+        ui.plan.set_text(plan_note)
+        ask_model(raw, it, ctx)
+    } else {
+        finish(local_pick(ctx, it), "本地规则", raw, it, ctx, "")
+    }
+}
+
+fn ask_model(raw, it, ctx){
+    let cands = []
+    for i s in songs {
+        let like = s.fb.g
+        if ctx.a != nil { like = like + fb_get(s.fb, ctx.a.id) }
+        cands.push({i: i title: s.t artist: s.a energy: s.en vocal: s.vo mood: s.md lang: s.lg like: like})
+    }
+    let n = songs.len() - 1
+    host.request("model.complete", {
+        task: "你是一个音乐 DJ。根据用户此刻的情境（时段、天气、活动）和一句话意图，从候选歌曲里挑 6 首，按播放顺序排列。like 为正表示用户在这个情境或总体上喜欢过，负的尽量不选。recent 是上一批，用户说换一批时避开。为每首写一句不超过 30 字的中文理由，要具体到情境或意图。understood 用一句话写你如何理解用户的意图。只能从 songs 的 i 里选。"
+        input: {context: ctx_text(ctx) intent: raw recent: last_keys songs: cands}
+        schema: {type: "object" required: ["understood" "picks"] additionalProperties: false
+            properties: {understood: {type: "string" maxLength: 80}
+                picks: {type: "array" minItems: 3 maxItems: 8
+                    items: {type: "object" required: ["i" "why"] additionalProperties: false
+                        properties: {i: {type: "integer" minimum: 0 maximum: n} why: {type: "string" maxLength: 40}}}}}}
+        class: "fast"
+    }, fn(r){ model_answer(r, raw, it, ctx) })
+}
+
+fn model_answer(r, raw, it, ctx){
+    busy = false
+    if !r.is_ok {
+        finish(local_pick(ctx, it), "本地规则", raw, it, ctx, "AI 不可用：" + r.error)
+        return
+    }
+    let out = []
+    let seen = []
+    for p in r.data.output.picks {
+        let ok_i = p.i >= 0 && p.i < songs.len()
+        for x in seen { if x == p.i { ok_i = false } }
+        if ok_i { out.push({i: p.i why: p.why}) seen.push(p.i) }
+    }
+    if out.len() < 3 {
+        finish(local_pick(ctx, it), "本地规则", raw, it, ctx, "AI 返回的歌不足 3 首")
+        return
+    }
+    finish(out, "AI", raw, it, ctx, "AI 理解：" + r.data.output.understood)
+}
+
+fn finish(picks, how, raw, it, ctx, note){
+    playlist = picks
+    let summary = how + " · " + ctx_text(ctx)
+    if note != "" {
+        summary = summary + "\n" + note
+    }
+    if how != "AI" {
+        if it.words.len() > 0 {
+            let w = ""
+            for x in it.words { if w == "" { w = x } else { w = w + "、" + x } }
+            summary = summary + "\n本地规则听懂了：" + w
+        } else if ("" + raw).trim() != "" {
+            summary = summary + "\n这句话本地规则没认出关键词，只按情境选"
+        }
+    }
+    plan_note = summary
+    save_last()
+    log_history(how, raw, ctx)
+    sync_home()
+}
+
+fn log_history(how, raw, ctx){
+    let h = read_json("history.json")
+    if h == nil { h = [] }
+    let keys = []
+    for p in playlist { keys.push(key_of(songs[p.i])) }
+    let act = ""
+    if ctx.a != nil { act = ctx.a.id }
+    let next = [{at: time_now() how: how intent: raw context: ctx_text(ctx) act: act act_source: ctx.source picks: keys}]
+    for x in h { if next.len() < 30 { next.push(x) } }
+    write_json("history.json", next)
+}
+
+// ---- 反馈：总体分 + 当前活动下的分 ----
+fn feedback(i, v){
+    let s = songs[i]
+    let ctx = current_act()
+    s.fb.g = clamp(s.fb.g + v, -3, 3)
+    if ctx.a != nil { fb_set(s.fb, ctx.a.id, clamp(fb_get(s.fb, ctx.a.id) + v, -3, 3)) }
+    save_feedback()
+    let where = "总体"
+    if ctx.a != nil { where = "「" + ctx.a.n + "」和总体" }
+    if v > 0 { ui.plan.set_text("记下了：在" + where + "里更常推荐《" + s.t + "》") }
+    else { ui.plan.set_text("记下了：在" + where + "里少推《" + s.t + "》") }
+    ui.list.render()
+}
+
+// ---- 曲库 ----
+fn add_song(){
+    let raw = ("" + ui.new_song.text()).trim()
+    if raw == "" { return }
+    let cut = raw.search(" - ")
+    let t = raw
+    let a = "未知歌手"
+    if cut > 0 { t = raw.split(" - ")[0].trim() a = raw.split(" - ")[1].trim() }
+    for s in songs {
+        if s.t == t && s.a == a { ui.lib_status.set_text("曲库里已经有《" + t + "》") return }
+    }
+    songs.push({t: t a: a en: nil vo: nil md: nil lg: nil src: "user" fb: blank_fb()})
+    save_library()
+    ui.new_song.set_text("")
+    ui.lib_status.set_text("已添加《" + t + "》，还没有标签；点「AI 补标签」或直接用（按中性处理）")
+    ui.lib_list.render()
+}
+fn remove_song(i){
+    let s = songs[i]
+    if s.src == "seed" { return }
+    let kept = []
+    for j x in songs { if j != i { kept.push(x) } }
+    songs = kept
+    playlist = []
+    save_library()
+    save_feedback()
+    ui.lib_status.set_text("已删除《" + s.t + "》")
+    ui.lib_list.render()
+}
+fn untagged(){
+    let out = []
+    for i s in songs { if s.en == nil && out.len() < 30 { out.push({i: i title: s.t artist: s.a}) } }
+    out
+}
+fn ai_tag(){
+    let todo = untagged()
+    if todo.len() == 0 { ui.lib_status.set_text("没有需要补标签的歌") return }
+    if !host.has("model") { ui.lib_status.set_text("这台设备没有给本应用 AI 权限，无法补标签") return }
+    ui.lib_status.set_text("AI 正在补 " + todo.len() + " 首歌的标签…")
+    host.request("model.complete", {
+        task: "为每首歌估计：energy 能量 1-5（1 最安静）、vocal 是否有人声、mood 从给定列表选一个、lang 语种（zh 中文、en 英文、instr 纯音乐、other 其他）。不认识的歌按歌名和歌手合理推断。"
+        input: {moods: MOODS songs: todo}
+        schema: {type: "object" required: ["tags"] additionalProperties: false
+            properties: {tags: {type: "array" maxItems: 30
+                items: {type: "object" required: ["i" "energy" "vocal" "mood" "lang"] additionalProperties: false
+                    properties: {i: {type: "integer" minimum: 0} energy: {type: "integer" minimum: 1 maximum: 5}
+                        vocal: {type: "boolean"} mood: {type: "string" enum: MOODS}
+                        lang: {type: "string" enum: ["zh" "en" "instr" "other"]}}}}}}
+        class: "fast"
+    }, fn(r){ tag_answer(r) })
+}
+fn tag_answer(r){
+    if !r.is_ok { ui.lib_status.set_text("AI 补标签失败：" + r.error) return }
+    let n = 0
+    for tg in r.data.output.tags {
+        if tg.i >= 0 && tg.i < songs.len() && songs[tg.i].src == "user" {
+            let s = songs[tg.i]
+            s.en = tg.energy s.vo = tg.vocal s.md = tg.mood s.lg = tg.lang s.src = "user_ai"
+            n = n + 1
+        }
+    }
+    save_library()
+    ui.lib_status.set_text("AI 补了 " + n + " 首的标签（标记为 AI 推断）")
+    ui.lib_list.render()
+}
+fn fb_text(s){
+    let parts = ""
+    if s.fb.g > 0 { parts = "你喜欢过 +" + s.fb.g }
+    if s.fb.g < 0 { parts = "你不太喜欢 " + s.fb.g }
+    parts
+}
+fn tag_line(s){
+    if s.en == nil { return "未标注" }
+    let v = "人声"
+    if !s.vo { v = "纯音乐" }
+    let src = "人工粗标"
+    if s.src == "user_ai" { src = "AI 推断" }
+    "能量" + s.en + " · " + v + " · " + s.md + " · " + src
+}
+
+// ---- 情境控制 ----
+fn set_act(id){
+    if prefs.act == id && manual_left() > 0 { prefs.act = "" prefs.act_until = 0 }
+    else { prefs.act = id prefs.act_until = time_now() + ACT_TTL }
+    save_prefs()
+    sync_context()
+}
+fn set_city(i){
+    prefs.city = i
+    save_prefs()
+    ui.cities.render()
+    fetch_weather()
+}
+fn toggle_weather(){ prefs.use_weather = !prefs.use_weather save_prefs() sync_context() }
+fn toggle_time(){ prefs.use_time = !prefs.use_time save_prefs() sync_context() }
+
+fn sync_context(){
+    let p = local_parts()
+    let mm = "" + p.minute
+    if p.minute < 10 { mm = "0" + mm }
+    let tl = slot_name(p.hour) + " " + p.hour + ":" + mm
+    if weather.state != "ok" { tl = tl + "（按 UTC+8）" }
+    if !prefs.use_time { tl = tl + " · 不参与" }
+    ui.ctx_time.set_text(tl)
+    let wl = "加载中…"
+    if weather.state == "fail" { wl = "不可用（网络或服务出错）· 不参与" }
+    if weather.state == "ok" {
+        wl = CITIES[prefs.city].n + " " + weather.text + " " + round(weather.temp) + "°C · Open-Meteo"
+        if !prefs.use_weather { wl = wl + " · 不参与" }
+    }
+    ui.ctx_weather.set_text(wl)
+    let c = current_act()
+    let al = "未设置 · 不参与"
+    if c.source == "manual" { al = c.a.n + " · 手动 · 还剩 " + ceil(manual_left() / 60) + " 分钟" }
+    if c.source == "time" { al = c.a.n + " · 按时段推测" }
+    ui.ctx_act.set_text(al)
+    ui.acts.render()
+    ui.toggles.render()
+}
+fn sync_home(){
+    ui.plan.set_text(plan_note)
+    ui.list.render()
+}
+
+// ---- 页面切换与播放 ----
+fn show(name){
+    screen = name
+    ui.home.set_visible(name == "home")
+    ui.library.set_visible(name == "library")
+    ui.player_pane.set_visible(name == "player")
+    if name == "home" { sync_context() sync_home() }
+    if name == "library" { ui.lib_list.render() }
+}
+fn play(i){
+    playing = songs[i]
+    ui.player_title.set_text(playing.t + " — " + playing.a)
+    ui.player_fail.set_text("")
+    show("player")
+    open_source()
+}
+fn open_source(){
+    if playing == nil { return }
+    ui.sources.render()
+    let q = (playing.t + " " + playing.a).url_encode()
+    let url = SOURCES[source].url + q
+    ui.player_url.set_text("在 " + SOURCES[source].n + " 搜索：" + playing.t + " " + playing.a + "\n" + url)
+    let ok_open = ui.reader.open(url)
+    if !ok_open { ui.player_fail.set_text("打不开这个页面：这台设备可能没给本应用打开网页的权限") }
+}
+fn pick_source(i){ source = i open_source() }
+fn close_player(){ ui.reader.close() playing = nil show("home") }
+
+fn boot(){
+    load_all()
+    sync_context()
+    sync_home()
+    ui.cities.render()
+    fetch_weather()
+}
+start_timeout(0.05, || boot())
+start_interval(60, || sync_context())
+
+// ---- 外观 ----
+let ground = #x14161a
+let card = #x1f232a
+let raised = #x2a2f38
+let ink = #xf2f2f2
+let secondary = #x9aa3ad
+let accent = #xffb02e
+let good = #x3ddc84
+let bad = #xff6b6b
+
+let Chip = ButtonFlat{height: 32 padding: Inset{left: 12 right: 12}
+    draw_bg +: {border_radius: 16.0 color: raised color_hover: #x353b46 color_down: #x404753 border_size: 0.0}
+    draw_text +: {color: ink color_hover: ink color_down: ink text_style +: {font_size: 13}}
+}
+let ChipOn = Chip{
+    draw_bg +: {color: accent color_hover: #xffc05a color_down: #xe09a20}
+    draw_text +: {color: #x14161a color_hover: #x14161a color_down: #x14161a}
+}
+let Small = ButtonFlat{height: 30 padding: Inset{left: 10 right: 10}
+    draw_bg +: {border_radius: 8.0 color: raised color_hover: #x353b46 color_down: #x404753 border_size: 0.0}
+    draw_text +: {color: ink color_hover: ink color_down: ink text_style +: {font_size: 12}}
+}
+let Primary = ButtonFlat{height: 40 padding: Inset{left: 18 right: 18}
+    draw_bg +: {border_radius: 20.0 color: accent color_hover: #xffc05a color_down: #xe09a20 border_size: 0.0}
+    draw_text +: {color: #x14161a color_hover: #x14161a color_down: #x14161a text_style +: {font_size: 14}}
+}
+let Bar = ButtonFlat{height: 36 padding: Inset{left: 10 right: 10}
+    draw_bg +: {color: #x00000000 color_hover: #xffffff14 color_down: #xffffff24 border_size: 0.0}
+    draw_text +: {color: accent color_hover: accent color_down: accent text_style +: {font_size: 14}}
+}
+let Field = TextInput{width: Fill height: 40
+    draw_bg +: {color: raised color_hover: raised color_focus: raised color_empty: raised border_radius: 10.0}
+    draw_text +: {color: ink color_hover: ink color_focus: ink color_empty: secondary color_empty_hover: secondary}
+}
+
+SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
+    home := SolidView{width: Fill height: Fill flow: Down spacing: 10 padding: Inset{left: 14 right: 14 top: 12 bottom: 8} draw_bg.color: ground
+        View{width: Fill height: Fit flow: Right align: Align{y: 0.5}
+            Label{width: Fill text: "情境 DJ" draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 24}}
+            Bar{text: "曲库" on_click: || show("library")}
+        }
+        RoundedView{width: Fill height: Fit flow: Down spacing: 6 padding: 12 draw_bg.color: card draw_bg.border_radius: 12.0
+            Label{text: "此刻的情境（都可以改）" draw_text.color: accent draw_text.text_style: theme.font_bold{font_size: 13}}
+            View{width: Fill height: Fit flow: Right spacing: 8
+                Label{width: 40 text: "时段" draw_text.color: secondary draw_text.text_style.font_size: 12}
+                ctx_time := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style.font_size: 13}
+            }
+            View{width: Fill height: Fit flow: Right spacing: 8
+                Label{width: 40 text: "天气" draw_text.color: secondary draw_text.text_style.font_size: 12}
+                ctx_weather := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style.font_size: 13}
+            }
+            View{width: Fill height: Fit flow: Right spacing: 8
+                Label{width: 40 text: "活动" draw_text.color: secondary draw_text.text_style.font_size: 12}
+                ctx_act := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style.font_size: 13}
+            }
+            acts := ScrollXView{width: Fill height: 40 flow: Right spacing: 6 padding: Inset{top: 4}
+                on_render: || {
+                    for a in ACTS {
+                        if prefs.act == a.id && manual_left() > 0 { ChipOn{text: a.n on_click: || set_act(a.id)} }
+                        else { Chip{text: a.n on_click: || set_act(a.id)} }
+                    }
+                }
+            }
+            toggles := View{width: Fill height: Fit flow: Right spacing: 6
+                on_render: || {
+                    if prefs.use_time { ChipOn{text: "用时段" on_click: || toggle_time()} }
+                    else { Chip{text: "用时段" on_click: || toggle_time()} }
+                    if prefs.use_weather { ChipOn{text: "用天气" on_click: || toggle_weather()} }
+                    else { Chip{text: "用天气" on_click: || toggle_weather()} }
+                }
+            }
+            cities := ScrollXView{width: Fill height: 36 flow: Right spacing: 6
+                on_render: || {
+                    for i c in CITIES {
+                        if prefs.city == i { ChipOn{text: c.n on_click: || set_city(i)} }
+                        else { Chip{text: c.n on_click: || set_city(i)} }
+                    }
+                }
+            }
+        }
+        View{width: Fill height: Fit flow: Right spacing: 8 align: Align{y: 0.5}
+            intent := Field{empty_text: "想听什么？例：写代码，不要人声" on_return: |text| recommend()}
+            Primary{text: "推荐" on_click: || recommend()}
+        }
+        plan := Label{width: Fill text: "" draw_text.color: secondary draw_text.text_style.font_size: 12}
+        list := ScrollYView{width: Fill height: Fill flow: Down spacing: 8
+            on_render: || {
+                if playlist.len() == 0 {
+                    View{width: Fill height: 160 align: Align{x: 0.5 y: 0.5}
+                        Label{text: "选一下活动、说一句想听什么，再点「推荐」" draw_text.color: secondary draw_text.text_style.font_size: 13}
+                    }
+                }
+                for n p in playlist {
+                    RoundedView{width: Fill height: Fit flow: Down spacing: 6 padding: 12 draw_bg.color: card draw_bg.border_radius: 10.0
+                        Label{width: Fill text: "" + (n + 1) + ". " + songs[p.i].t + " — " + songs[p.i].a draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 14}}
+                        Label{width: Fill text: p.why draw_text.color: secondary draw_text.text_style.font_size: 12}
+                        View{width: Fill height: Fit flow: Right spacing: 8
+                            Label{width: Fill text: fb_text(songs[p.i]) draw_text.color: accent draw_text.text_style.font_size: 11}
+                            Small{text: "喜欢" on_click: || feedback(p.i, 1)}
+                            Small{text: "不喜欢" on_click: || feedback(p.i, -1)}
+                            Small{text: "去听" on_click: || play(p.i)}
+                        }
+                    }
+                }
+            }
+        }
+    }
+    library := SolidView{visible: false width: Fill height: Fill flow: Down spacing: 10 padding: Inset{left: 14 right: 14 top: 12 bottom: 8} draw_bg.color: ground
+        View{width: Fill height: Fit flow: Right align: Align{y: 0.5}
+            Bar{text: "‹ 返回" on_click: || show("home")}
+            Label{width: Fill text: "曲库" draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 20}}
+            Small{text: "AI 补标签" on_click: || ai_tag()}
+        }
+        View{width: Fill height: Fit flow: Right spacing: 8 align: Align{y: 0.5}
+            new_song := Field{empty_text: "歌名 - 歌手" on_return: |text| add_song()}
+            Primary{text: "添加" on_click: || add_song()}
+        }
+        lib_status := Label{width: Fill text: "内置 45 首为人工粗标注；你添加的歌可删除" draw_text.color: secondary draw_text.text_style.font_size: 12}
+        lib_list := ScrollYView{width: Fill height: Fill flow: Down spacing: 0
+            on_render: || {
+                for i s in songs {
+                    if s.src != "seed" {
+                        View{width: Fill height: Fit flow: Right spacing: 8 padding: Inset{top: 8 bottom: 8} align: Align{y: 0.5}
+                            View{width: Fill height: Fit flow: Down spacing: 2
+                                Label{width: Fill text: s.t + " — " + s.a draw_text.color: ink draw_text.text_style.font_size: 13}
+                                Label{width: Fill text: "你添加的 · " + tag_line(s) draw_text.color: accent draw_text.text_style.font_size: 11}
+                            }
+                            Small{text: "删除" on_click: || remove_song(i)}
+                        }
+                        SolidView{width: Fill height: 1 draw_bg.color: raised}
+                    }
+                }
+                for s in songs {
+                    if s.src == "seed" {
+                        View{width: Fill height: Fit flow: Down spacing: 2 padding: Inset{top: 8 bottom: 8}
+                            Label{width: Fill text: s.t + " — " + s.a draw_text.color: ink draw_text.text_style.font_size: 13}
+                            Label{width: Fill text: tag_line(s) draw_text.color: secondary draw_text.text_style.font_size: 11}
+                        }
+                        SolidView{width: Fill height: 1 draw_bg.color: raised}
+                    }
+                }
+            }
+        }
+    }
+    player_pane := SolidView{visible: false width: Fill height: Fill flow: Down draw_bg.color: ground
+        View{width: Fill height: Fit flow: Right align: Align{y: 0.5} spacing: 6 padding: Inset{left: 4 right: 12 top: 6 bottom: 6}
+            Bar{text: "‹ 返回" on_click: || close_player()}
+            player_title := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 14}}
+        }
+        sources := View{width: Fill height: Fit flow: Right spacing: 6 padding: Inset{left: 12 right: 12 bottom: 6}
+            on_render: || {
+                for i s in SOURCES {
+                    if source == i { ChipOn{text: s.n on_click: || pick_source(i)} }
+                    else { Chip{text: s.n on_click: || pick_source(i)} }
+                }
+            }
+        }
+        player_url := Label{width: Fill padding: Inset{left: 14 right: 14} text: "" draw_text.color: secondary draw_text.text_style.font_size: 11}
+        Label{width: Fill padding: Inset{left: 14 right: 14 top: 4 bottom: 6} text: "下方是应用内网页，在页面里点播放。若一直空白：当前平台（例如 Linux 桌面版）没有内置网页，请在手机或 macOS 上使用，或用上面的链接在浏览器打开。" draw_text.color: secondary draw_text.text_style.font_size: 11}
+        player_fail := Label{width: Fill padding: Inset{left: 14 right: 14} text: "" draw_text.color: bad draw_text.text_style.font_size: 12}
+        reader := WebReader{width: Fill height: Fill on_error: || ui.player_fail.set_text(ui.reader.error())}
+    }
+}

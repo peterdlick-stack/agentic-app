@@ -37,6 +37,9 @@
 - **最可能的原因（未证实）**：这次的测试数据目录在 `/mnt/f/...`，WSL 访问 Windows 磁盘走 9P，每次 fs 读写都很慢，再加上内存压力（G1 时曾到 96%）。之前 T1–T10 能通过，很可能是因为数据放在 WSL 自己的 ext4 上。
 - **代码层面确实有个脆弱点**：启动是一条链（load_all → step2 → step3 → step3b → step4），中间任何一步超时，`booted` 就永远是 false，界面卡死在"正在加载…"。另外 `load_all` 一次要读 prefs、places、library 三个文件，`finish()` 一次要写 last、读写 history、写 encounters，单个处理函数里 I/O 太多。
 - 下一步：先让 GPT-B 做 A/B 对照定位原因（见对话里的指令），**再决定改不改代码**。建议的加固方向：每次文件读写拆进单独的 `start_timeout`；`finish()` 里的写文件延后执行；启动链加看门狗，超时就重试那一步，或者显示错误而不是永远"正在加载…"。
+- **A/B 结论（evidence\T-main-2026-10-05\AB\REPORT.md）**：A 组（d88f706，数据放 WSL ext4）通过，三个 json 都生成了；B 组（534c327，D4 之前，数据放 /mnt/f）照样超时。两组可用内存都超过 14 GiB，swap 为 0。**结论：原因是 F 盘的读写路径，不是 D4 引入的。**
+- 由此带来的影响：PLAN G1 把桌面版的 `OCTOSENSE_APP_DATA` 设在了 F 盘，**Fano 日常使用的桌面版同样会卡在"正在加载…"**。必须改到 WSL ext4（应用存储上限 16 MiB，对 C 盘影响可以忽略）。
+- 代码加固仍然要做：评委和真机的环境我们控制不了，任何一步超时都不应该让启动永久卡死。**把 F 盘数据目录当作现成的压力测试**：加固后在 /mnt/f 上也能正常启动，就算合格。
 
 ## ④ 下一步行动（新对话的起点）
 1. **D4（10-06，`main`）**：在 `bundle/main.splash` 实现 `encounters.json`，规格见 DEMO-ILOVEU §4.2。挂载点：`finish()` 里 `log_history()` 之后记 `seen`；`play(i)` 记 `heard`；`feedback(i, v)` 在 v>0 时记 `liked`。启动时在 `load_step3` 和 `load_step4` 之间插一步，用 `run_chunks` 分批读取。同步更新 `bundle/AGENT.md` 的文件说明，在 PLAN 里补测试用例，通知 GPT-B 跑 T11–T13。

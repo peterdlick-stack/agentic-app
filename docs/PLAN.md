@@ -349,3 +349,104 @@ Ctx = {at: number  hour: int  minute: int  weekday: int(0 = 周日)  slot: strin
   - 每个处理函数的指令上限确实生效（30 万次的循环被拦下）。0.1 秒一次的压力测试跑了约 2400 次采样，没有触发会话级预算，按真实的 10 秒间隔折算约 6–7 小时。
 - **已知行为**：从步行切到公交时，60 秒窗口会先经过约 20 秒的"跑步或骑行"，再变成"乘车"。工作日通勤时段内，两者都推断为通勤，不影响结果；其他时段会被短暂推断为运动。
 - **仍未验证**：真机 GPS（要等手机能装上应用）、AI 推断情境（要等 G1）、天气请求成功时的显示（本环境访问不到 Open-Meteo）。
+
+---
+
+# 第二部分：v0.3 计划（2026-10-05 晚定稿，10-06 至 10-12 执行）
+
+## 9. 对齐后的算法设计
+
+### 9.1 已经定下来的事
+
+| 事项 | 结论 |
+|---|---|
+| AI 用哪个 | **MiniMax**（赛方提供）。它已经配在 OctoSense 桌面版里，应用通过平台的 `model.complete` 调用，**应用和仓库里都不放任何密钥**（平台规则禁止，检查器会拒绝；仓库公开，放了就会泄露） |
+| 联网搜索 | `model.complete` 只能一问一答，没有搜索工具；商店应用的 Agent 也不能用 `web_search`。歌曲信息改用 **MusicBrainz**（免费、无密钥）+ AI 自身知识补全，补全的字段标注"AI 推断" |
+| 读蓝牙或耳机信息 | **平台不支持**：脚本接口和权限清单里都没有，已逐项核对。改为向平台提 issue，申请开放这个接口（技术加分项，见 G4） |
+| 扫描本机曲库 | **平台不支持**：应用只能读写自己的沙盒，没有文件选择器，也不能读剪贴板。改为批量粘贴导入"歌名 - 歌手" |
+| 规律学习 | 两层：**本地统计为主**（可解释、离线、不花钱），**AI 负责总结**成人能看懂的"你的规律" |
+| 模板 | 同类情境确认满 3 次，就提示"要不要存成模板"；也可以手动把这次存成模板 |
+| 演示数据 | 你从 10-06 起每天真实使用、积累数据（优先）；同时准备一份**明确标注为"演示数据"**的导入包作为兜底 |
+
+### 9.2 新的推荐流程
+
+```
+感知信号 → 个人规律统计 → 候选活动前 3 名（带概率）+「其他」
+   → 你点一下确认（或者直接点某个模板）
+   → 补充要求（可以留空）→「下一步」
+   → 选曲 → 歌单和逐首理由 → 喜欢 / 不喜欢
+   → 确认记录和反馈都回流到统计
+AI 定期：总结"你的规律"、建议新模板
+```
+
+### 9.3 数据（都在 `accounts/device/` 下，助手可以读；不含坐标）
+
+| 文件 | 结构 | 用途 |
+|---|---|---|
+| `labels.json` | 最近 500 条 `{at, day: "weekday"\|"weekend", slot: 时段名, place_kind: ""\|home\|school\|work\|gym, motion: still\|walk\|run_bike\|vehicle\|unknown, chosen: 活动id, top: [候选id×3], how: "tap"\|"manual"\|"template"\|"intent"}` | 每次确认的活动，也就是你的真实标签 |
+| `templates.json` | `[{id, name, day, slot, place_kind, act, req: {instr, energy, mood, lang}, extra: 补充要求文字, uses, created}]` | 场景模板 |
+| `routine.json` | `{at, text: AI 写的规律总结, n_labels}` | 缓存 AI 的总结，避免重复调用 |
+
+### 9.4 规律统计（候选排序）
+
+- **情境桶** b = (day, slot, place_kind, motion)；**粗桶** b' = (day, slot)。
+- **先验** prior(a | b)：v0.2 融合规则推断出的活动取 0.55，其余 6 个活动平分 0.45。
+- **后验**：P(a | b) = (n(b, a) + α·prior(a | b)) / (n(b) + α)，取 α = 3。n(b) < 3 时，用粗桶 b' 的计数代替（回退）。
+- **候选**：取 P 最大的前 3 个显示，另加"其他"（展开为 7 个活动）。
+- **什么时候主动问**：P 最大值 < 0.7、情境桶变了、或者你主动点"推荐"时，才显示候选卡；否则直接用最大的那个，并留一个"不对？"让你改。
+- **AI 总结**：每新增 20 条确认、或者你点"看看我的规律"时，把各桶的计数表（不含时间戳明细，大约 2 KB）交给 `model.complete`，返回 `{text ≤ 120 字, patterns: [{day, slot, act, share}]≤5}`，存进 `routine.json`。
+
+### 9.5 模板
+
+- **提示条件**：同一个 (day, slot, chosen) 组合在最近 14 天内确认满 3 次，并且这几次补充要求解析出的约束有过半一致，就提示"要不要存成模板"。你同意后才保存。
+- **使用**：点模板 → 补充要求输入框，预填模板里的 extra，可以改、可以清空 → "下一步" → 生成歌单。`uses` 加 1，同时也算一次确认，写入 labels。
+- **管理**：可以改名、删除。
+
+### 9.6 歌曲信息（P2）
+
+- **导入**：输入框支持一次粘贴多行或用"；"分隔的"歌名 - 歌手"，去重后加入曲库。
+- **MusicBrainz**：`network.hosts` 加 `musicbrainz.org`；请求 `/ws/2/recording?query=recording:"<歌名>" AND artist:"<歌手>"&fmt=json&limit=1`，User-Agent 写成 `ContextDJ/0.3 ( https://github.com/peterdlick-stack/agentic-app )`；每秒最多 1 次，后台排队并显示进度。能拿到的字段：时长、艺人、专辑、年份；语种只在一部分条目里有。
+- **AI 补全**：能量 1–5、是否人声、情绪、语种（MusicBrainz 缺的话），一律标注"AI 推断"。**不追求精确 BPM**（免费、无密钥的 BPM 来源基本没有了）。
+
+## 10. 任务分配（v0.3）
+
+### Claude（只改 `bundle/**` 和文档）
+
+| 编号 | 时间 | 内容 | 完成标准 |
+|---|---|---|---|
+| C6 | 10-06 | **P0**：候选排序卡 + 一键确认 + `labels.json`；新的推荐流程（候选 / 模板 → 补充要求 → 下一步）；**整体 UI 重做**，顺便合并主页上两处不一致的活动显示 | card-host 实测通过，截图都打开看过，检查器 PASSED |
+| C7 | 10-07 | **P1**：规律统计 + AI 规律总结卡；模板的提示、保存和使用 | 用模拟确认数据测试概率和模板提示 |
+| C8 | 10-08 | **P2**：批量导入 + MusicBrainz 补全 + AI 补标签 | 依赖 G3 的网络结论 |
+| C9 | 随时 | 按 G1、G2、G3 的报告修复 | — |
+| C10 | 10-10 | 演示数据包（标注清楚）、README、决赛演示脚本 | — |
+
+### GPT（在 Fano 的电脑上，第 1 节的磁盘和目录规则继续有效；**不改 `bundle/`，不推 `main`**）
+
+**G0–G2 照第 3 节继续做。** 说明两点：
+- G1 的 MiniMax 已经配在 WSL 桌面版里（见 `C:\Users\admin\Downloads\Agentic Apps\MINIMAX-SETUP-STATUS.txt`）。第 1 步只需要确认这个桌面版**有没有 `model` 服务**，也就是是否包含 OctoSense PR #95，不需要重新配置密钥。
+- 不得读取、复制、打印或转存任何密钥文件的内容。
+
+**G3 网络可达性（30 分钟）**
+在你的网络环境下，分别从 Windows 和 WSL 用 curl 测这三个地址能不能访问、延迟多少，结果写入 `evidence\G3-net\REPORT.md`：
+1. `https://api.open-meteo.com/v1/forecast?latitude=31.82&longitude=117.23&current=temperature_2m`
+2. `https://musicbrainz.org/ws/2/recording?query=recording:%22%E6%99%B4%E5%A4%A9%22%20AND%20artist:%22%E5%91%A8%E6%9D%B0%E4%BC%A6%22&fmt=json&limit=1`，请求头带 `User-Agent: ContextDJ/0.3 ( https://github.com/peterdlick-stack/agentic-app )`
+3. 同一个 MusicBrainz 请求，换成英文歌 `Blinding Lights` / `The Weeknd`
+
+每条记录 HTTP 状态码、耗时、返回内容的前 500 个字符，以及第 2、3 条是否返回了 length、release、date 字段。只用 curl，不装任何软件。
+
+**G4 起草平台 issue（30 分钟，只写不提交）**
+写到 `evidence\G4-issue\ISSUE.md`，由 Fano 自己去 `OctoSense-org/makepad` 或 `OctoSense-org/OctoSense` 提交。内容：
+- 请求让脚本应用读取**当前音频输出设备的类型**（扬声器、有线耳机、蓝牙），只读、粗粒度、不含设备地址；
+- 说明用途：情境感知音乐推荐，戴耳机和外放应该推荐不同的歌；
+- 指出平台底层已经有音频设备事件 `Event::AudioDevices`，只是没有开放给脚本；
+- 给出建议的接口，例如 `sys.audio_route()` 返回 `"speaker"|"wired"|"bluetooth"|"unknown"`，以及隐私说明。
+
+**G5 每日使用记录（10-06 起，配合 Fano）**
+每天结束时，把 WSL 或桌面版里情境 DJ 的 `accounts/device/labels.json` 和 `history.json` **复制**一份到 `F:\context-dj-work\evidence\G5-usage\<日期>\`（只复制，不改），并统计条数写进 `count.txt`。等 Fano 真正开始用桌面版里的情境 DJ 再开始。
+
+### Fano
+
+- 把这份计划第 10 节里 GPT 的部分（G0–G5）交给 GPT。
+- `F:\context-dj-work` 建好后授权给 Claude。
+- 10-06 起每天真实用几次（通勤、学习、睡前各用一次就够），每次都点一下候选活动确认。这些就是决赛演示的真实数据。
+- G4 的 issue 由你自己提交。

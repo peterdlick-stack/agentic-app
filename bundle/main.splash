@@ -122,6 +122,10 @@ let ALPHA = 3           // 先验的权重（相当于 3 条虚拟记录）
 let ASK_P = 0.7         // 最可能的活动概率低于它时，主动请你确认
 let last_rank = nil     // 最近一次排序结果 {list n level bucket}
 let show_all_acts = false
+// 你在原话里说明的情境、或 AI 从你的话里判断出的情境，在同一情境桶里沿用 30 分钟，
+// 这样情境卡和刚生成的歌单显示的是同一个活动（G1 报告的不一致问题）
+let session_act = nil   // {id source conf why at bucket}
+let SESSION_S = 1800
 let sim_places = []     // 模拟模式下标记的地点，只在内存里
 let here = {place: nil dist: -1}
 let sim = {kind: "off" lat: 0.0 lon: 0.0 t: 0}
@@ -198,21 +202,50 @@ fn read_json(name){
 }
 fn write_json(name, v){ fs.write(DATA + name, v.to_json()) }
 
+// ---- 启动加载（分批）：一次处理太多条会超过每个处理函数 20 万条指令的上限（500 条确认记录时实测超限），
+// 所以曲库、反馈、确认记录都分批，每批之间让出一次（start_timeout），也避开 64 ms 的单次时间上限 ----
+let booted = false
+fn run_chunks(list, start, size, each, done){
+    let end = min(start + size, list.len())
+    for i in end - start { each(list[start + i]) }
+    if end < list.len() { start_timeout(0.01, || run_chunks(list, end, size, each, done)) }
+    else { done() }
+}
+fn as_list(v){
+    if v == nil { return [] }
+    v
+}
+fn load_lib_song(s){
+    let t = pick(s, "t", "")
+    if t != "" {
+        songs.push({t: t a: pick(s, "a", "未知歌手") en: pick(s, "en", nil) vo: pick(s, "vo", nil)
+            md: pick(s, "md", nil) lg: pick(s, "lg", nil) src: pick(s, "src", "user") fb: blank_fb()})
+    }
+}
+let song_keys = []      // 与 songs 一一对应的 "歌名|歌手"，加载反馈时避免反复拼字符串
+fn index_songs(){
+    song_keys = []
+    for s in songs { song_keys.push(key_of(s)) }
+}
+fn load_fb_row(row){
+    let k = pick(row, "k", "")
+    for j key in song_keys {
+        if key == k { songs[j].fb = fb_clean(pick(row, "fb", nil)) }
+    }
+}
+fn load_label(x){
+    let chosen = pick(x, "chosen", "")
+    if act_by_id(chosen) != nil {
+        labels.push({at: pick(x, "at", 0) day: pick(x, "day", "") slot: pick(x, "slot", "") place_kind: pick(x, "place_kind", "")
+            motion: pick(x, "motion", "unknown") chosen: chosen top: pick(x, "top", []) how: pick(x, "how", "tap")})
+    }
+}
+// 第 1 步：内置曲库、偏好、地点（都很小），然后分批读你的曲库
 fn load_all(){
     fs.mkdir(DATA)
     songs = []
     for s in SEED {
         songs.push({t: s.t a: s.a en: s.en vo: s.vo md: s.md lg: s.lg src: "seed" fb: blank_fb()})
-    }
-    let lib = read_json("library.json")
-    if lib != nil {
-        for s in lib {
-            let t = pick(s, "t", "")
-            if t != "" {
-                songs.push({t: t a: pick(s, "a", "未知歌手") en: pick(s, "en", nil) vo: pick(s, "vo", nil)
-                    md: pick(s, "md", nil) lg: pick(s, "lg", nil) src: pick(s, "src", "user") fb: blank_fb()})
-            }
-        }
     }
     let p = read_json("prefs.json")
     if p != nil {
@@ -230,50 +263,47 @@ fn load_all(){
         prefs.use_time = pick(p, "use_time", true)
         prefs.use_gps = pick(p, "use_gps", true)
     }
-    let fb = read_json("feedback.json")
-    if fb != nil {
-        for row in fb {
-            let k = pick(row, "k", "")
-            for s in songs {
-                if key_of(s) == k { s.fb = fb_clean(pick(row, "fb", nil)) }
-            }
-        }
-    }
     let pl = nil
     if fs.exists(PLACES_FILE) { pl = fs.read(PLACES_FILE).parse_json() }
     places = []
-    if pl != nil {
-        for x in pl {
-            let kind = pick(x, "kind", "")
-            if kind_name(kind) != "" {
-                places.push({id: pick(x, "id", kind) kind: kind name: kind_name(kind) lat: pick(x, "lat", 0.0) lon: pick(x, "lon", 0.0)})
-            }
+    for x in as_list(pl) {
+        let kind = pick(x, "kind", "")
+        if kind_name(kind) != "" {
+            places.push({id: pick(x, "id", kind) kind: kind name: kind_name(kind) lat: pick(x, "lat", 0.0) lon: pick(x, "lon", 0.0)})
         }
     }
-    let lb = read_json("labels.json")
+    run_chunks(as_list(read_json("library.json")), 0, 30, |s| load_lib_song(s), || load_step2())
+}
+// 第 2 步：分批套用反馈
+fn load_step2(){
+    index_songs()
+    run_chunks(as_list(read_json("feedback.json")), 0, 30, |row| load_fb_row(row), || load_step3())
+}
+// 第 3 步：分批读确认记录
+fn load_step3(){
     labels = []
-    if lb != nil {
-        for x in lb {
-            let chosen = pick(x, "chosen", "")
-            if act_by_id(chosen) != nil {
-                labels.push({at: pick(x, "at", 0) day: pick(x, "day", "") slot: pick(x, "slot", "") place_kind: pick(x, "place_kind", "")
-                    motion: pick(x, "motion", "unknown") chosen: chosen top: pick(x, "top", []) how: pick(x, "how", "tap")})
-            }
-        }
-    }
+    run_chunks(as_list(read_json("labels.json")), 0, 50, |x| load_label(x), || load_step4())
+}
+// 第 4 步：恢复上次歌单，启动完成
+fn load_step4(){
     let last = read_json("last.json")
     if last != nil {
         let keys = pick(last, "keys", [])
         let whys = pick(last, "whys", [])
         playlist = []
         for i k in keys {
-            for j s in songs {
-                if key_of(s) == k && i < whys.len() { playlist.push({i: j why: whys[i]}) }
+            for j key in song_keys {
+                if key == k && i < whys.len() { playlist.push({i: j why: whys[i]}) }
             }
         }
         playlist_act = pick(last, "act", "")
         if playlist.len() > 0 { plan_note = "上次的歌单（重启后恢复）" }
     }
+    booted = true
+    fetch_weather()
+    sync_home()
+    ui.cities.render()
+    gps_poll()
 }
 
 fn save_prefs(){ write_json("prefs.json", prefs) }
@@ -551,6 +581,7 @@ fn update_here(){
     if best != nil && bd <= PLACE_R_M { here = {place: best dist: bd} }
 }
 fn gps_poll(){
+    if !booted { return }
     let f = read_fix()
     let now = time_now()
     if f != nil {
@@ -765,12 +796,22 @@ fn infer_activity(it){
     if it != nil && it.act != "" {
         return act_result(it.act, "intent", 0.9, ["你说了「" + it.act_word + "」"])
     }
+    if session_act != nil && time_now() - session_act.at < SESSION_S && session_act.bucket == bucket_key(rk.bucket) {
+        let w = []
+        for x in session_act.why { w.push(x) }
+        w.push("沿用刚才歌单的判断（" + ceil((SESSION_S - (time_now() - session_act.at)) / 60) + " 分钟内有效）")
+        return act_result(session_act.id, session_act.source, session_act.conf, w)
+    }
     let top = rk.list[0]
     if rk.n > 0 {
         let why = []
         for w in r.why { why.push(w) }
         let span_word = "同一时段、地点和移动状态"
         if rk.level == "coarse" { span_word = "同一时段" }
+        if top.k == 0 {
+            why.push("规律：" + span_word + "下你确认过 " + rk.n + " 次，但还没有一致的选择，暂按规则推测")
+            return act_result(top.id, r.source, top.p, why)
+        }
         why.push("规律：" + span_word + "下你确认过 " + rk.n + " 次，其中「" + act_name(top.id) + "」" + top.k + " 次")
         return act_result(top.id, "routine", top.p, why)
     }
@@ -1059,7 +1100,7 @@ fn ctx_text(ctx){
 }
 
 fn recommend(){
-    if busy { return }
+    if busy || !booted { return }
     let raw = ui.intent.text()
     let it = parse_intent(raw)
     let ctx = build_ctx(it)
@@ -1093,7 +1134,7 @@ fn signals_for_ai(ctx){
     let manual = ""
     if ctx.activity.source == "manual" { manual = ctx.activity.id }
     {time: day_word(ctx) + ctx.slot + " " + ctx.hour + "点" weather: wx motion: mt place: here_text()
-        rule_activity: ctx.activity.id + "（" + source_word(ctx.activity.source) + "：" + join(ctx.activity.why, "；") + "）"
+        rule_activity: ctx.activity.id + "（" + source_word(ctx.activity.source) + "，可信度 " + round(ctx.activity.conf * 100) / 100 + "：" + join(ctx.activity.why, "；") + "）"
         manual: manual}
 }
 fn ask_model(raw, it, ctx){
@@ -1105,7 +1146,7 @@ fn ask_model(raw, it, ctx){
     }
     let n = songs.len() - 1
     host.request("model.complete", {
-        task: "你是一个懂情境的音乐 DJ。第一步，判断用户此刻在做什么：signals 是传感器和规则给出的情境（manual 非空表示用户手动选定，必须照用），intent 是用户的原话；用户原话里说明的情境优先于传感器推断。activity 从给定的 8 个值里选一个，判断不了就选 unknown，activity_why 用一句中文说明依据。第二步，从 songs 里挑 6 首按播放顺序排列：能量、是否人声、情绪要贴合你判断的活动和用户的意图；like 为正表示用户喜欢过，为负尽量不选；recent 是上一批，用户说换一批时避开。每首的 why 用不超过 30 字的中文说明它为什么适合此刻。understood 用一句话写你对用户意图的理解。只能从 songs 的 i 里选。"
+        task: "你是一个懂情境的音乐 DJ。第一步，判断用户此刻在做什么：signals 是传感器和规则给出的情境（manual 非空表示用户手动选定，必须照用），intent 是用户的原话；用户原话里说明的情境优先于传感器推断。rule_activity 后面括号里的可信度低于 0.5 时只是猜测（例如只凭时段），understood 里不要把它写成确定的事实，可以写“可能在…”。activity 从给定的 8 个值里选一个，判断不了就选 unknown，activity_why 用一句中文说明依据。第二步，从 songs 里挑 6 首按播放顺序排列：能量、是否人声、情绪要贴合你判断的活动和用户的意图；like 为正表示用户喜欢过，为负尽量不选；recent 是上一批，用户说换一批时避开。每首的 why 用不超过 30 字的中文说明它为什么适合此刻。understood 用一句话写你对用户意图的理解。只能从 songs 的 i 里选。"
         input: {signals: signals_for_ai(ctx) intent: raw recent: last_keys songs: cands}
         schema: {type: "object" required: ["understood" "activity" "activity_why" "picks"] additionalProperties: false
             properties: {understood: {type: "string" maxLength: 80}
@@ -1143,15 +1184,20 @@ fn model_answer(r, raw, it, ctx){
     }
     // PLAN 2.4：手动和原话里的明确情境优先；否则采用 AI 的判断
     let act = pick(o, "activity", "unknown")
+    ai_raw = {activity: act activity_why: pick(o, "activity_why", "")}
     if ctx.activity.source != "manual" && ctx.activity.source != "intent" && act != "unknown" && act_by_id(act) != nil {
         ctx.activity = act_result(act, "ai", 0.85, ["AI：" + pick(o, "activity_why", "")])
     }
     finish(out, "AI", raw, it, ctx, "AI 理解：" + pick(o, "understood", ""))
 }
 
+let ai_raw = nil          // 最近一次 AI 返回的原始情境判断，写进历史，便于核对（G1 报告）
 fn finish(picks, how, raw, it, ctx, note){
     playlist = picks
     playlist_act = ctx.activity.id
+    if ctx.activity.source == "intent" || ctx.activity.source == "ai" {
+        session_act = {id: ctx.activity.id source: ctx.activity.source conf: ctx.activity.conf why: ctx.activity.why at: time_now() bucket: bucket_key(cur_bucket())}
+    }
     last_ctx = ctx
     let summary = how + " · " + ctx_text(ctx)
     if note != "" { summary = summary + "\n" + note }
@@ -1166,6 +1212,7 @@ fn finish(picks, how, raw, it, ctx, note){
     save_last()
     log_history(how, raw, ctx)
     sync_home()
+    refresh_views()
 }
 
 // 历史不存坐标（PLAN 2.7）
@@ -1177,7 +1224,8 @@ fn log_history(how, raw, ctx){
     let pk = ""
     if ctx.here.place != nil { pk = ctx.here.place.kind }
     let next = [{at: time_now() how: how intent: raw ctx_text: ctx_text(ctx) act: ctx.activity.id act_source: ctx.activity.source
-        motion: ctx.motion.state place_kind: pk sim: sim.kind != "off" picks: keys}]
+        motion: ctx.motion.state place_kind: pk sim: sim.kind != "off" picks: keys ai_raw: ai_raw}]
+    ai_raw = nil
     for x in h { if next.len() < 30 { next.push(x) } }
     write_json("history.json", next)
 }
@@ -1207,6 +1255,7 @@ fn add_song(){
         if s.t == t && s.a == a { ui.lib_status.set_text("曲库里已经有《" + t + "》") return }
     }
     songs.push({t: t a: a en: nil vo: nil md: nil lg: nil src: "user" fb: blank_fb()})
+    index_songs()
     save_library()
     ui.new_song.set_text("")
     ui.lib_status.set_text("已添加《" + t + "》，还没有标签；点「AI 补标签」或直接用（按中性处理）")
@@ -1218,6 +1267,7 @@ fn remove_song(i){
     let kept = []
     for j x in songs { if j != i { kept.push(x) } }
     songs = kept
+    index_songs()
     playlist = []
     save_library()
     save_feedback()
@@ -1437,11 +1487,9 @@ fn close_player(){
 }
 
 fn boot(){
-    load_all()
-    fetch_weather()
+    plan_note = "正在加载…"
     sync_home()
-    ui.cities.render()
-    gps_poll()
+    load_all()
 }
 start_timeout(0.05, || boot())
 start_interval(GPS_POLL_S, || gps_poll())

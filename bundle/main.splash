@@ -106,7 +106,7 @@ let SIMS = [
 
 // ---- 状态 ----
 let songs = []          // 内置 + 用户添加；每首带 src 与反馈分
-let prefs = {city: 0 act: "" act_until: 0 use_weather: true use_time: true use_gps: true}
+let prefs = {city: 0 act: "" act_until: 0 act_how: "manual" act_bucket: "" use_weather: true use_time: true use_gps: true}
 let weather = {state: "loading" temp: 0 code: 0 text: "" offset: 28800 at: 0 coords: "city"}
 let wx_pos = nil        // 上次查天气用的坐标 {lat lon at}
 let wx_seq = 0          // 只采用最新一次天气请求的结果
@@ -115,6 +115,13 @@ let same_since = 0      // 定位点从什么时候起没变过
 let motion = {state: "unknown" speed: 0.0 conf: 0.0 n: 0 source: "none" note: "还没有定位"}
 let pending = {state: "" count: 0}
 let places = []         // [Place]，存到 places.json
+// ---- 规律统计（PLAN 9.4）----
+let labels = []         // 你每次确认的活动（真实标签），存到 labels.json，最多 LABEL_MAX 条
+let LABEL_MAX = 500
+let ALPHA = 3           // 先验的权重（相当于 3 条虚拟记录）
+let ASK_P = 0.7         // 最可能的活动概率低于它时，主动请你确认
+let last_rank = nil     // 最近一次排序结果 {list n level bucket}
+let show_all_acts = false
 let sim_places = []     // 模拟模式下标记的地点，只在内存里
 let here = {place: nil dist: -1}
 let sim = {kind: "off" lat: 0.0 lon: 0.0 t: 0}
@@ -213,6 +220,8 @@ fn load_all(){
         if city >= 0 && city < CITIES.len() { prefs.city = city }
         prefs.act = pick(p, "act", "")
         prefs.act_until = pick(p, "act_until", 0)
+        prefs.act_how = pick(p, "act_how", "manual")
+        prefs.act_bucket = pick(p, "act_bucket", "")
         if act_by_id(prefs.act) == nil {
             prefs.act = ""
             prefs.act_until = 0
@@ -241,6 +250,17 @@ fn load_all(){
             }
         }
     }
+    let lb = read_json("labels.json")
+    labels = []
+    if lb != nil {
+        for x in lb {
+            let chosen = pick(x, "chosen", "")
+            if act_by_id(chosen) != nil {
+                labels.push({at: pick(x, "at", 0) day: pick(x, "day", "") slot: pick(x, "slot", "") place_kind: pick(x, "place_kind", "")
+                    motion: pick(x, "motion", "unknown") chosen: chosen top: pick(x, "top", []) how: pick(x, "how", "tap")})
+            }
+        }
+    }
     let last = read_json("last.json")
     if last != nil {
         let keys = pick(last, "keys", [])
@@ -260,6 +280,7 @@ fn save_prefs(){ write_json("prefs.json", prefs) }
 // 地点放在存储根目录，不放 accounts/device/：应用助手只能读后者，这样坐标不会经助手发给 AI
 let PLACES_FILE = "places.json"
 fn save_places(){ fs.write(PLACES_FILE, places.to_json()) }
+fn save_labels(){ write_json("labels.json", labels) }
 fn save_library(){
     let out = []
     for s in songs { if s.src != "seed" { out.push({t: s.t a: s.a en: s.en vo: s.vo md: s.md lg: s.lg src: s.src}) } }
@@ -613,13 +634,8 @@ fn sim_set(kind){
 
 // ---- C 情境融合（PLAN 2.4）----
 fn act_result(id, src, conf, why){ {id: id source: src conf: conf why: why} }
-fn infer_activity(it){
-    if manual_left() > 0 {
-        return act_result(prefs.act, "manual", 1.0, ["你手动选了「" + act_name(prefs.act) + "」，还剩 " + ceil(manual_left() / 60) + " 分钟"])
-    }
-    if it != nil && it.act != "" {
-        return act_result(it.act, "intent", 0.9, ["你说了「" + it.act_word + "」"])
-    }
+// 不看手动和原话、只看传感器和时段的规则推断（PLAN 2.4 的优先级 3–8），同时作为规律统计的先验
+fn infer_rules(){
     let p = local_parts()
     let rush = p.weekday >= 1 && p.weekday <= 5 && ((p.hour >= 7 && p.hour < 9) || (p.hour >= 17 && p.hour < 19))
     let m = motion
@@ -651,6 +667,181 @@ fn infer_activity(it){
     }
     act_result("", "none", 0.0, ["没有可用的情境信号"])
 }
+
+// ---- 规律统计：候选活动排序（PLAN 9.4）----
+fn day_type(p){
+    if p.weekday == 0 || p.weekday == 6 { return "weekend" }
+    "weekday"
+}
+fn cur_bucket(){
+    let p = local_parts()
+    let pk = ""
+    if here.place != nil { pk = here.place.kind }
+    {day: day_type(p) slot: slot_name(p.hour) place: pk motion: motion.state}
+}
+fn bucket_key(b){ b.day + "|" + b.slot + "|" + b.place + "|" + b.motion }
+// 每个时段里常见的「第二猜测」，用来让冷启动时的第 2、3 个候选有意义
+fn slot_alts(h){
+    if h < 6 { return ["sleep" "relax"] }
+    if h < 9 { return ["commute" "workout"] }
+    if h < 12 { return ["work" "study"] }
+    if h < 14 { return ["relax" "walk"] }
+    if h < 17 { return ["work" "study"] }
+    if h < 19 { return ["commute" "workout"] }
+    if h < 23 { return ["relax" "study"] }
+    ["sleep" "relax"]
+}
+// 先验：规则推断的活动 0.55；本时段的常见活动里、和它不同的平分 0.15；剩下 0.30 七个活动平分（合计为 1）
+fn prior_of(id, r){
+    if r.id == "" { return 1.0 / ACTS.len() }
+    let pr = 0.30 / ACTS.len()
+    if id == r.id { pr = pr + 0.55 }
+    let alts = []
+    for a in slot_alts(local_parts().hour) { if a != r.id { alts.push(a) } }
+    if alts.len() == 0 { alts = ["relax"] }
+    for a in alts { if a == id { pr = pr + 0.15 / alts.len() } }
+    pr
+}
+// P(a|b) = (n(b,a) + ALPHA·prior(a|b)) / (n(b) + ALPHA)；完整桶不足 3 条时回退到 (日类型, 时段)
+fn rank_acts(r){
+    let b = cur_bucket()
+    let cnt = blank_fb()
+    let n = 0
+    for l in labels {
+        if l.day == b.day && l.slot == b.slot && l.place_kind == b.place && l.motion == b.motion {
+            fb_set(cnt, l.chosen, fb_get(cnt, l.chosen) + 1)
+            n = n + 1
+        }
+    }
+    let level = "full"
+    if n < 3 {
+        cnt = blank_fb()
+        n = 0
+        for l in labels {
+            if l.day == b.day && l.slot == b.slot {
+                fb_set(cnt, l.chosen, fb_get(cnt, l.chosen) + 1)
+                n = n + 1
+            }
+        }
+        level = "coarse"
+    }
+    let rest = []
+    for a in ACTS {
+        let pr = prior_of(a.id, r)
+        let k = fb_get(cnt, a.id)
+        rest.push({id: a.id k: k p: (k + ALPHA * pr) / (n + ALPHA)})
+    }
+    let sorted = []
+    for t in ACTS.len() {
+        let bi = 0
+        let bv = -1.0
+        for j x in rest {
+            if x.p > bv {
+                bv = x.p
+                bi = j
+            }
+        }
+        sorted.push(rest[bi])
+        rest[bi].p = -2.0
+    }
+    // 上面把 p 改成了 -2 作为「已选」标记，这里按原公式重算一次概率
+    let out = []
+    for x in sorted {
+        let pr = prior_of(x.id, r)
+        out.push({id: x.id k: x.k p: (x.k + ALPHA * pr) / (n + ALPHA)})
+    }
+    {list: out n: n level: level bucket: b}
+}
+fn infer_activity(it){
+    // 先算规律排序：候选卡在手动选择期间也要显示最新的概率
+    let r = infer_rules()
+    let rk = rank_acts(r)
+    last_rank = rk
+    if manual_left() > 0 {
+        let verb = "手动选了"
+        if prefs.act_how == "tap" { verb = "确认了" }
+        return act_result(prefs.act, "manual", 1.0, ["你" + verb + "「" + act_name(prefs.act) + "」，还剩 " + ceil(manual_left() / 60) + " 分钟"])
+    }
+    if it != nil && it.act != "" {
+        return act_result(it.act, "intent", 0.9, ["你说了「" + it.act_word + "」"])
+    }
+    let top = rk.list[0]
+    if rk.n > 0 {
+        let why = []
+        for w in r.why { why.push(w) }
+        let span_word = "同一时段、地点和移动状态"
+        if rk.level == "coarse" { span_word = "同一时段" }
+        why.push("规律：" + span_word + "下你确认过 " + rk.n + " 次，其中「" + act_name(top.id) + "」" + top.k + " 次")
+        return act_result(top.id, "routine", top.p, why)
+    }
+    r
+}
+// 一键确认（PLAN 9.2）：确认后在 90 分钟内按它推荐，并记一条真实标签；再点一次取消
+fn confirm_act(id, how){
+    if prefs.act == id && manual_left() > 0 {
+        prefs.act = ""
+        prefs.act_until = 0
+        save_prefs()
+        refresh_views()
+        return
+    }
+    let b = cur_bucket()
+    let top = []
+    if last_rank != nil {
+        for k in 3 { if k < last_rank.list.len() { top.push(last_rank.list[k].id) } }
+    }
+    add_label(b, id, top, how)
+    prefs.act = id
+    prefs.act_until = time_now() + ACT_TTL
+    prefs.act_how = how
+    prefs.act_bucket = bucket_key(b)
+    show_all_acts = false
+    save_prefs()
+    refresh_views()
+}
+fn add_label(b, id, top, how){
+    // 同一情境桶里 30 分钟内重复确认同一个活动，只算一次（避免反复点击放大统计）
+    if labels.len() > 0 {
+        let l = labels[labels.len() - 1]
+        if l.chosen == id && l.day == b.day && l.slot == b.slot && l.place_kind == b.place && l.motion == b.motion && time_now() - l.at < 1800 {
+            l.at = time_now()
+            save_labels()
+            return
+        }
+    }
+    let next = []
+    let start = 0
+    if labels.len() >= LABEL_MAX { start = labels.len() - LABEL_MAX + 1 }
+    for j x in labels { if j >= start { next.push(x) } }
+    next.push({at: time_now() day: b.day slot: b.slot place_kind: b.place motion: b.motion chosen: id top: top how: how})
+    labels = next
+    save_labels()
+}
+fn toggle_all_acts(){
+    show_all_acts = !show_all_acts
+    ui.cands.render()
+}
+fn pct(p){ "" + round(p * 100) + "%" }
+fn cand_top3(){
+    let out = []
+    if last_rank == nil { return out }
+    for k in 3 { if k < last_rank.list.len() { out.push(last_rank.list[k]) } }
+    out
+}
+// 候选卡的标题：要不要主动请你确认
+fn cand_title(){
+    if manual_left() > 0 {
+        let verb = "已手动选择"
+        if prefs.act_how == "tap" { verb = "已确认" }
+        return verb + "：" + act_name(prefs.act) + "（还剩 " + ceil(manual_left() / 60) + " 分钟，再点一次取消）"
+    }
+    if last_rank == nil { return "① 你现在在做什么？" }
+    let top = last_rank.list[0]
+    if top.p < ASK_P || last_rank.n == 0 {
+        return "① 你现在在做什么？点一下确认，我会越来越懂你"
+    }
+    "① 按你的规律，你多半在" + act_name(top.id) + "（" + pct(top.p) + "）；不对就点下面改"
+}
 fn build_ctx(it){
     let p = local_parts()
     {at: time_now() hour: p.hour minute: p.minute weekday: p.weekday slot: slot_name(p.hour)
@@ -658,12 +849,16 @@ fn build_ctx(it){
         weather: weather motion: motion here: here activity: infer_activity(it)}
 }
 fn source_word(src){
-    if src == "manual" { return "手动" }
+    if src == "manual" {
+        if prefs.act_how == "tap" { return "你确认的" }
+        return "手动"
+    }
     if src == "intent" { return "你说的" }
     if src == "ai" { return "AI 推断" }
     if src == "place" { return "地点推断" }
     if src == "motion" { return "移动推断" }
     if src == "time" { return "时段推测" }
+    if src == "routine" { return "规律推断" }
     "无"
 }
 fn act_line(a){
@@ -868,6 +1063,11 @@ fn recommend(){
     let raw = ui.intent.text()
     let it = parse_intent(raw)
     let ctx = build_ctx(it)
+    if ctx.activity.source == "intent" {
+        let top = []
+        if last_rank != nil { for k in 3 { if k < last_rank.list.len() { top.push(last_rank.list[k].id) } } }
+        add_label(cur_bucket(), ctx.activity.id, top, "intent")
+    }
     if playlist.len() > 0 {
         last_keys = []
         for p in playlist { last_keys.push(key_of(songs[p.i])) }
@@ -1151,7 +1351,8 @@ fn sync_context(){
     ui.ctx_act.set_text(act_line(c.activity))
     ui.ctx_why.set_text("依据：" + join(c.activity.why, "；"))
     ui.sim_banner.set_visible(sim.kind != "off")
-    ui.acts.render()
+    ui.cand_title.set_text(cand_title())
+    ui.cands.render()
     ui.toggles.render()
 }
 fn fix_lines(){
@@ -1312,11 +1513,24 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
                 ctx_act := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 13}}
             }
             ctx_why := Label{width: Fill text: "" draw_text.color: secondary draw_text.text_style.font_size: 11}
-            acts := ScrollXView{width: Fill height: 38 flow: Right spacing: 6 padding: Inset{top: 2}
+            cand_title := Label{width: Fill text: "" draw_text.color: accent draw_text.text_style.font_size: 12}
+            cands := View{width: Fill height: Fit flow: Down spacing: 6
                 on_render: || {
-                    for a in ACTS {
-                        if prefs.act == a.id && manual_left() > 0 { ChipOn{text: a.n on_click: || set_act(a.id)} }
-                        else { Chip{text: a.n on_click: || set_act(a.id)} }
+                    View{width: Fill height: Fit flow: Right spacing: 6
+                        for c in cand_top3() {
+                            if prefs.act == c.id && manual_left() > 0 { ChipOn{text: act_name(c.id) + " " + pct(c.p) on_click: || confirm_act(c.id, "tap")} }
+                            else { Chip{text: act_name(c.id) + " " + pct(c.p) on_click: || confirm_act(c.id, "tap")} }
+                        }
+                        if show_all_acts { Chip{text: "收起" on_click: || toggle_all_acts()} }
+                        else { Chip{text: "其他" on_click: || toggle_all_acts()} }
+                    }
+                    if show_all_acts {
+                        ScrollXView{width: Fill height: 38 flow: Right spacing: 6
+                            for a in ACTS {
+                                if prefs.act == a.id && manual_left() > 0 { ChipOn{text: a.n on_click: || confirm_act(a.id, "manual")} }
+                                else { Chip{text: a.n on_click: || confirm_act(a.id, "manual")} }
+                            }
+                        }
                     }
                 }
             }
@@ -1340,15 +1554,15 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
             }
         }
         View{width: Fill height: Fit flow: Right spacing: 8 align: Align{y: 0.5}
-            intent := Field{empty_text: "想听什么？例：在地铁上，有点困" on_return: |text| recommend()}
-            Primary{text: "推荐" on_click: || recommend()}
+            intent := Field{empty_text: "② 补充要求（可留空）：例 不要人声" on_return: |text| recommend()}
+            Primary{text: "下一步" on_click: || recommend()}
         }
         plan := Label{width: Fill text: "" draw_text.color: secondary draw_text.text_style.font_size: 12}
         list := ScrollYView{width: Fill height: Fill flow: Down spacing: 8
             on_render: || {
                 if playlist.len() == 0 {
                     View{width: Fill height: 120 align: Align{x: 0.5 y: 0.5}
-                        Label{width: Fill align: Align{x: 0.5} text: "说一句想听什么，再点「推荐」" draw_text.color: secondary draw_text.text_style.font_size: 13}
+                        Label{width: Fill align: Align{x: 0.5} text: "① 确认情境 → ② 写要求（可留空）→ 点「下一步」" draw_text.color: secondary draw_text.text_style.font_size: 13}
                     }
                 }
                 for n p in playlist {

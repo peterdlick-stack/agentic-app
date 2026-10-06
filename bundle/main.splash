@@ -119,7 +119,7 @@ let SIMS = [
 
 // ---- 状态 ----
 let songs = []          // 内置 + 用户添加；每首带 src 与反馈分
-let prefs = {city: 0 act: "" act_until: 0 act_how: "manual" act_bucket: "" use_weather: true use_time: true use_gps: true}
+let prefs = {city: 0 act: "" act_until: 0 act_how: "manual" act_bucket: "" use_weather: true use_time: true use_gps: true tpl_skip: []}
 let weather = {state: "loading" temp: 0 code: 0 text: "" offset: 28800 at: 0 coords: "city"}
 let wx_pos = nil        // 上次查天气用的坐标 {lat lon at}
 let wx_seq = 0          // 只采用最新一次天气请求的结果
@@ -134,6 +134,19 @@ let LABEL_MAX = 500
 let ALPHA = 3           // 先验的权重（相当于 3 条虚拟记录）
 let ASK_P = 0.7         // 最可能的活动概率低于它时，主动请你确认
 let last_rank = nil     // 最近一次排序结果 {list n level bucket}
+// ---- 规律总结和模板（PLAN 9.4、9.5，C7）----
+let SLOTS = ["深夜" "早晨" "上午" "中午" "下午" "傍晚" "晚上"]
+let stat = []           // 计数表：(工作日/周末 × 时段 × 活动)，用时从 labels 现算（确认会被改选替换，增量维护容易错）
+let routine = nil       // AI 写的规律总结 {at text n_labels patterns by}，存到 routine.json
+let routine_busy = false
+let ROUTINE_EVERY = 20  // 每新增 20 条确认，自动请 AI 重新总结一次（有 AI 时）
+let templates = []      // [{id name day slot place_kind act req extra uses created}]，存到 templates.json
+let tpl_offer = nil     // 要不要提示"存成模板" {day slot place_kind act extra n k key}
+let TPL_MIN = 3         // 同一 (日类型, 时段, 活动) 14 天内确认满 3 次才提示
+let TPL_DAYS = 14
+let NO_REQ = "0|0||"    // 没有补充要求时的约束签名
+let rt_note = ""        // 规律页的状态行
+let routine_tried = 0   // 上次自动请求 AI 总结的时间：失败后一小时内不再自动重试
 let show_all_acts = false
 // 你在原话里说明的情境、或 AI 从你的话里判断出的情境，在同一情境桶里沿用 30 分钟，
 // 这样情境卡和刚生成的歌单显示的是同一个活动（G1 报告的不一致问题）
@@ -152,7 +165,7 @@ let last_ctx = nil
 let last_keys = []      // 上一批，用于「换一批」
 let plan_note = ""
 let busy = false
-let screen = "home"     // home | sense | library | songcard | player
+let screen = "home"     // home | routine | sense | library | songcard | player
 let playing = nil
 let source = 0
 let SOURCES = [
@@ -267,6 +280,8 @@ fn boot_label(step){
     if step == "encounters" { return "相遇记录" }
     if step == "cards" { return "歌曲卡" }
     if step == "card_history" { return "歌曲卡历史" }
+    if step == "templates" { return "模板" }
+    if step == "routine" { return "规律总结" }
     if step == "last" { return "上次的歌单" }
     "收尾"
 }
@@ -329,7 +344,28 @@ fn load_label(x){
     let chosen = pick(x, "chosen", "")
     if act_by_id(chosen) != nil {
         labels.push({at: pick(x, "at", 0) day: pick(x, "day", "") slot: pick(x, "slot", "") place_kind: pick(x, "place_kind", "")
-            motion: pick(x, "motion", "unknown") chosen: chosen top: pick(x, "top", []) how: pick(x, "how", "tap")})
+            motion: pick(x, "motion", "unknown") chosen: chosen top: pick(x, "top", []) how: pick(x, "how", "tap")
+            extra: pick(x, "extra", "") sig: pick(x, "sig", NO_REQ)})
+    }
+}
+fn load_tpl(t){
+    let act = pick(t, "act", "")
+    if act_by_id(act) != nil {
+        let extra = pick(t, "extra", "")
+        templates.push({id: pick(t, "id", "t" + templates.len()) name: pick(t, "name", "模板") day: pick(t, "day", "weekday")
+            slot: pick(t, "slot", "") place_kind: pick(t, "place_kind", "") act: act req: req_of(extra) extra: extra
+            uses: pick(t, "uses", 0) created: pick(t, "created", 0)})
+    }
+}
+fn boot_routine(){
+    routine = nil
+    let rt = read_json("routine.json")
+    if rt != nil && pick(rt, "text", "") != "" {
+        let ps = []
+        for x in as_list(pick(rt, "patterns", [])) {
+            ps.push({day: pick(x, "day", "") slot: pick(x, "slot", "") act: pick(x, "act", "") share: pick(x, "share", 0)})
+        }
+        routine = {at: pick(rt, "at", 0) text: pick(rt, "text", "") n_labels: pick(rt, "n_labels", 0) patterns: ps by: pick(rt, "by", "ai")}
     }
 }
 // 每一步一个处理函数；读了文件的步骤只读这一个文件。重试时整步重来，所以每步开头先清空自己要填的数据
@@ -366,7 +402,13 @@ fn boot_run(gen, step){
         boot_read(gen, "cards.json", 5, |x| load_song_card(x), "card_history")
     } else if step == "card_history" {
         card_history = []
-        boot_read(gen, "history.json", 10, |x| load_card_history(x), "last")
+        boot_read(gen, "history.json", 10, |x| load_card_history(x), "templates")
+    } else if step == "templates" {
+        templates = []
+        boot_read(gen, "templates.json", 10, |t| load_tpl(t), "routine")
+    } else if step == "routine" {
+        boot_routine()
+        boot_next("last")
     } else if step == "last" {
         boot_last()
         boot_next("done")
@@ -390,6 +432,7 @@ fn boot_prefs(){
         prefs.use_weather = pick(p, "use_weather", true)
         prefs.use_time = pick(p, "use_time", true)
         prefs.use_gps = pick(p, "use_gps", true)
+        prefs.tpl_skip = pick(p, "tpl_skip", [])
     }
 }
 fn boot_places(){
@@ -932,6 +975,7 @@ fn infer_activity(it){
     if manual_left() > 0 {
         let verb = "手动选了"
         if prefs.act_how == "tap" { verb = "确认了" }
+        if prefs.act_how == "template" { verb = "用模板选了" }
         return act_result(prefs.act, "manual", 1.0, ["你" + verb + "「" + act_name(prefs.act) + "」，还剩 " + ceil(manual_left() / 60) + " 分钟"])
     }
     if it != nil && it.act != "" {
@@ -999,7 +1043,7 @@ fn confirm_act(id, how){
     let stop = n_before
     if dup { stop = n_before - 1 }
     for j x in flow_labels_before { if j >= start && j < stop { next.push(x) } }
-    next.push({at: time_now() day: b.day slot: b.slot place_kind: b.place motion: b.motion chosen: id top: top how: how})
+    next.push({at: time_now() day: b.day slot: b.slot place_kind: b.place motion: b.motion chosen: id top: top how: how extra: "" sig: NO_REQ})
     labels = next
     prefs.act = id
     prefs.act_until = time_now() + ACT_TTL
@@ -1008,9 +1052,11 @@ fn confirm_act(id, how){
     flow_activity = id
     // 先跳到 ②，再写文件、重算情境（各占一个处理函数）。F 盘慢路径上同步写 prefs 会吃掉大半 64 ms，
     // 之后的 sync_context 撞上墙钟上限，跳转就丢了（2026-10-06 T20 实测）
+    ui.step2_note.set_visible(false)
     home_step(2)
     start_timeout(0.01, || save_labels())
     defer_save_prefs_and_refresh()
+    start_timeout(0.05, || routine_maybe_auto())
 }
 fn defer_save_prefs_and_refresh(){
     start_timeout(0.02, || save_prefs())
@@ -1024,6 +1070,7 @@ fn flow_uncertain(){
     prefs.act_until = 0
     session_act = nil
     flow_activity = infer_activity(nil).id
+    ui.step2_note.set_visible(false)
     home_step(2)
     defer_save_prefs_and_refresh()
 }
@@ -1041,10 +1088,393 @@ fn add_label(b, id, top, how){
     let start = 0
     if labels.len() >= LABEL_MAX { start = labels.len() - LABEL_MAX + 1 }
     for j x in labels { if j >= start { next.push(x) } }
-    next.push({at: time_now() day: b.day slot: b.slot place_kind: b.place motion: b.motion chosen: id top: top how: how})
+    next.push({at: time_now() day: b.day slot: b.slot place_kind: b.place motion: b.motion chosen: id top: top how: how extra: "" sig: NO_REQ})
     labels = next
     // 选歌的处理函数里不直接写文件（一个处理函数最多一次读写，见 AGENTS.md）
     start_timeout(0.01, || save_labels())
+    start_timeout(0.05, || routine_maybe_auto())
+}
+// ---- 规律统计（PLAN 9.4）。计数表下标 = 日类型 × 时段 × 活动；每次用时从 labels 现算，一遍扫完 ----
+fn stat_j(di, si, ai){ di * SLOTS.len() * ACTS.len() + si * ACTS.len() + ai }
+fn slot_index(s){
+    for i x in SLOTS { if x == s { return i } }
+    -1
+}
+fn act_index(id){
+    for i a in ACTS { if a.id == id { return i } }
+    -1
+}
+fn stat_build(){
+    stat = []
+    for i in 2 * SLOTS.len() * ACTS.len() { stat.push(0) }
+    for l in labels {
+        let si = slot_index(l.slot)
+        let ai = act_index(l.chosen)
+        if si >= 0 && ai >= 0 {
+            let di = 0
+            if l.day == "weekend" { di = 1 }
+            let j = stat_j(di, si, ai)
+            stat[j] = stat[j] + 1
+        }
+    }
+}
+fn day_id(di){
+    if di == 1 { return "weekend" }
+    "weekday"
+}
+fn day_name(d){
+    if d == "weekend" { return "周末" }
+    "工作日"
+}
+// 最常见的组合：同一 (日类型, 时段) 里某个活动至少 2 次；按次数取前 5
+fn routine_local(){
+    let cands = []
+    for di in 2 {
+        for si in SLOTS.len() {
+            let tot = 0
+            for ai in ACTS.len() { tot = tot + stat[stat_j(di, si, ai)] }
+            for ai in ACTS.len() {
+                let k = stat[stat_j(di, si, ai)]
+                if k >= 2 { cands.push({day: day_id(di) slot: SLOTS[si] act: ACTS[ai].id k: k n: tot}) }
+            }
+        }
+    }
+    let out = []
+    for t in 5 {
+        let bi = -1
+        let bv = 0
+        for j c in cands {
+            if c.k > bv {
+                bv = c.k
+                bi = j
+            }
+        }
+        if bi >= 0 {
+            let c = cands[bi]
+            out.push({day: c.day slot: c.slot act: c.act k: c.k n: c.n})
+            c.k = -1
+        }
+    }
+    out
+}
+fn routine_local_text(ps){
+    if labels.len() == 0 { return "还没有确认记录。在主页 ① 点一下活动，这里就会慢慢出现你的规律。" }
+    if ps.len() == 0 { return "一共 " + labels.len() + " 条确认，还看不出固定的规律（同一时段的同一个活动至少要 2 次）。" }
+    let parts = []
+    for p in ps { parts.push(day_name(p.day) + p.slot + "多半在" + act_name(p.act) + "（" + p.k + "/" + p.n + " 次）") }
+    "一共 " + labels.len() + " 条确认。" + join(parts, "；") + "。"
+}
+// 每个 (日类型, 时段) 里确认过哪些活动、各几次
+fn routine_detail(){
+    let lines = []
+    for di in 2 {
+        for si in SLOTS.len() {
+            let parts = []
+            let tot = 0
+            for ai in ACTS.len() {
+                let k = stat[stat_j(di, si, ai)]
+                if k > 0 {
+                    parts.push(ACTS[ai].n + " " + k)
+                    tot = tot + k
+                }
+            }
+            if tot > 0 { lines.push(day_name(day_id(di)) + SLOTS[si] + "（" + tot + " 次）：" + join(parts, "、")) }
+        }
+    }
+    if lines.len() == 0 { return "还没有确认记录" }
+    join(lines, "\n")
+}
+fn ago(t){
+    let d = time_now() - t
+    if d < 3600 { return "" + ceil(d / 60) + " 分钟前" }
+    if d < 86400 { return "" + floor(d / 3600) + " 小时前" }
+    "" + floor(d / 86400) + " 天前"
+}
+// AI 的输入只有计数表（不含时间戳明细、坐标、原话），约 2 KB
+fn routine_table(){
+    let rows = []
+    for di in 2 {
+        for si in SLOTS.len() {
+            let acts = []
+            let tot = 0
+            for ai in ACTS.len() {
+                let k = stat[stat_j(di, si, ai)]
+                if k > 0 {
+                    acts.push({act: ACTS[ai].id n: k})
+                    tot = tot + k
+                }
+            }
+            if tot > 0 { rows.push({day: day_id(di) slot: SLOTS[si] total: tot acts: acts}) }
+        }
+    }
+    rows
+}
+fn routine_ask(manual){
+    if routine_busy || !booted { return }
+    if !host.has("model") {
+        if manual { rt_note = "这台设备没有给本应用开放 AI，下面是本地统计" }
+        sync_routine()
+        return
+    }
+    if labels.len() == 0 {
+        rt_note = "还没有确认记录，没什么可总结的"
+        sync_routine()
+        return
+    }
+    routine_busy = true
+    rt_note = "AI 正在总结你的规律…"
+    sync_routine()
+    stat_build()
+    let names = []
+    for a in ACTS { names.push({id: a.id name: a.n}) }
+    host.request("model.complete", {
+        task: "你在帮用户总结 TA 听歌时的生活规律。buckets 是用户在每个（日类型 weekday 工作日 / weekend 周末，时段）里亲手确认过的活动次数，acts 给出活动 id 对应的中文名。text：用不超过 120 字的中文，说出 2 到 4 条最明显的规律，带上次数或比例；某个时段总次数少于 3 的，要说明还不确定。不要编造 buckets 里没有的内容，不要猜测具体地点或人。patterns：最多 5 条最明显的规律，share 是该活动在该时段所有确认里的占比（0 到 1）。"
+        input: {n_labels: labels.len() buckets: routine_table() acts: names}
+        schema: {type: "object" required: ["text" "patterns"] additionalProperties: false
+            properties: {text: {type: "string" maxLength: 120}
+                patterns: {type: "array" maxItems: 5
+                    items: {type: "object" required: ["day" "slot" "act" "share"] additionalProperties: false
+                        properties: {day: {type: "string" enum: ["weekday" "weekend"]}
+                            slot: {type: "string" enum: SLOTS}
+                            act: {type: "string" enum: ["study" "work" "commute" "walk" "workout" "relax" "sleep"]}
+                            share: {type: "number" minimum: 0 maximum: 1}}}}}}
+        class: "fast"
+    }, fn(r){ routine_answer(r) })
+}
+fn routine_answer(r){
+    routine_busy = false
+    if !r.is_ok {
+        rt_note = "AI 总结失败：" + r.error + "。下面是本地统计"
+        sync_routine()
+        return
+    }
+    let o = pick(r.data, "output", nil)
+    let text = pick(o, "text", "")
+    if text == "" {
+        rt_note = "AI 没有返回总结。下面是本地统计"
+        sync_routine()
+        return
+    }
+    let ps = []
+    for p in as_list(pick(o, "patterns", [])) {
+        let d = pick(p, "day", "")
+        let s = pick(p, "slot", "")
+        let a = pick(p, "act", "")
+        let sh = pick(p, "share", -1)
+        if (d == "weekday" || d == "weekend") && slot_index(s) >= 0 && act_by_id(a) != nil && sh >= 0 && sh <= 1 {
+            ps.push({day: d slot: s act: a share: sh})
+        }
+    }
+    routine = {at: time_now() text: text n_labels: labels.len() patterns: ps by: "ai"}
+    rt_note = "AI 总结完成"
+    sync_routine()
+    let keep = routine
+    start_timeout(0.01, || write_json("routine.json", keep))
+}
+// 每新增 ROUTINE_EVERY 条确认，后台请 AI 重新总结（没有 AI 时什么都不做）
+fn labels_since(t0){
+    let n = 0
+    for l in labels { if l.at > t0 { n = n + 1 } }
+    n
+}
+fn routine_maybe_auto(){
+    if !booted || !host.has("model") || routine_busy || time_now() - routine_tried < 3600 { return }
+    let t0 = 0
+    if routine != nil { t0 = routine.at }
+    if labels_since(t0) >= ROUTINE_EVERY {
+        routine_tried = time_now()
+        routine_ask(false)
+    }
+}
+
+// ---- 模板（PLAN 9.5）----
+// 补充要求解析出的约束：是否人声、能量高低、情绪、语种
+fn req_of(extra){
+    let it = parse_intent(extra)
+    let e = 0
+    if it.energy > 0 { e = 1 }
+    if it.energy < 0 { e = -1 }
+    {instr: it.instr energy: e mood: it.mood lang: it.lang}
+}
+fn req_sig(r){ "" + r.instr + "|" + r.energy + "|" + r.mood + "|" + r.lang }
+fn save_templates(){ if booted { write_json("templates.json", templates) } }
+fn tpl_find(day, slot, act){
+    for i t in templates { if t.day == day && t.slot == slot && t.act == act { return i } }
+    -1
+}
+// 歌单生成后，把这次的补充要求记到刚才那条确认上（同一活动、同一时段、90 分钟内）。返回有没有改动
+fn label_attach(raw){
+    if labels.len() == 0 { return false }
+    let l = labels[labels.len() - 1]
+    if time_now() - l.at > ACT_TTL || l.chosen != playlist_act { return false }
+    let b = cur_bucket()
+    if l.day != b.day || l.slot != b.slot { return false }
+    l.extra = raw
+    l.sig = req_sig(req_of(raw))
+    true
+}
+// 先算、先更新界面，最后才写文件（一个处理函数最多一次读写）
+fn tpl_after_playlist(raw){
+    let changed = label_attach(raw)
+    tpl_check()
+    ui.tpl_offer_row.render()
+    if changed { start_timeout(0.01, || save_labels()) }
+}
+// 提示条件：同一 (日类型, 时段, 活动) 最近 14 天确认满 3 次，且过半次数的补充要求约束一致；你说过"不用"的不再提
+fn tpl_check(){
+    tpl_offer = nil
+    if labels.len() == 0 { return }
+    let last = labels[labels.len() - 1]
+    if time_now() - last.at > ACT_TTL { return }
+    if tpl_find(last.day, last.slot, last.chosen) >= 0 { return }
+    let cut = time_now() - TPL_DAYS * 86400
+    let groups = []
+    let n = 0
+    for l in labels {
+        if l.at >= cut && l.chosen == last.chosen && l.slot == last.slot && l.day == last.day {
+            n = n + 1
+            let gi = -1
+            for j g in groups { if g.sig == l.sig { gi = j } }
+            if gi < 0 { groups.push({sig: l.sig k: 1 extra: l.extra at: l.at}) }
+            else {
+                let g = groups[gi]
+                g.k = g.k + 1
+                if l.at >= g.at {
+                    g.extra = l.extra
+                    g.at = l.at
+                }
+            }
+        }
+    }
+    if n < TPL_MIN { return }
+    let best = groups[0]
+    for g in groups { if g.k > best.k { best = g } }
+    if best.k * 2 <= n { return }
+    let key = last.day + "|" + last.slot + "|" + last.chosen + "|" + best.sig
+    for s in prefs.tpl_skip { if s == key { return } }
+    tpl_offer = {day: last.day slot: last.slot place_kind: last.place_kind act: last.chosen extra: best.extra n: n k: best.k key: key}
+}
+fn tpl_offer_text(){
+    if tpl_offer == nil { return "" }
+    let o = tpl_offer
+    let t = "最近 14 天的" + day_name(o.day) + o.slot + "，你 " + o.n + " 次选了「" + act_name(o.act) + "」"
+    if o.extra != "" { t = t + "，其中 " + o.k + " 次的要求是「" + o.extra + "」" }
+    t + "。存成模板，下次在 ① 点一下就行？"
+}
+fn tpl_add(day, slot, pk, act, extra){
+    let name = day_name(day) + slot + " · " + act_name(act)
+    templates.push({id: "t" + time_now() + "-" + templates.len() name: name day: day slot: slot place_kind: pk act: act
+        req: req_of(extra) extra: extra uses: 0 created: time_now()})
+    start_timeout(0.01, || save_templates())
+    name
+}
+fn tpl_saved_note(name){
+    plan_note = "已存成模板「" + name + "」，在 ① 下面点它就能用；在「规律」页可以改名或删除"
+    ui.plan.set_text(plan_note)
+    ui.tpl_offer_row.render()
+    ui.tpl_row.render()
+}
+fn tpl_accept(){
+    if tpl_offer == nil { return }
+    let o = tpl_offer
+    let name = tpl_add(o.day, o.slot, o.place_kind, o.act, o.extra)
+    tpl_offer = nil
+    tpl_saved_note(name)
+}
+fn tpl_decline(){
+    if tpl_offer == nil { return }
+    let keep = []
+    for s in prefs.tpl_skip { if keep.len() < 49 { keep.push(s) } }
+    keep.push(tpl_offer.key)
+    prefs.tpl_skip = keep
+    tpl_offer = nil
+    ui.tpl_offer_row.render()
+    start_timeout(0.01, || save_prefs())
+}
+fn tpl_same_exists(){
+    let b = cur_bucket()
+    for t in templates { if t.day == b.day && t.slot == b.slot && t.act == playlist_act && t.extra == playlist_intent { return true } }
+    false
+}
+// 手动：把这份歌单的情境和要求存成模板
+fn tpl_save_current(){
+    if busy { return }
+    if playlist_act == "" {
+        ui.plan.set_text("这份歌单没有确定的活动，存不成模板。先在 ① 点一个活动")
+        return
+    }
+    if tpl_same_exists() {
+        ui.plan.set_text("已经有一样的模板了")
+        return
+    }
+    let b = cur_bucket()
+    let name = tpl_add(b.day, b.slot, b.place, playlist_act, playlist_intent)
+    tpl_offer = nil
+    tpl_saved_note(name)
+}
+// 使用：算一次确认（how = template，和点活动走同一条路，回 ① 改选会替换它），
+// 把模板的要求填进 ② 的输入框，可以改，再点「选歌」
+fn tpl_use(i){
+    if !booted { boot_hint() return }
+    if busy || i >= templates.len() { return }
+    let t = templates[i]
+    if !(flow_labels_before != nil && prefs.act == t.act && manual_left() > 0) { confirm_act(t.act, "template") }
+    t.uses = t.uses + 1
+    ui.intent.set_text(t.extra)
+    home_step(2)
+    ui.step2_note_text.set_text("用了模板「" + t.name + "」：要求已经填好，可以改，再点「选歌」")
+    ui.step2_note.set_visible(true)
+    start_timeout(0.04, || save_templates())
+}
+fn tpl_delete(i){
+    let keep = []
+    let gone = ""
+    for j t in templates {
+        if j != i { keep.push(t) } else { gone = t.name }
+    }
+    templates = keep
+    rt_note = "已删除模板「" + gone + "」"
+    sync_routine()
+    start_timeout(0.01, || save_templates())
+}
+fn tpl_rename(i){
+    let name = ("" + ui.tpl_name_in.text()).trim()
+    if name == "" {
+        rt_note = "先在上面的输入框里写新名字，再点这个模板的「改名」"
+        sync_routine()
+        return
+    }
+    templates[i].name = name
+    ui.tpl_name_in.set_text("")
+    rt_note = "已改名为「" + name + "」"
+    sync_routine()
+    start_timeout(0.01, || save_templates())
+}
+fn tpl_line(t){
+    let x = "要求：" + t.extra
+    if t.extra == "" { x = "没有补充要求" }
+    day_name(t.day) + t.slot + " · " + act_name(t.act) + " · " + x + " · 用过 " + t.uses + " 次"
+}
+fn rt_meta(){
+    if routine == nil {
+        if host.has("model") { return "还没有 AI 总结：每新增 20 条确认会自动总结一次，也可以点右上角" }
+        return "本地统计（这台设备没有给本应用开放 AI）"
+    }
+    let more = labels_since(routine.at)
+    let t = "AI 总结（可能不准）· 基于 " + routine.n_labels + " 条确认 · " + ago(routine.at)
+    if more > 0 { t = t + " · 之后又新增了 " + more + " 条" }
+    t
+}
+fn sync_routine(){
+    if screen != "routine" { return }
+    stat_build()
+    let ps = routine_local()
+    if routine != nil { ui.rt_text.set_text(routine.text) }
+    else { ui.rt_text.set_text(routine_local_text(ps)) }
+    ui.rt_meta.set_text(rt_meta())
+    ui.rt_local.set_text(routine_detail())
+    ui.rt_status.set_text(rt_note)
+    ui.tpl_list.render()
 }
 fn toggle_all_acts(){
     show_all_acts = !show_all_acts
@@ -1062,6 +1492,7 @@ fn cand_title(){
     if manual_left() > 0 {
         let verb = "已手动选择"
         if prefs.act_how == "tap" { verb = "已确认" }
+        if prefs.act_how == "template" { verb = "已用模板" }
         if flow_labels_before != nil { return verb + "：" + act_name(prefs.act) + "（再点同一活动可撤销本次确认）" }
         return verb + "：" + act_name(prefs.act) + "（可重新选择）"
     }
@@ -1081,6 +1512,7 @@ fn build_ctx(it){
 fn source_word(src){
     if src == "manual" {
         if prefs.act_how == "tap" { return "你确认的" }
+        if prefs.act_how == "template" { return "模板" }
         return "手动"
     }
     if src == "intent" { return "你说的" }
@@ -1445,6 +1877,8 @@ fn finish(picks, how, raw, it, ctx, note){
     start_timeout(0.01, || save_last())
     start_timeout(0.02, || log_history(how, raw, ctx, keys, air))
     start_timeout(0.03, || enc_seen(ctx, picks))
+    let req = playlist_intent
+    start_timeout(0.04, || tpl_after_playlist(req))
 }
 
 // ---- 第一次相遇（DEMO-ILOVEU 4.2）----
@@ -1701,6 +2135,7 @@ fn sync_context(){
     ui.sim_banner.set_visible(sim.kind != "off")
     ui.cand_title.set_text(cand_title())
     ui.cands.render()
+    ui.tpl_row.render()
     ui.toggles.render()
 }
 fn fix_lines(){
@@ -1738,10 +2173,12 @@ fn sync_sense(){
 fn refresh_views(){
     if screen == "home" { sync_context() }
     if screen == "sense" { sync_sense() }
+    if screen == "routine" { sync_routine() }
 }
 fn sync_home(){
     ui.plan.set_text(plan_note)
     ui.list.render()
+    ui.tpl_offer_row.render()
 }
 
 // ---- 歌曲卡：只读取本机文案和图片；反馈/初听沿用原有入口 ----
@@ -2099,6 +2536,9 @@ fn flow_restart(){
     flow_labels_before = nil
     flow_activity = ""
     ui.intent.set_text("")
+    ui.step2_note.set_visible(false)
+    tpl_offer = nil
+    ui.tpl_offer_row.render()
     home_step(1)
 }
 fn toggle_context(){
@@ -2111,6 +2551,7 @@ fn show(name){
     ui.home.set_visible(name == "home")
     ui.sense.set_visible(name == "sense")
     ui.library.set_visible(name == "library")
+    ui.routine_page.set_visible(name == "routine")
     ui.player_pane.set_visible(name == "player")
     ui.song_card.set_visible(name == "songcard")
     if name == "home" {
@@ -2120,6 +2561,10 @@ fn show(name){
     }
     if name == "sense" { sync_sense() }
     if name == "library" { ui.lib_list.render() }
+    if name == "routine" {
+        rt_note = ""
+        sync_routine()
+    }
 }
 fn play(i){
     let event_act = playlist_act
@@ -2230,6 +2675,7 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
         View{width: Fill height: 52 flow: Right spacing: 8 align: Align{y: 0.5}
             home_back := Bar{visible: false width: 44 text: "‹" on_click: || home_step(home_page - 1)}
             Label{width: Fill text: "情境 DJ" draw_text.color: SC_INK draw_text.text_style: theme.font_bold{font_size: 24}}
+            Bar{text: "规律" on_click: || show("routine")}
             Bar{text: "感知" on_click: || show("sense")}
             Bar{text: "曲库" on_click: || show("library")}
         }
@@ -2262,6 +2708,14 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
             ScText{width: Fill text: "你现在在做什么？"}
             ctx_act := ScMuted{width: Fill text: ""}
             cand_title := ScMuted{width: Fill text: ""}
+            tpl_row := View{width: Fill height: Fit flow: Down spacing: 8 on_render: || {
+                if templates.len() > 0 {
+                    ScMuted{width: Fill text: "常用模板：点一下，活动和要求一起填好"}
+                    ScrollXView{width: Fill height: 50 flow: Right spacing: 6
+                        for i t in templates { Chip{text: t.name on_click: || tpl_use(i)} }
+                    }
+                }
+            }}
             cands := View{width: Fill height: Fit flow: Down spacing: 8 on_render: || {
                 for r in 4 {
                     View{width: Fill height: 52 flow: Right spacing: 8
@@ -2285,6 +2739,7 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
         step2 := ScrollYView{visible: false width: Fill height: Fill flow: Down spacing: 16
             activity_chip := Chip{width: Fill text: "" on_click: || home_step(1)}
             ScTitle{text: "② 有什么要求"}
+            step2_note := RoundedView{visible: false width: Fill height: Fit flow: Down padding: 10 draw_bg.color: SC_CARD draw_bg.border_radius: 16.0 step2_note_text := ScMuted{width: Fill text: "" draw_text.color: SC_ACCENT}}
             ScText{width: Fill text: "还有什么要求吗？"}
             View{width: Fill height: Fit flow: Down spacing: 10
                 for row in 3 {
@@ -2302,6 +2757,22 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
             play_activity := Chip{width: Fill text: "" on_click: || home_step(1)}
             play_intent := Chip{width: Fill text: "" on_click: || home_step(2)}
             plan := ScMuted{width: Fill text: ""}
+            tpl_offer_row := View{width: Fill height: Fit flow: Down spacing: 6 on_render: || {
+                if tpl_offer != nil && !busy {
+                    RoundedView{width: Fill height: Fit flow: Down spacing: 8 padding: 12 draw_bg.color: SC_CARD draw_bg.border_radius: 16.0
+                        ScText{width: Fill text: tpl_offer_text() draw_text.text_style.font_size: 13}
+                        View{width: Fill height: 44 flow: Right spacing: 8
+                            ChipOn{text: "存成模板" on_click: || tpl_accept()}
+                            Chip{text: "不用了" on_click: || tpl_decline()}
+                        }
+                    }
+                } else if playlist.len() > 0 && playlist_act != "" && !busy && !tpl_same_exists() {
+                    View{width: Fill height: 44 flow: Right spacing: 8 align: Align{y: 0.5}
+                        ScMuted{width: Fill text: "常用这个情境和要求？"}
+                        Small{text: "存成模板" on_click: || tpl_save_current()}
+                    }
+                }
+            }}
             list := ScrollYView{width: Fill height: Fill flow: Down spacing: 10 on_render: || {
                 if playlist.len() == 0 { ScMuted{width: Fill text: "还没有歌单"} }
                 for n p in playlist {
@@ -2366,6 +2837,44 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
             }
         }
         sense_status := Label{width: Fill text: "" draw_text.color: secondary draw_text.text_style.font_size: 12}
+    }
+    routine_page := SolidView{visible: false width: Fill height: Fill flow: Down spacing: 10 padding: Inset{left: 14 right: 14 top: 12 bottom: 8} draw_bg.color: ground
+        View{width: Fill height: 52 flow: Right align: Align{y: 0.5}
+            Bar{text: "‹ 返回" on_click: || show("home")}
+            Label{width: Fill text: "我的规律" draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 20}}
+            Small{text: "让 AI 总结" on_click: || routine_ask(true)}
+        }
+        rt_status := ScMuted{width: Fill text: "" draw_text.color: SC_ACCENT}
+        ScrollYView{width: Fill height: Fill flow: Down spacing: 10
+            RoundedView{width: Fill height: Fit flow: Down spacing: 6 padding: 16 draw_bg.color: SC_CARD draw_bg.border_radius: 24.0
+                Label{width: Fill text: "总结" draw_text.color: SC_ACCENT draw_text.text_style: theme.font_bold{font_size: 13}}
+                rt_text := ScText{width: Fill text: ""}
+                rt_meta := ScMuted{width: Fill text: "" draw_text.text_style.font_size: 11}
+            }
+            RoundedView{width: Fill height: Fit flow: Down spacing: 6 padding: 16 draw_bg.color: SC_CARD draw_bg.border_radius: 24.0
+                Label{width: Fill text: "本地统计（你亲手确认的活动，不含自动推断）" draw_text.color: SC_ACCENT draw_text.text_style: theme.font_bold{font_size: 13}}
+                rt_local := ScMuted{width: Fill text: ""}
+            }
+            RoundedView{width: Fill height: Fit flow: Down spacing: 6 padding: 16 draw_bg.color: SC_CARD draw_bg.border_radius: 24.0
+                Label{width: Fill text: "模板" draw_text.color: SC_ACCENT draw_text.text_style: theme.font_bold{font_size: 13}}
+                tpl_name_in := Field{empty_text: "改名：先写新名字，再点下面某个模板的「改名」"}
+                tpl_list := View{width: Fill height: Fit flow: Down spacing: 4 on_render: || {
+                    if templates.len() == 0 {
+                        ScMuted{width: Fill text: "还没有模板。同一时段反复确认同一个活动时，歌单上方会提示你存成模板；也可以在歌单上方点「存成模板」。" draw_text.text_style.font_size: 11}
+                    }
+                    for i t in templates {
+                        View{width: Fill height: Fit flow: Right spacing: 6 padding: Inset{top: 6 bottom: 6} align: Align{y: 0.5}
+                            View{width: Fill height: Fit flow: Down spacing: 2
+                                ScText{width: Fill text: t.name draw_text.text_style.font_size: 13}
+                                ScMuted{width: Fill text: tpl_line(t) draw_text.text_style.font_size: 11}
+                            }
+                            Small{text: "改名" on_click: || tpl_rename(i)}
+                            Small{text: "删除" on_click: || tpl_delete(i)}
+                        }
+                    }
+                }}
+            }
+        }
     }
     library := SolidView{visible: false width: Fill height: Fill flow: Down spacing: 10 padding: Inset{left: 14 right: 14 top: 12 bottom: 8} draw_bg.color: ground
         View{width: Fill height: Fit flow: Right align: Align{y: 0.5}

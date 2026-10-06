@@ -266,6 +266,7 @@ fn boot_label(step){
     if step == "labels" { return "确认记录" }
     if step == "encounters" { return "相遇记录" }
     if step == "cards" { return "歌曲卡" }
+    if step == "story_config" { return "故事配置" }
     if step == "card_history" { return "歌曲卡历史" }
     if step == "last" { return "上次的歌单" }
     "收尾"
@@ -363,7 +364,10 @@ fn boot_run(gen, step){
         boot_read(gen, "encounters.json", 20, |x| load_enc(x), "cards")
     } else if step == "cards" {
         song_cards = []
-        boot_read(gen, "cards.json", 5, |x| load_song_card(x), "card_history")
+        boot_read(gen, "cards.json", 5, |x| load_song_card(x), "story_config")
+    } else if step == "story_config" {
+        try { story_config_load() } { story_config = {key: "" model: "" base_url: ""} }
+        boot_next("card_history")
     } else if step == "card_history" {
         card_history = []
         boot_read(gen, "history.json", 10, |x| load_card_history(x), "last")
@@ -1743,7 +1747,7 @@ fn sync_home(){
     ui.list.render()
 }
 
-// ---- 歌曲卡：只读取本机文案和图片；反馈/初听沿用原有入口 ----
+// ---- 歌曲卡：第 3 页按需生成，其他页不请求故事；反馈/初听沿用原有入口 ----
 let song_cards = []
 let card_history = []
 let sc_history_gen = 0
@@ -1763,7 +1767,24 @@ let sc_player_return = false
 
 fn empty_song_card(){
     {k: "" facts: [] reading: "" by: "" credits: "" date: "" where: "" note: ""
+        archive: [] fail: "" at: 0 model: "" done: false raw: nil
         lyrics: "" front: "" user: "" demo: false}
+}
+fn story_fields(){ ["首发" "平台" "作词" "作曲" "编曲" "演唱" "调教" "PV" "曲绘" "其他"] }
+fn story_archive(rows){
+    let out = []
+    for row in rows {
+        let k = pick(row, "k", "")
+        let v = pick(row, "v", "")
+        let src = pick(row, "src", "")
+        let url = pick(row, "url", "")
+        let allowed = false
+        for field in story_fields() { if k == field { allowed = true } }
+        if allowed && v != "" && src != "" && regex("^https?://[^ /]+/").test(url) {
+            out.push({k: k v: v src: src url: url})
+        }
+    }
+    out
 }
 fn load_song_card(row){
     let story = pick(row, "story", nil)
@@ -1774,15 +1795,210 @@ fn load_song_card(row){
         let text = pick(f, "text", "")
         let src = pick(f, "src", "")
         let url = pick(f, "url", "")
-        // 没有出处的条目不呈现为事实。
         if text != "" && src != "" && url != "" { facts.push({text: text src: src url: url}) }
     }
     let k = pick(row, "k", "")
+    let rows = []
+    if archive != nil && archive.to_json().search("[") == 0 { rows = story_archive(archive) }
+    let reading = pick(story, "text", pick(story, "reading", ""))
     if k != "" {
-        song_cards.push({k: k facts: facts reading: pick(story, "reading", "") by: pick(story, "by", "")
+        song_cards.push({k: k facts: facts reading: reading by: pick(story, "by", "")
+            archive: rows fail: pick(story, "fail", "") at: pick(story, "at", 0) model: pick(story, "model", "")
+            done: reading != "" || pick(story, "by", "") == "ai" raw: row
             credits: pick(archive, "credits", "") date: pick(archive, "date", "") where: pick(archive, "where", "") note: pick(archive, "note", "")
             lyrics: pick(row, "lyrics", "") front: pick(covers, "front", "") user: pick(covers, "user", "") demo: pick(row, "sim", false) == true})
     }
+}
+// 配置只来自应用存储，日志不输出请求体、响应体、请求头或凭据。
+let STORY_TIMEOUT_S = 120.0
+let story_config = {key: "" model: "" base_url: ""}
+let story_jobs = []
+let story_seq = 0
+let story_revision = 0
+let story_saved = 0
+let STORY_SYSTEM = "你是一位懂音乐、会讲故事的乐评人。用户会给你一首歌的歌名和歌手（有时还有歌词）。你要先上网查资料，再给这首歌写一段故事。\n\n【第一步：查资料】\n查这首歌的：首发时间和平台；作词、作曲、编曲、演唱、调教、PV、曲绘等署名；这首歌写了什么；它后来出现在哪些舞台、被谁翻唱、在哪里流传；创作者写这首歌前后公开说过的话、经历过的事。\n只记录你真的在网页上看到、能给出网址的信息。\n\n【第二步：写故事】\n- 中文，250–400 字，分 3–5 段。像讲给朋友听，不像写报告。\n- 故事讲的是这首歌：它写了什么、为什么动人、后来去了哪里、和谁产生了联系。可以有画面感，可以下判断，语气要笃定。\n- 具体事实（日期、人名、作者原话、作者经历过的事、哪一场演出、播放量和数字）只能来自你第一步查到并有网址的资料。查不到的就不写，也不要提\"查不到\"。\n- 舞台和演出尤其要小心：没有网址证明的演出，一场都不能写。\n- 不要猜创作者当时的心理和动机，除非他本人公开说过。可以写\"这首歌把……写成了……\"，不能写\"他写这首歌时一定……\"。\n- 不整句引用歌词，最多化用其中两三个词。\n- 禁止这些写法：\n  · 防御性的话：可能、或许、据说、似乎、需要说明的是、由于资料有限、以下内容仅供参考、没有找到\n  · 空泛的煽情：治愈了无数人、甜到心里、泪目、神曲、DNA 动了、满满的回忆、触动了每一个人\n  · 套话开头：在……的时代、说起……就不得不提\n- 如果查到的资料不足以写出一段不靠编造的故事，story 返回空字符串。宁可空着，也不要硬写。\n\n【输出】\n只输出一个 JSON 对象，不要有任何其他文字，不要用代码块包裹：\n{\"archive\":[{\"k\":\"字段名\",\"v\":\"内容\",\"src\":\"来源名称\",\"url\":\"网址\"}],\"story\":\"故事正文，段落之间用\\n分隔\"}\narchive 的字段名只用：首发、平台、作词、作曲、编曲、演唱、调教、PV、曲绘、其他。没有网址的条目不要输出。\n\n下面是一段合格故事的范例，学它的语气，不要照搬内容：\n2013 年 4 月 20 日零点刚过，B 站上多了一首歌。标题只有三个词：I LOVE U。\n那时洛天依还是一个很新的声音。这首歌的作曲、编曲、调教都出自阿良良木健一人，PV 也是他自己做的；苍十三写词，历历路路画了曲绘。几个人把世上最直白的一句话，交给了一个刚出道的虚拟歌手。\n直白有直白的分量。告白最难的从来不是措辞，而是说出口，而一首歌可以替听的人先说出口。\n九年后，阿良良木健写了《I LOVE U TOO》，在简介里把它献给因为《I LOVE U》、因为洛天依而相识相恋的人。那句话在这九年里被很多人借去用过，其中有一些，得到了回应。\n一首歌写下“我爱你”，九年后，它自己收到了一句“我也爱你”。"
+fn story_config_load(){
+    story_config = {key: "" model: "" base_url: ""}
+    let raw = try { fs.read(DATA + "ai.json") } { "" }
+    let conf = try { raw.parse_json() } { nil }
+    let key = pick(conf, "key", "")
+    let base = pick(conf, "base_url", "")
+    let model = pick(conf, "model", "")
+    if key != "" && key.to_json().search("\"") == 0 && model != "" && model.to_json().search("\"") == 0 && (base == "https://api.minimaxi.com/v1" || base == "https://api.minimaxi.com/anthropic") {
+        story_config = {key: key model: model base_url: base}
+    }
+}
+fn story_find(k){
+    for i c in song_cards { if c.k == k { return i } }
+    -1
+}
+fn story_job(k){
+    for j in story_jobs { if j.k == k { return j } }
+    nil
+}
+fn story_refresh(k){
+    if screen == "songcard" && sc_page == 2 && key_of(sc_song()) == k { ui.sc_content.render() }
+}
+fn story_sources(c){
+    let names = []
+    for row in c.archive {
+        let found = false
+        for n in names { if n == row.src { found = true } }
+        if !found { names.push(row.src) }
+    }
+    for f in c.facts {
+        let found = false
+        for n in names { if n == f.src { found = true } }
+        if !found { names.push(f.src) }
+    }
+    join(names, " · ")
+}
+fn story_start(retry){
+    if !booted || screen != "songcard" || sc_page != 2 || story_config.key == "" { return }
+    let song = sc_song()
+    let k = key_of(song)
+    let c = sc_data()
+    let old = story_job(k)
+    // 即使界面超时，传输结束前也不重发同一首；旧回调不会覆盖重试结果。
+    if old != nil && old.wire { return }
+    if c.reading != "" || (c.done && !retry) { return }
+    story_seq = story_seq + 1
+    let job = {k: k id: story_seq active: true wire: true t: song.t a: song.a model: story_config.model lyrics: c.lyrics started: time_now()}
+    if old != nil { story_jobs.retain(|x| x.k != k) }
+    story_jobs.push(job)
+    start_timeout(STORY_TIMEOUT_S, || story_timeout(job))
+    start_timeout(0.01, || story_read_lyrics(job))
+    story_refresh(k)
+}
+fn story_read_lyrics(job){
+    let lyrics = ""
+    if job.lyrics != "" { lyrics = try { fs.read(job.lyrics) } { "" } }
+    start_timeout(0.01, || story_send(job, lyrics))
+}
+fn story_send(job, lyrics){
+    if !job.active { job.wire = false return }
+    let user = "歌名：" + job.t + "\n歌手：" + job.a
+    if lyrics != "" { user = user + "\n歌词（仅供你理解内容，不要整句引用）：\n" + lyrics }
+    let payload = {model: job.model max_tokens: 6000 system: STORY_SYSTEM
+        messages: [{role: "user" content: user}]
+        tools: [{type: "web_search_20250305" name: "web_search"}]}
+    log("story-ai request #" + job.id + " " + job.k)
+    let sent = try {
+        net.http_request(net.HttpRequest{url: "https://api.minimaxi.com/anthropic/v1/messages"
+            method: net.HttpMethod.POST max_response_body_bytes: 1048576
+            headers: {"Content-Type": "application/json" "x-api-key": story_config.key "anthropic-version": "2023-06-01"}
+            body: payload.to_json()}) do net.HttpEvents{
+                on_response: |res| story_response(job, res)
+                on_error: |err| {
+                    job.wire = false
+                    let reason = "network"
+                    for tag in ["connect failed" "write failed" "read failed" "body exceeds" "cancelled"] {
+                        if err.message.search(tag) >= 0 { reason = tag }
+                    }
+                    if job.active { story_finish(job, "", [], reason) }
+                }
+            }
+        true
+    } { false }
+    if !sent { job.wire = false story_finish(job, "", [], "request") }
+}
+fn story_timeout(job){
+    if job.active { story_finish(job, "", [], "timeout") }
+}
+fn story_response(job, res){
+    job.wire = false
+    if !job.active { return }
+    if res.status_code < 200 || res.status_code >= 300 { story_finish(job, "", [], "http_" + res.status_code) return }
+    let parsed = try { story_parse(res.body.to_string()) } { {valid: false text: "" rows: []} }
+    if !parsed.valid { story_finish(job, "", [], "parse_or_search") return }
+    story_finish(job, parsed.text, parsed.rows, "")
+}
+// parse_json 会容忍坏 JSON；逐个字符串规范化后与重新序列化结果比较，拒绝截断和多余文字。
+fn story_json_shape(raw){
+    let out = ""
+    let token = ""
+    let quoted = false
+    let escaped = false
+    for ch in raw.split("") {
+        if ch == "" { continue }
+        if quoted {
+            token = token + ch
+            if escaped { escaped = false }
+            else if ch == "\\" { escaped = true }
+            else if ch == "\"" { out = out + token.parse_json().to_json() token = "" quoted = false }
+        } else if ch == "\"" { quoted = true token = ch }
+        else if ch != " " && ch != "\n" && ch != "\r" && ch != "\t" { out = out + ch }
+    }
+    if quoted { return "" }
+    out
+}
+fn story_parse(raw){
+    let response = raw.parse_json()
+    let last = ""
+    let urls = []
+    let searched = false
+    if pick(response, "stop_reason", "") != "end_turn" { return {valid: false text: "" rows: []} }
+    for block in pick(response, "content", []) {
+        if pick(block, "type", "") == "web_search_tool_result" {
+            for hit in pick(block, "content", []) {
+                let url = pick(hit, "url", "")
+                if url != "" { urls.push(url) searched = true }
+            }
+        }
+        if pick(block, "type", "") == "text" { last = pick(block, "text", "") }
+    }
+    last = last.trim()
+    if last.search("```json") == 0 { last = last.strip_prefix("```json").strip_suffix("```").trim() }
+    else if last.search("```") == 0 { last = last.strip_prefix("```").strip_suffix("```").trim() }
+    let result = last.parse_json()
+    if story_json_shape(last) != story_json_shape(result.to_json()) { return {valid: false text: "" rows: []} }
+    let text = pick(result, "story", nil)
+    let archive = pick(result, "archive", nil)
+    if !searched || text == nil || text.to_json().search("\"") != 0 || archive == nil || archive.to_json().search("[") != 0 {
+        return {valid: false text: "" rows: []}
+    }
+    let rows = []
+    for row in story_archive(archive) {
+        let seen = false
+        for url in urls { if row.url == url { seen = true } }
+        if seen { rows.push(row) }
+    }
+    {valid: true text: text.trim() rows: rows}
+}
+fn story_finish(job, text, rows, fail){
+    if !job.active { return }
+    job.active = false
+    let index = story_find(job.k)
+    if index < 0 {
+        let raw = {k: job.k story: {} archive: [] lyrics: "" covers: {front: "" user: ""}}
+        load_song_card(raw.to_json().parse_json())
+        index = story_find(job.k)
+    }
+    let c = song_cards[index]
+    c.reading = text c.archive = rows c.fail = fail c.by = "ai" c.at = time_now() c.model = job.model c.done = true
+    c.facts = [] c.credits = "" c.date = "" c.where = "" c.note = ""
+    c.raw.story = {text: text by: "ai" at: c.at model: job.model}
+    if fail != "" { c.raw.story = {text: "" by: "ai" fail: fail at: c.at} }
+    c.raw.archive = rows
+    story_revision = story_revision + 1
+    start_timeout(0.01, || story_save_prepare())
+    start_timeout(0.02, || story_refresh(job.k))
+    log("story-ai result #" + job.id + " " + job.k + " " + (if fail == "" "success" else fail) + " elapsed=" + (time_now() - job.started))
+}
+// 网络回调不做文件 I/O；快照序列化和单次写入分别占一个处理函数。
+fn story_save_prepare(){
+    if !booted || story_saved == story_revision { return }
+    let rows = []
+    for c in song_cards { rows.push(c.raw) }
+    let text = rows.to_json()
+    let revision = story_revision
+    start_timeout(1.0, || story_save_prepare())
+    start_timeout(0.01, || story_save_write(revision, text))
+}
+fn story_save_write(revision, text){
+    if revision < story_saved { return }
+    fs.write(DATA + "cards.json", text)
+    story_saved = revision
 }
 fn load_card_history(row){
     card_history.push({picks: pick(row, "picks", []) act: pick(row, "act", "") sim: pick(row, "sim", false) == true})
@@ -1868,7 +2084,7 @@ fn sc_return(){
 }
 fn has_story(i){
     let k = key_of(songs[i])
-    for c in song_cards { if c.k == k { return true } }
+    for c in song_cards { if c.k == k && c.reading != "" { return true } }
     false
 }
 fn song_title(i){ songs[i].t + if songs[i].fb.g > 0 " ♥" else "" }
@@ -1969,6 +2185,7 @@ fn sc_turn(page){
     if next == sc_page { return }
     sc_page = next
     sc_render()
+    if sc_page == 2 { start_timeout(0.01, || story_start(false)) }
 }
 fn sc_swipe(dx, dy){
     if dx < 0 { sc_turn(sc_page + 1) }
@@ -2437,27 +2654,30 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
                         for line in sc_lyric_lines() { ScText{width: Fill text: line} }
                     }
                     if sc_page == 2 {
-                        ScTitle{text: "故事和档案"}
-                        if c.facts.len() == 0 && c.reading == "" { ScText{width: Fill text: "还没有这首歌的故事"} }
-                        if c.facts.len() > 0 {
-                            ScMuted{text: "事实 · 每条附出处" draw_text.color: SC_INK}
-                            for f in c.facts {
-                                RoundedView{width: Fill height: Fit flow: Down spacing: 6 padding: 16 draw_bg.color: SC_CARD draw_bg.border_radius: 16.0
-                                    ScText{width: Fill text: f.text}
-                                    ScMuted{width: Fill text: "出处：" + f.src}
-                                }
-                            }
-                        }
-                        if c.reading != "" {
-                            ScText{width: Fill text: "解读（AI 整理，可能不准）" draw_text.color: SC_INK}
-                            ScMuted{width: Fill text: if c.by == "preset" "预制内容" else if c.by == "ai" "应用内生成" else "生成方式未注明"}
+                        let job = story_job(key_of(sc_song()))
+                        if job != nil && job.active {
+                            ScMuted{width: Fill text: "正在找资料、写这首歌的故事…"}
+                        } else if c.reading != "" {
                             ScText{width: Fill text: c.reading}
+                        } else if story_config.key == "" {
+                            ScText{width: Fill text: "还没有这首歌的故事"}
+                        } else if c.fail != "" {
+                            ScText{width: Fill text: "这次没写成"}
+                            ScButton{text: "重试" on_click: || story_start(true)}
+                        } else if c.done {
+                            ScText{width: Fill text: "这首歌的资料还不够写一个故事"}
+                        } else {
+                            ScText{width: Fill text: "还没有这首歌的故事"}
                         }
-                        if c.credits != "" || c.date != "" || c.where != "" || c.note != "" { ScTitle{text: "歌曲档案"} }
-                        if c.credits != "" { ScText{width: Fill text: c.credits} }
+                        for row in c.archive { ScMuted{width: Fill text: row.k + "　" + row.v} }
+                        // 旧对象档案保持旧的排版，旧事实仍要求来源。
+                        for f in c.facts { ScMuted{width: Fill text: f.text} }
+                        if c.credits != "" { ScMuted{width: Fill text: c.credits} }
                         if c.date != "" { ScMuted{width: Fill text: "首发：" + c.date} }
                         if c.where != "" { ScMuted{width: Fill text: "平台：" + c.where} }
                         if c.note != "" { ScMuted{width: Fill text: c.note} }
+                        let sources = story_sources(c)
+                        if sources != "" { ScMuted{width: Fill max_lines: 1 text_overflow: TextOverflow.Ellipsis text: "来源：" + sources} }
                     }
                     if sc_page == 3 {
                         let e = sc_enc()
@@ -2479,6 +2699,11 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
                         }
                     }
                     View{width: Fill height: 12}
+                }
+                if sc_page == 2 && c.reading != "" {
+                    ScMuted{width: Fill height: 26 align: Align{x: 1.0 y: 0.5}
+                        draw_text.color: #x8FA3BC80 draw_text.text_style.font_size: 11
+                        text: "故事由 AI 根据公开资料写成"}
                 }
             }}
         }

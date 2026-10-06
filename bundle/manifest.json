@@ -21,12 +21,13 @@
   ],
   "id": "context-dj",
   "integrity": {
-    "bundle_blake3": "581951b1454c81c63c75d692b549597784e916991d46754b81f78e848f324a76"
+    "bundle_blake3": "ad5772e49d0aa7ba6ec486de7f7656cff24be10c57ba429141b781ce06889f09"
   },
   "name": "情境 DJ",
   "network": {
     "hosts": [
-      "api.open-meteo.com"
+      "api.open-meteo.com",
+      "api.minimaxi.com"
     ]
   },
   "schema": 1,

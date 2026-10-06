@@ -1,6 +1,6 @@
 # 情境 DJ v0.2 计划书：情境感知 + 按情境选曲
 
-版本：2026-10-05 17:00（北京时间）　负责人：Claude（应用代码）、GPT（本机部署与测试）、Fano（决策与人工步骤）
+版本：2026-10-05 17:00（北京时间）　负责人：Claude（应用代码）、GPT（本机部署与测试）、泛舟（决策与人工步骤）
 
 目标：今天做完"自动情境感知 → 按情境选曲"这条核心链路，并在真实环境里验证；明天专心做 UI。
 初赛只交仓库地址（已登记），所以今天不打 tag，也不提交 App Hub。
@@ -48,11 +48,11 @@
 | 路径 | 负责人 | 说明 |
 |---|---|---|
 | `bundle/**`、`BRIEF.md`、`README.md`、`PRIVACY.md`、`AGENTS.md` | **Claude** | 只有 Claude 改。GPT 改 `bundle/` 会让应用包的摘要和审查结果失效 |
-| `docs/PLAN.md` | Claude | GPT 想改的话，经 Fano 转达 |
+| `docs/PLAN.md` | Claude | GPT 想改的话，经泛舟转达 |
 | `tools/**`、`docs/test-reports/**` | **GPT** | 本机部署和测试脚本、测试报告 |
 
 - Claude 直接推送 `main`。GPT **不推 `main`**：它的脚本推到 `gpt/tools` 分支，报告写在 `<本机工作目录>\evidence\`。
-- 交接方式：GPT 写完 `REPORT.md` → Fano 告诉 Claude 路径 → Claude 读取（需要 Fano 把 `<本机工作目录>` 授权给 Claude）。
+- 交接方式：GPT 写完 `REPORT.md` → 泛舟告诉 Claude 路径 → Claude 读取（需要泛舟把 `<本机工作目录>` 授权给 Claude）。
 
 ---
 
@@ -237,18 +237,18 @@ Ctx = {at: number  hour: int  minute: int  weekday: int(0 = 周日)  slot: strin
 | C4 | 修复 G1 / G2 报告里的问题（最多 2 轮） | — |
 | C5 | 代码和测试结果的对抗性审查 | 写成审查记录 |
 
-### GPT（在 Fano 的电脑上，严格遵守第 1 节）
+### GPT（在泛舟的电脑上，严格遵守第 1 节）
 
 **G0 准备工作区（15 分钟）**
 1. 建好 1.1 节的目录。
 2. 记录 C 盘和 F 盘的剩余空间，以及 WSL 虚拟磁盘 ext4.vhdx 的大小，写入 `evidence\G0-disk\disk.txt`。
 3. 把 `https://github.com/peterdlick-stack/agentic-app` 克隆到 `<本机工作目录>\repo`。
-4. 告诉 Fano：把 `<本机工作目录>` 授权给 Claude。
+4. 告诉泛舟：把 `<本机工作目录>` 授权给 Claude。
 
 **G1 在真实 AI 服务上验证（先用 v0.1 把流程跑通，等 C3 通知后再测 v0.2）**
 1. 判断 WSL 里那套桌面版能不能用 `model.complete`：在 `~/octosense-ws` 下的 OctoSense 源码目录里查是否包含 OctoSense PR #95（`git log --oneline | grep -i "model"`，或者检查 `apps/ai-providers/host-service/src/complete/` 是否存在）。
    - 包含 → 用 WSL 桌面版（已接 MiniMax）。
-   - 不包含 → 下载 Windows 版 `octosense_0.1.0-beta.1_x64-setup.exe` 到 `downloads\`，安装到 `<本机工作目录>\octosense-win\`（安装程序不能选目录的话，先停下问）。在桌面版的 AI 设置里由 **Fano 本人**填 MiniMax 密钥。**密钥不得写进任何文件、日志或截图。**
+   - 不包含 → 下载 Windows 版 `octosense_0.1.0-beta.1_x64-setup.exe` 到 `downloads\`，安装到 `<本机工作目录>\octosense-win\`（安装程序不能选目录的话，先停下问）。在桌面版的 AI 设置里由 **泛舟本人**填 MiniMax 密钥。**密钥不得写进任何文件、日志或截图。**
 2. 按 OctoScript-App-Design-Flow `docs/PUBLISHING.md` §4，用**一次性测试密钥**建本地目录 `<本机工作目录>\mirror`，用 `hub publish` 发布 `repo\bundle`。
 3. 用 `OCTOSENSE_HUB` 和 `OCTOSENSE_HUB_ANCHOR` 指向这个目录启动桌面版，`OCTOSENSE_APP_DATA` 设为 `<本机工作目录>\octosense-data`，在 App Hub 里安装并打开情境 DJ。
 4. 依次跑场景（v0.2 版本）：
@@ -268,7 +268,7 @@ Ctx = {at: number  hour: int  minute: int  weekday: int(0 = 周日)  slot: strin
 4. **只调查、不编译**：Home 里有没有办法装本地应用包（开发者设置、App Studio、导入）。有就记下步骤，没有就写"没有找到"。
 5. 写 `evidence\G2-phone\REPORT.md`。**不要编译 APK，不要往 WSL 里装 Android SDK 或 NDK。**
 
-### Fano
+### 泛舟
 
 - 把这份计划里 G0–G2 的部分交给 GPT。
 - G0 完成后，把 `<本机工作目录>` 授权给 Claude。
@@ -296,7 +296,7 @@ Ctx = {at: number  hour: int  minute: int  weekday: int(0 = 周日)  slot: strin
 
 ## 5. 时间表（10 月 5 日）
 
-| 时间 | Claude | GPT | Fano |
+| 时间 | Claude | GPT | 泛舟 |
 |---|---|---|---|
 | 17:00–17:30 | C1 开始 | G0 | 交任务、授权文件夹 |
 | 17:30–20:30 | C1 → C2 → C3 | G1 第 1–3 步（用 v0.1）、G2 | 填密钥 |
@@ -333,7 +333,7 @@ Ctx = {at: number  hour: int  minute: int  weekday: int(0 = 周日)  slot: strin
 9. **两边同时改同一个文件。** GPT 并行写代码，最可能和我在 `main.splash` 上冲突，还会让应用包摘要失效。→ 按文件划分归属，GPT 不推 `main`。
 10. **"AI 路径通过"的标准太松。** 初稿写的是"没有报错就算通过"。→ 改成：必须看到 AI 真实返回的歌单和 `understood`；"本地规则 · AI 不可用"算失败。
 11. **API 是否真的存在。** `sys.gps` 在系统地图应用（`apps/maps/bundle/main.splash`）中有实际使用，说明 shell 里可用；`cos` 在文档中列出，实现时还要先用 card-host 实测一次再依赖它。
-12. **密钥安全。** MiniMax 密钥只由 Fano 在桌面版的设置界面里填，GPT 不经手、不记录。
+12. **密钥安全。** MiniMax 密钥只由泛舟在桌面版的设置界面里填，GPT 不经手、不记录。
 13. **时间太紧，GPT 可能在手机上耗掉整个晚上。** → G2 限时 90 分钟，只调查、不编译。
 
 **仍未解决的问题**（如实列出）：P40 上 OctoSense 的定位权限是否会弹窗、弹窗是什么样，要等 G2 报告；`hub publish` 做本地发布在 Windows 版桌面上是否被识别，要等 G1 报告。
@@ -420,7 +420,7 @@ AI 定期：总结"你的规律"、建议新模板
 | C9 | 随时 | 按 G1、G2、G3 的报告修复 | — |
 | C10 | 10-10 | 演示数据包（标注清楚）、README、决赛演示脚本 | — |
 
-### GPT（在 Fano 的电脑上，第 1 节的磁盘和目录规则继续有效；**不改 `bundle/`，不推 `main`**）
+### GPT（在泛舟的电脑上，第 1 节的磁盘和目录规则继续有效；**不改 `bundle/`，不推 `main`**）
 
 **G0–G2 照第 3 节继续做。** 说明两点：
 - G1 的 MiniMax 已经配在 WSL 桌面版里（见 `<旧工程目录>\MINIMAX-SETUP-STATUS.txt`）。第 1 步只需要确认这个桌面版**有没有 `model` 服务**，也就是是否包含 OctoSense PR #95，不需要重新配置密钥。
@@ -435,16 +435,16 @@ AI 定期：总结"你的规律"、建议新模板
 每条记录 HTTP 状态码、耗时、返回内容的前 500 个字符，以及第 2、3 条是否返回了 length、release、date 字段。只用 curl，不装任何软件。
 
 **G4 起草平台 issue（30 分钟，只写不提交）**
-写到 `evidence\G4-issue\ISSUE.md`，由 Fano 自己去 `OctoSense-org/makepad` 或 `OctoSense-org/OctoSense` 提交。内容：
+写到 `evidence\G4-issue\ISSUE.md`，由泛舟自己去 `OctoSense-org/makepad` 或 `OctoSense-org/OctoSense` 提交。内容：
 - 请求让脚本应用读取**当前音频输出设备的类型**（扬声器、有线耳机、蓝牙），只读、粗粒度、不含设备地址；
 - 说明用途：情境感知音乐推荐，戴耳机和外放应该推荐不同的歌；
 - 指出平台底层已经有音频设备事件 `Event::AudioDevices`，只是没有开放给脚本；
 - 给出建议的接口，例如 `sys.audio_route()` 返回 `"speaker"|"wired"|"bluetooth"|"unknown"`，以及隐私说明。
 
-**G5 每日使用记录（10-06 起，配合 Fano）**
-每天结束时，把 WSL 或桌面版里情境 DJ 的 `accounts/device/labels.json` 和 `history.json` **复制**一份到 `<本机工作目录>\evidence\G5-usage\<日期>\`（只复制，不改），并统计条数写进 `count.txt`。等 Fano 真正开始用桌面版里的情境 DJ 再开始。
+**G5 每日使用记录（10-06 起，配合泛舟）**
+每天结束时，把 WSL 或桌面版里情境 DJ 的 `accounts/device/labels.json` 和 `history.json` **复制**一份到 `<本机工作目录>\evidence\G5-usage\<日期>\`（只复制，不改），并统计条数写进 `count.txt`。等泛舟真正开始用桌面版里的情境 DJ 再开始。
 
-### Fano
+### 泛舟
 
 - 把这份计划第 10 节里 GPT 的部分（G0–G5）交给 GPT。
 - `<本机工作目录>` 建好后授权给 Claude。
@@ -463,7 +463,7 @@ AI 定期：总结"你的规律"、建议新模板
   - 同一情境下反复点击会放大统计。现在 30 分钟内的同一确认只算一次。
   - 自动采用的推断**不记为标签**，否则模型会自己强化自己；只有用户的点选、手动选择和原话才记。
   - 一键确认显示为"你确认的"，不显示"手动"。
-- **还没做（10-06）**：视觉和布局重做（和 Fano 一起定风格）、模板（C7）、AI 规律总结（C7）。
+- **还没做（10-06）**：视觉和布局重做（和泛舟一起定风格）、模板（C7）、AI 规律总结（C7）。
 
 ## 12. G1–G4 报告处理（2026-10-05 晚）
 
@@ -477,7 +477,7 @@ AI 定期：总结"你的规律"、建议新模板
 | G1 | C 盘空闲减少约 18 GiB，最可能是系统分页文件扩大（内存压力） | 不是应用写入。C 盘目前仍剩约 168 GiB；之后测试注意内存占用 |
 | G2 | Home 和 Bridge 已装到 P40；系统定位回调可用，独立卫星定位未验证；**手机读不到官方 App Hub 目录（Connection reset，访问 raw.githubusercontent.com 被重置）**；本地导入没有入口 | 手机端演示要先解决网络问题；决赛演示以桌面为主 |
 | G3 | MusicBrainz 可达；**Open-Meteo 本轮超时**（G1 时曾成功，说明不稳定） | 天气按可选信号处理（已有降级）；C8 要处理候选歧义：跳过 video 和 live，缺失字段保留为缺失，年份取最早的发行日期 |
-| G4 | issue 草稿完成 | 由 Fano 审阅后提交 |
+| G4 | issue 草稿完成 | 由泛舟审阅后提交 |
 
 ## 13. D4 第一次相遇记录（2026-10-05 晚，`main`）
 
@@ -531,11 +531,11 @@ Claude 在云端 Linux 上自己编译 card-host（Xvfb、`--hidden`），数据
 | T19 | 写 `history.json` 每次都中断，然后推荐 | 歌单照常显示；`last`、`encounters` 照常写入 | 通过 |
 | **T20** | **数据目录放在 `/mnt/f`，冷启动、推荐、重启（GPT-B）** | **能进入正常界面；T11–T13 可以继续跑** | `5463687` 不通过（点活动不进 ②，见 §15.2）；**`cf9cc9b` 通过**：冷启动、真实 AI 歌单、重启都正常，重启时"读取偏好超时"重试 3 次后恢复（10-06，GPT-B） |
 
-**已知限制**：重试只对付偶发的慢。某一个文件的一次读取本身就超过 64 ms 时（例如很大的相遇记录放在很慢的盘上），这一步会一直失败；此时界面会明确显示"读取××超时"，不会再无声地卡住，但仍然进不去。T20 若出现这种情况，要把那个文件拆小，或者 Fano 的桌面版把数据目录改到 WSL ext4（③-补2 已建议）。
+**已知限制**：重试只对付偶发的慢。某一个文件的一次读取本身就超过 64 ms 时（例如很大的相遇记录放在很慢的盘上），这一步会一直失败；此时界面会明确显示"读取××超时"，不会再无声地卡住，但仍然进不去。T20 若出现这种情况，要把那个文件拆小，或者泛舟的桌面版把数据目录改到 WSL ext4（③-补2 已建议）。
 
 ## 15. G12 合并（2026-10-06，`main`）
 
-Fano 10-06 决定 G12 当天合并，由 Claude 执行。G12 由 GPT 在 `demo/unify` 实现（`db1c768`，基于 `dc7f95d`），报告在本机 `<本机工作目录>\demo-iloveu\G12-unify\`。Claude 审查后修了两处，加了 `.gitattributes`，再合并。合并前的 `main` 打了标签 `v0.3.0-pre-unify`（`ef9a4f8`）。
+泛舟 10-06 决定 G12 当天合并，由 Claude 执行。G12 由 GPT 在 `demo/unify` 实现（`db1c768`，基于 `dc7f95d`），报告在本机 `<本机工作目录>\demo-iloveu\G12-unify\`。Claude 审查后修了两处，加了 `.gitattributes`，再合并。合并前的 `main` 打了标签 `v0.3.0-pre-unify`（`ef9a4f8`）。
 
 - **选歌看门狗**：G12 在进入 ③ 时就把 `busy` 设为真并隐藏歌单，只有 `finish()` 会恢复。选歌途中处理函数被中断（慢盘上撞 64 ms 墙钟上限）或模型一直不回，界面就永久停在"正在选歌"，三步卡片全部点不动。现在每次选歌有编号 `rec_gen`，45 秒（`REC_TIMEOUT_S`）没完成就解锁、显示歌单区并提示"这次选歌没有完成……可以再试一次"；之后才到的模型回调直接作废。`add_label` 的写文件挪进单独的处理函数。
 - **重复确认去重**：G12 的 `confirm_act` 自己拼确认列表，丢掉了 `add_label` 的"同一情境桶 30 分钟内同一活动只算一次"。"从头再选一次"后再点同一活动会多记一条，放大规律统计。已恢复。
@@ -568,7 +568,7 @@ GPT-B 在 F 盘慢路径上测 `5463687`（报告在本机 `<本机工作目录>
 | N14 | 启动"确认记录"一步每次都中断，点"不确定" | ① 上没有任何提示，点击无反应 | ① 显示"读取确认记录超时，第 n 次重试"，点击后补"还在读取数据" ✅ |
 | 回归 | N11 去重、N8 替换/撤销、选歌看门狗、♥ 后返回歌单出现心形且 `feedback`、`encounters.liked` 写入 | — | 全部通过 ✅ |
 
-**桌面版验证（GPT-B，10-06 下午，报告在本机 `<本机工作目录>\evidence\2026-10-06\T20-cf9cc9b\`）**：`cf9cc9b` 在 F 盘上 T20 通过（重启时 ① 显示"读取偏好超时，第 1…3 次重试"，之后恢复，看门狗按设计工作）；ext4 上 N4、N8、去重、♥ 返回歌单 / 曲库出现心形、重启恢复都通过。之后 Fano 的日常桌面版升级到 `cf9cc9b`，并放入《I LOVE U》的卡片内容、歌词、封面（不进 git），原有使用记录不变。
+**桌面版验证（GPT-B，10-06 下午，报告在本机 `<本机工作目录>\evidence\2026-10-06\T20-cf9cc9b\`）**：`cf9cc9b` 在 F 盘上 T20 通过（重启时 ① 显示"读取偏好超时，第 1…3 次重试"，之后恢复，看门狗按设计工作）；ext4 上 N4、N8、去重、♥ 返回歌单 / 曲库出现心形、重启恢复都通过。之后泛舟的日常桌面版升级到 `cf9cc9b`，并放入《I LOVE U》的卡片内容、歌词、封面（不进 git），原有使用记录不变。
 
 ### 15.3 选歌超时放宽到 90 秒，版本 0.3.1（2026-10-06 傍晚）
 

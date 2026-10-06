@@ -532,3 +532,26 @@ Claude 在云端 Linux 上自己编译 card-host（Xvfb、`--hidden`），数据
 | **T20** | **数据目录放在 `/mnt/f`，冷启动、推荐、重启（GPT-B）** | **能进入正常界面；T11–T13 可以继续跑** | 待测 |
 
 **已知限制**：重试只对付偶发的慢。某一个文件的一次读取本身就超过 64 ms 时（例如很大的相遇记录放在很慢的盘上），这一步会一直失败；此时界面会明确显示"读取××超时"，不会再无声地卡住，但仍然进不去。T20 若出现这种情况，要把那个文件拆小，或者 Fano 的桌面版把数据目录改到 WSL ext4（③-补2 已建议）。
+
+## 15. G12 合并（2026-10-06，`main`）
+
+Fano 10-06 决定 G12 当天合并，由 Claude 执行。G12 由 GPT 在 `demo/unify` 实现（`db1c768`，基于 `dc7f95d`），报告在本机 `F:\context-dj-work\demo-iloveu\G12-unify\`。Claude 审查后修了两处，加了 `.gitattributes`，再合并。合并前的 `main` 打了标签 `v0.3.0-pre-unify`（`ef9a4f8`）。
+
+- **选歌看门狗**：G12 在进入 ③ 时就把 `busy` 设为真并隐藏歌单，只有 `finish()` 会恢复。选歌途中处理函数被中断（慢盘上撞 64 ms 墙钟上限）或模型一直不回，界面就永久停在"正在选歌"，三步卡片全部点不动。现在每次选歌有编号 `rec_gen`，45 秒（`REC_TIMEOUT_S`）没完成就解锁、显示歌单区并提示"这次选歌没有完成……可以再试一次"；之后才到的模型回调直接作废。`add_label` 的写文件挪进单独的处理函数。
+- **重复确认去重**：G12 的 `confirm_act` 自己拼确认列表，丢掉了 `add_label` 的"同一情境桶 30 分钟内同一活动只算一次"。"从头再选一次"后再点同一活动会多记一条，放大规律统计。已恢复。
+- **换行和戳**：`ef9a4f8` 的 `bundle_blake3` 是在 Windows CRLF 工作区盖的；在 LF 检出（Linux、macOS、GitHub 下载）上 `hub check` 判为 REFUSED（digest 不符）。`287eecf` 没有这个问题。`.gitattributes` 规定 bundle 文本一律 LF，本次按 LF 重新盖戳，合并后的 LF 检出不重新盖戳也 PASSED。
+
+### 15.1 测试（Claude，card-host，Linux + Xvfb 隐藏窗口；A/B 对照 `db1c768`）
+
+| # | 场景 | 期望 | `db1c768` | 合并版 |
+|---|---|---|---|---|
+| N11 | 确认"散步"→ 选歌 →"从头再选一次"→ 再点"散步" | `labels.json` 只有 1 条 | `[walk, walk]` | `[walk]` ✅ |
+| N8 | 回 ① 改点"学习" | 替换本次确认 | `[walk, study]` | `[walk, study]` ✅ |
+| N8b | 再点"学习"撤销 | 恢复 | `[walk]` | `[walk]` ✅ |
+| N7 | "不确定，先按推断继续" | 不新增 | — | `[walk]` ✅ |
+| N12 | 故障注入：`recommend_run` 超指令上限（临时副本，超时改 3 秒） | 不永久卡死，流程可继续 | 卡在"正在选歌"，"从头再选一次"无效 | 3.1 秒后提示并解锁，"从头再选一次"回 ① ✅ |
+| — | card-host 无 model 服务时选歌 | 走"AI 不可用"回退并出歌单 | — | ✅（验证了带编号的模型回调路径） |
+| — | 干净 LF 检出上 `hub check`（不重新盖戳） | PASSED | `ef9a4f8`：REFUSED | PASSED ✅ |
+
+**没测**：真实 MiniMax 下迟到回调被作废（card-host 没有 model 服务）；桌面版复测、F 盘 T20 交给 GPT-B（`F:\context-dj-work\demo-iloveu\CLAUDE-TO-GPT-2026-10-06.md`）。
+

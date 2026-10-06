@@ -1,6 +1,6 @@
 # Context DJ validation tools
 
-Task-specific helpers for PLAN G0–G5 on Fano's Windows + WSL machine. They reuse existing binaries and are pinned to the inspected local paths; they do not bootstrap a new machine or build OctoSense. Reports, captures, downloaded APKs and private credentials are not part of this branch.
+Task-specific helpers for PLAN G0–G5 on 泛舟's Windows + WSL machine. They reuse existing binaries and are pinned to the inspected local paths; they do not bootstrap a new machine or build OctoSense. Reports, captures, downloaded APKs and private credentials are not part of this branch.
 
 All output is under `F:\context-dj-work` (`/mnt/f/context-dj-work` in WSL). Do not edit `bundle/`, push `main`, compile inside WSL, install SDK/NDK, or read credential file contents. Scripts reference existing credential locations only where the native application needs them. Test signing keys are handled only by the existing hub CLI; never inspect them.
 
@@ -51,7 +51,7 @@ No APK compilation or SDK installation. Stop only this task's server, not unrela
 
 ## G5: daily byte-for-byte snapshot
 
-Not before 2026-10-06 (UTC+8), and only after Fano confirms actual usage and the source directory. The G1 test directory has no labels.json and is not proof that G5 can start.
+Not before 2026-10-06 (UTC+8), and only after 泛舟 confirms actual usage and the source directory. The G1 test directory has no labels.json and is not proof that G5 can start.
 
 ```powershell
 python F:\context-dj-work\repo\tools\g5-snapshot.py --source 'F:\PATH-TO-ACTUAL-APP\accounts\device' --real-use-confirmed --check

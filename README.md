@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Hackathon](https://img.shields.io/badge/GOSIM_Agentic_App_黑客松-2026-orange)](https://github.com/gosimfoundation/hackathon-agenticapp26)
 [![Track](https://img.shields.io/badge/场景-音乐-66CCFF)](#对照官方评审口径)
-[![Version](https://img.shields.io/badge/版本-0.3.3-0B1526)](https://github.com/peterdlick-stack/agentic-app/tree/3345814/bundle)
+[![Version](https://img.shields.io/badge/版本-0.3.4-0B1526)](https://github.com/peterdlick-stack/agentic-app/tree/d56da0b/bundle)
 [![Built with](https://img.shields.io/badge/OctoSense-脚本应用-lightgrey)](https://github.com/OctoSense-org/OctoScript-App-Design-Flow)
 
 一个 OctoSense 脚本应用（`bundle/main.splash` 一个文件），GOSIM 智能体应用黑客松 2026 音乐场景参赛作品，队伍 KYBER（成员见[文末](#作者支持与许可)）。
@@ -63,7 +63,7 @@
 - 没有 GPS 信号时，移动状态显示“没有定位”；天气请求失败时显示“不可用 · 不参与”，不参与推荐，其余功能照常。
 - AI 服务不可用时，改用本地规则选歌，并在歌单上方写明原因，以及本地规则从你的话里听懂了什么。
 
-截图和录像里出现的官方封面只用于演示，原图不在仓库里。
+截图和录像里出现的官方封面只用于演示，原图文件不在仓库里。
 
 ## 一次完整的任务
 
@@ -99,7 +99,7 @@
 - **不读相册**。歌曲卡封面背面只能放你自己的照片，目前要手动放进应用存储。
 - **不替你下结论**。AI 的判断和你的确认冲突时，按你的确认来；推测出来的情境明确标“推测”。
 - **不编造歌曲故事**。没有出处的内容不写成事实；找不到创作缘起就写“本次核查没有找到”。
-- **仓库里没有歌词、官方封面和用户照片**（仓库公开，有版权问题）。
+- **仓库里没有歌词、官方封面原图和用户照片**（仓库公开，有版权问题）；演示截图和视频里能看到封面。
 
 **仍需人工处理的步骤**：
 
@@ -266,6 +266,8 @@ curl -s 127.0.0.1:8141/quit           # 退出
 | 项目 | 状态 | 在哪里验证 |
 |---|---|---|
 | 门禁检查 `context-dj 0.3.3 — PASSED` | ✅ | 干净检出 |
+| App Hub 门禁 `hub check`：`context-dj 0.3.4 — PASSED` | ✅ | 云端容器，App Hub `78dfda5` |
+| 商店截图是 0.3.4 当前界面 | ✅ | `card-host`，2026-10-06 |
 | 三步主界面、候选确认与撤销、去重 | ✅ | `card-host` + 桌面版 |
 | 真实 MiniMax：情境判断 + 选歌 + 理由 | ✅ | 桌面版（v0.2 的 5 个场景、彩排 18 次请求、正式录制） |
 | AI 不可用退回本地规则；选歌途中出错不卡死 | ✅ | `card-host`（无 model 服务、故障注入） |
@@ -273,7 +275,7 @@ curl -s 127.0.0.1:8141/quit           # 退出
 | 第一次相遇：只记第一次、模拟记录被替换、不含坐标 | ✅ | `card-host` |
 | 启动看门狗、慢盘启动、故障注入 | ✅ | `card-host` 故障注入 + 桌面版放在 `/mnt/f` |
 | 重启后数据全部保留 | ✅ | `card-host` + 桌面版 |
-| 仓库里没有歌词、封面、照片 | ✅ | `git ls-files` |
+| 仓库里没有歌词、封面原图、照片 | ✅ | `git ls-files` |
 | 桌面上用鼠标横拖翻页 | ❌ 未通过 | 桌面版（远程桥拖动未触发翻页，页码圆点可用） |
 | 真实 MiniMax 下迟到结果被作废 | ⏳ 未验证 | `card-host` 没有 model 服务 |
 | 真机 GPS、触屏滑动、手机上的 AI | ⏳ 未验证 | 还没有把商店应用装到手机上的途径 |
@@ -285,6 +287,8 @@ curl -s 127.0.0.1:8141/quit           # 退出
 
 <details>
 <summary><b>逐轮验证记录（按时间倒序）</b></summary>
+
+**0.3.4（2026-10-06，App Hub 提交版）**：只改 `listing.json` 和商店截图，`main.splash` 与 0.3.3 逐字节相同。6 张商店截图在 `card-host` 里按当前界面重拍（三步卡片、歌单、歌曲卡、相遇页、感知页、曲库）；App Hub `main`（`78dfda5`）的 `hub check` 为 `context-dj 0.3.4 — PASSED`，唯一警告是发布者未签名。
 
 **演示录制与 0.3.1–0.3.3（2026-10-06）**：
 - 0.3.1：选歌超时从 45 秒放宽到 90 秒（彩排 18 次真实 MiniMax 请求里，6 次在 45 秒处被判超时，成功的请求有 41、43 秒才返回的）。
@@ -336,11 +340,12 @@ agentic-app/
 │  ├─ listing.json         商店资料：描述、分类、截图、隐私政策
 │  ├─ AGENT.md             只读应用助手的说明
 │  ├─ assets/icon.svg
-│  └─ screenshots/         商店截图（仍是 0.3.0 之前的旧界面，复赛版本更新）
+│  └─ screenshots/         商店截图（0.3.4，当前界面）
 ├─ docs/
 │  ├─ PLAN.md              设计、接口、阈值和每一轮测试记录
 │  ├─ DEMO-ILOVEU.md       歌曲卡的设计规格、数据格式和验收用例
 │  └─ media/               演示视频和 README 截图
+├─ tools/                  GPT 在作者电脑上做 G0–G5 验证用的脚本（路径写死在作者本机，见 tools/README.md）
 ├─ AGENTS.md               开发约定和实测踩过的坑（CLAUDE.md、GEMINI.md 只是引用它）
 ├─ BRIEF.md                v0.1 的原始需求
 ├─ PRIVACY.md              隐私说明
@@ -358,7 +363,7 @@ agentic-app/
 
 `docs/` 里 G6、G12、T1–T14 这类编号是内部任务和测试用例的编号，定义在 `docs/PLAN.md` 和 `docs/DEMO-ILOVEU.md` 里。
 
-各 Agent 的任务书和测试报告留在作者本机，不放进仓库；仓库里的提交记录保留了每次改动的作者。应用自身的 Agent（选歌、情境判断、只读应用助手）使用平台的 `model` 服务。
+各 Agent 的任务书和测试报告留在作者本机，不放进仓库（`tools/` 只有脚本，不含报告和截图）；仓库里的提交记录保留了每次改动的作者。应用自身的 Agent（选歌、情境判断、只读应用助手）使用平台的 `model` 服务。
 
 ## 作者、支持与许可
 

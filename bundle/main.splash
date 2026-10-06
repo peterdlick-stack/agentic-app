@@ -235,6 +235,7 @@ let boot_seen = -1        // 看门狗上次看到的 boot_tick
 let boot_tries = 0        // 当前这一步重试了几次（换下一步时清零）
 let boot_retries = 0      // 整个启动一共重试了几次，启动完成后显示出来，方便测试核对
 let boot_restored = false
+let boot_hint_suffix = ""  // 启动没完成时点了活动，给 ① 上的提示补一句
 fn boot_next(step){
     boot_step = step
     boot_tries = 0
@@ -282,6 +283,8 @@ fn boot_watch(){
     plan_note = "正在加载…（读取" + boot_label(boot_step) + "超时，第 " + boot_tries + " 次重试）"
     if boot_tries >= 3 { plan_note = plan_note + "\n数据所在的磁盘可能太慢，会一直重试下去" }
     ui.plan.set_text(plan_note)
+    ui.boot_note_text.set_text(plan_note + boot_hint_suffix)
+    ui.boot_note.set_visible(true)
     let gen = boot_gen
     let step = boot_step
     start_timeout(0.01, || boot_run(gen, step))
@@ -430,6 +433,8 @@ fn boot_done(){
         plan_note = plan_note + "（启动时读写超时，重试了 " + boot_retries + " 次）"
     }
     booted = true
+    ui.boot_note_text.set_text(plan_note)
+    ui.boot_note.set_visible(boot_retries > 0)
     if boot_restored { flow_activity = playlist_act ui.intent.set_text(playlist_intent) }
     home_step(if boot_restored 3 else 1)
     sync_home()
@@ -964,15 +969,15 @@ fn undo_flow_label(){
     }
 }
 fn confirm_act(id, how){
-    if !booted || busy { return }
+    if !booted { boot_hint() return }
+    if busy { return }
     if flow_labels_before != nil && prefs.act == id && manual_left() > 0 {
         undo_flow_label()
         prefs.act = ""
         prefs.act_until = 0
         session_act = nil
         flow_activity = ""
-        save_prefs()
-        refresh_views()
+        defer_save_prefs_and_refresh()
         return
     }
     if flow_labels_before == nil { flow_labels_before = labels }
@@ -1001,21 +1006,26 @@ fn confirm_act(id, how){
     prefs.act_how = how
     prefs.act_bucket = bucket_key(b)
     flow_activity = id
-    save_prefs()
-    start_timeout(0.01, || save_labels())
-    refresh_views()
+    // 先跳到 ②，再写文件、重算情境（各占一个处理函数）。F 盘慢路径上同步写 prefs 会吃掉大半 64 ms，
+    // 之后的 sync_context 撞上墙钟上限，跳转就丢了（2026-10-06 T20 实测）
     home_step(2)
+    start_timeout(0.01, || save_labels())
+    defer_save_prefs_and_refresh()
+}
+fn defer_save_prefs_and_refresh(){
+    start_timeout(0.02, || save_prefs())
+    start_timeout(0.03, || refresh_views())
 }
 fn flow_uncertain(){
-    if !booted || busy { return }
+    if !booted { boot_hint() return }
+    if busy { return }
     undo_flow_label()
     prefs.act = ""
     prefs.act_until = 0
     session_act = nil
-    save_prefs()
     flow_activity = infer_activity(nil).id
-    refresh_views()
     home_step(2)
+    defer_save_prefs_and_refresh()
 }
 fn add_label(b, id, top, how){
     // 同一情境桶里 30 分钟内重复确认同一个活动，只算一次（避免反复点击放大统计）
@@ -1509,15 +1519,15 @@ fn feedback(i, v){
     if screen == "songcard" && sc_origin == "library" { feedback_act = "" }
     s.fb.g = clamp(s.fb.g + v, -3, 3)
     if feedback_act != "" { fb_set(s.fb, feedback_act, clamp(fb_get(s.fb, feedback_act) + v, -3, 3)) }
-    save_feedback()
-    // 第二次写文件放进单独的处理函数（③-补2）
-    if v > 0 { start_timeout(0.01, || enc_event_for(i, "liked", feedback_act)) }
+    // 界面先更新，写文件各占一个处理函数（③-补2；10-06 T20：慢盘上同步写会挤掉后面的界面更新）
+    start_timeout(0.01, || save_feedback())
+    if v > 0 { start_timeout(0.02, || enc_event_for(i, "liked", feedback_act)) }
     let where = "总体"
     if feedback_act != "" { where = "「" + act_name(feedback_act) + "」和总体" }
     if v > 0 { ui.plan.set_text("记下了：在" + where + "里更常推荐《" + s.t + "》") }
     else { ui.plan.set_text("记下了：在" + where + "里少推《" + s.t + "》") }
     ui.list.render()
-    ui.lib_list.render()
+    // 曲库列表在 show("library") 时重画，这里不再重画整张 46 行的列表
 }
 
 // ---- 曲库 ----
@@ -2143,8 +2153,17 @@ fn close_player(){
     } else { show("home") }
 }
 
+// ① 上的启动状态：三步卡片里歌单的状态行只在 ③ 显示，启动没读完时点活动会被忽略，
+// 必须让人在 ① 上就看到"还在加载 / 第几次重试"
+fn boot_hint(){
+    boot_hint_suffix = "\n还在读取数据，读完才能选择"
+    ui.boot_note_text.set_text(plan_note + boot_hint_suffix)
+    ui.boot_note.set_visible(true)
+}
 fn boot(){
     plan_note = "正在加载…"
+    ui.boot_note_text.set_text(plan_note)
+    ui.boot_note.set_visible(true)
     sync_home()
     boot_next("dir")
 }
@@ -2219,6 +2238,7 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
         sim_banner := Notice{visible: false ScMuted{width: Fill text: "模拟定位中：移动和地点来自模拟数据" draw_text.color: SC_WARNING}}
         step1 := ScrollYView{width: Fill height: Fill flow: Down spacing: 14
             ScTitle{text: "① 你在做什么"}
+            boot_note := Notice{visible: false boot_note_text := ScMuted{width: Fill text: "" draw_text.color: SC_WARNING}}
             RoundedView{width: Fill height: Fit flow: Down padding: 16 spacing: 6 draw_bg.color: SC_CARD draw_bg.border_radius: 24.0
                 Bar{width: Fill text: "改情境 ›" on_click: || toggle_context()}
                 ctx_time := ScMuted{width: Fill text: ""}

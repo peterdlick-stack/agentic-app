@@ -1,4 +1,4 @@
-// 歌曲卡 A 夜空配色；改方向时只改这组常量。
+// 全应用 A 夜空配色；所有色值集中于此。
 let SC_GROUND = #x0B1526
 let SC_CARD = #x14223A
 let SC_RAISED = #x1C2E4D
@@ -6,6 +6,9 @@ let SC_BORDER = #x2A4366
 let SC_ACCENT = #x66CCFF
 let SC_INK = #xE6F1FA
 let SC_MUTED = #x8FA3BC
+let SC_WARNING = #xE8B04B
+let SC_WARNING_BG = #xE8B04B24
+let SC_CLEAR = #x00000000
 
 // 情境 DJ v0.2：把「此刻的情境 + 一句话意图 + 过去的反馈」变成一组歌，并说明理由。
 // 情境来源只用平台真正开放的：GPS（速度 + 你标记的地点）、设备时钟、Open-Meteo 天气、
@@ -427,6 +430,8 @@ fn boot_done(){
         plan_note = plan_note + "（启动时读写超时，重试了 " + boot_retries + " 次）"
     }
     booted = true
+    if boot_restored { flow_activity = playlist_act ui.intent.set_text(playlist_intent) }
+    home_step(if boot_restored 3 else 1)
     sync_home()
     ui.cities.render()
     start_timeout(0.01, || fetch_weather())
@@ -948,28 +953,57 @@ fn infer_activity(it){
     }
     r
 }
-// 一键确认（PLAN 9.2）：确认后在 90 分钟内按它推荐，并记一条真实标签；再点一次取消
+// 同一次选歌流程中，回到第①步改选会替换本次确认；撤销恢复原列表。
+let flow_labels_before = nil
+let flow_activity = ""
+fn undo_flow_label(){
+    if flow_labels_before != nil {
+        labels = flow_labels_before
+        flow_labels_before = nil
+        start_timeout(0.01, || save_labels())
+    }
+}
 fn confirm_act(id, how){
-    if prefs.act == id && manual_left() > 0 {
+    if !booted || busy { return }
+    if flow_labels_before != nil && prefs.act == id && manual_left() > 0 {
+        undo_flow_label()
         prefs.act = ""
         prefs.act_until = 0
+        session_act = nil
+        flow_activity = ""
         save_prefs()
         refresh_views()
         return
     }
+    if flow_labels_before == nil { flow_labels_before = labels }
     let b = cur_bucket()
     let top = []
-    if last_rank != nil {
-        for k in 3 { if k < last_rank.list.len() { top.push(last_rank.list[k].id) } }
-    }
-    add_label(b, id, top, how)
+    if last_rank != nil { for k in 3 { if k < last_rank.list.len() { top.push(last_rank.list[k].id) } } }
+    let next = []
+    let start = max(0, flow_labels_before.len() - LABEL_MAX + 1)
+    for j x in flow_labels_before { if j >= start { next.push(x) } }
+    next.push({at: time_now() day: b.day slot: b.slot place_kind: b.place motion: b.motion chosen: id top: top how: how})
+    labels = next
     prefs.act = id
     prefs.act_until = time_now() + ACT_TTL
     prefs.act_how = how
     prefs.act_bucket = bucket_key(b)
-    show_all_acts = false
+    flow_activity = id
     save_prefs()
+    start_timeout(0.01, || save_labels())
     refresh_views()
+    home_step(2)
+}
+fn flow_uncertain(){
+    if !booted || busy { return }
+    undo_flow_label()
+    prefs.act = ""
+    prefs.act_until = 0
+    session_act = nil
+    save_prefs()
+    flow_activity = infer_activity(nil).id
+    refresh_views()
+    home_step(2)
 }
 fn add_label(b, id, top, how){
     // 同一情境桶里 30 分钟内重复确认同一个活动，只算一次（避免反复点击放大统计）
@@ -1005,7 +1039,8 @@ fn cand_title(){
     if manual_left() > 0 {
         let verb = "已手动选择"
         if prefs.act_how == "tap" { verb = "已确认" }
-        return verb + "：" + act_name(prefs.act) + "（还剩 " + ceil(manual_left() / 60) + " 分钟，再点一次取消）"
+        if flow_labels_before != nil { return verb + "：" + act_name(prefs.act) + "（再点同一活动可撤销本次确认）" }
+        return verb + "：" + act_name(prefs.act) + "（可重新选择）"
     }
     if last_rank == nil { return "① 你现在在做什么？" }
     let top = last_rank.list[0]
@@ -1108,7 +1143,7 @@ fn parse_intent(raw){
     if has(x, ["专注" "写代码" "看书" "复习" "刷题" "论文"]) {
         it.mood = "专注"
     }
-    if has(x, ["温暖" "治愈" "暖"]) {
+    if has(x, ["温暖" "治愈" "暖" "甜"]) {
         it.mood = "温暖"
     }
     if has(x, ["励志" "振奋" "冲" "加油"]) {
@@ -1123,7 +1158,7 @@ fn parse_intent(raw){
         it.lang = "en"
         it.words.push("英文歌")
     }
-    if has(x, ["换一批" "换一组" "换些" "别的"]) {
+    if has(x, ["换一批" "换一组" "换些" "别的" "没听过"]) {
         it.fresh = true
         it.words.push("换一批")
     }
@@ -1141,7 +1176,7 @@ fn score_song(s, ctx, it){
     if s.en != nil {
         let d = abs(s.en - target)
         sc = sc - d * 1.2
-        if d <= 0.8 && a != nil { why.push("能量" + s.en + "/5 合「" + a.n + "」") }
+        if d <= 0.8 && a != nil { why.push("节奏" + energy_word(s.en) + "，合「" + a.n + "」") }
     } else { sc = sc - 0.9 }
     if s.vo != nil {
         if !s.vo {
@@ -1230,9 +1265,19 @@ fn ctx_text(ctx){
     text
 }
 
-fn recommend(){
+fn recommend(){ choose_requirement(ui.intent.text()) }
+fn choose_requirement(raw){
     if busy || !booted { return }
-    let raw = ui.intent.text()
+    ui.intent.set_text(raw)
+    flow_labels_before = nil
+    busy = true
+    plan_note = "AI 正在理解情境并选歌…"
+    ui.plan.set_text(plan_note)
+    ui.list.set_visible(false)
+    home_step(3)
+    start_timeout(0.03, || recommend_run(raw))
+}
+fn recommend_run(raw){
     let it = parse_intent(raw)
     let ctx = build_ctx(it)
     if ctx.activity.source == "intent" {
@@ -1324,6 +1369,8 @@ fn model_answer(r, raw, it, ctx){
 
 let ai_raw = nil          // 最近一次 AI 返回的原始情境判断，写进历史，便于核对（G1 报告）
 fn finish(picks, how, raw, it, ctx, note){
+    busy = false
+    ui.list.set_visible(true)
     playlist = picks
     playlist_act = ctx.activity.id
     playlist_slot = ctx.slot
@@ -1342,6 +1389,8 @@ fn finish(picks, how, raw, it, ctx, note){
     }
     plan_note = summary
     playlist_intent = ("" + raw).trim()
+    flow_activity = ctx.activity.id
+    home_step(home_page)
     sync_home()
     refresh_views()
     // 写文件放到界面更新之后，每次读写各占一个处理函数：慢盘上一次写超时，只丢这一条记录，
@@ -1401,11 +1450,12 @@ fn enc_seen(ctx, picks){
     if changed { save_encounters() }
 }
 // 初听、心动：按点下去那一刻的情境记；活动用歌单生成时的活动（和反馈一致）
-fn enc_event(i, which){
+fn enc_event(i, which){ enc_event_for(i, which, playlist_act) }
+fn enc_event_for(i, which, event_act){
     if !booted { return }
     let pk = ""
     if here.place != nil { pk = here.place.kind }
-    if enc_mark(key_of(songs[i]), which, enc_moment(playlist_act, pk, motion.state)) { save_encounters() }
+    if enc_mark(key_of(songs[i]), which, enc_moment(event_act, pk, motion.state)) { save_encounters() }
 }
 
 // 历史不存坐标（PLAN 2.7）。读和写分在两个处理函数里
@@ -1423,16 +1473,19 @@ fn log_history(how, raw, ctx, keys, air){
 // ---- F 反馈：总体分 + 歌单生成时那个活动下的分 ----
 fn feedback(i, v){
     let s = songs[i]
+    let feedback_act = playlist_act
+    if screen == "songcard" && sc_origin == "library" { feedback_act = "" }
     s.fb.g = clamp(s.fb.g + v, -3, 3)
-    if playlist_act != "" { fb_set(s.fb, playlist_act, clamp(fb_get(s.fb, playlist_act) + v, -3, 3)) }
+    if feedback_act != "" { fb_set(s.fb, feedback_act, clamp(fb_get(s.fb, feedback_act) + v, -3, 3)) }
     save_feedback()
     // 第二次写文件放进单独的处理函数（③-补2）
-    if v > 0 { start_timeout(0.01, || enc_event(i, "liked")) }
+    if v > 0 { start_timeout(0.01, || enc_event_for(i, "liked", feedback_act)) }
     let where = "总体"
-    if playlist_act != "" { where = "「" + act_name(playlist_act) + "」和总体" }
+    if feedback_act != "" { where = "「" + act_name(feedback_act) + "」和总体" }
     if v > 0 { ui.plan.set_text("记下了：在" + where + "里更常推荐《" + s.t + "》") }
     else { ui.plan.set_text("记下了：在" + where + "里少推《" + s.t + "》") }
     ui.list.render()
+    ui.lib_list.render()
 }
 
 // ---- 曲库 ----
@@ -1508,13 +1561,23 @@ fn fb_text(s){
     if s.fb.g < 0 { parts = "你不太喜欢 " + s.fb.g }
     parts
 }
+fn energy_word(en){
+    if en == 1 { return "安静" }
+    if en == 2 { return "舒缓" }
+    if en == 3 { return "适中" }
+    if en == 4 { return "轻快" }
+    if en == 5 { return "激烈" }
+    "未标注"
+}
 fn tag_line(s){
-    if s.en == nil { return "未标注" }
-    let v = "人声"
-    if !s.vo { v = "纯音乐" }
-    let src = "人工粗标"
-    if s.src == "user_ai" { src = "AI 推断" }
-    "能量" + s.en + " · " + v + " · " + s.md + " · " + src
+    let v = "人声未标注"
+    if s.vo != nil { v = if s.vo "人声" else "纯音乐" }
+    let lang = "语种未标注"
+    if s.lg == "zh" { lang = "中文" }
+    if s.lg == "en" { lang = "英文" }
+    if s.lg == "instr" { lang = "器乐" }
+    if s.lg == "other" { lang = "其他语种" }
+    s.a + " · " + energy_word(s.en) + " · " + v + " · " + lang
 }
 
 // ---- 情境控制 ----
@@ -1643,6 +1706,8 @@ let song_cards = []
 let card_history = []
 let sc_history_gen = 0
 let sc_pos = -1
+let sc_queue = []
+let sc_origin = "home"
 let sc_page = 0
 let sc_back = false
 let sc_gen = 0
@@ -1695,7 +1760,7 @@ fn sc_history_chunk(gen, rows, start){
     if end < rows.len() { start_timeout(0.01, || sc_history_chunk(gen, rows, end)) }
     else if screen == "songcard" && sc_page == 3 { sc_render() }
 }
-fn sc_song(){ songs[playlist[sc_pos].i] }
+fn sc_song(){ songs[sc_queue[sc_pos]] }
 fn sc_data(){
     let k = key_of(sc_song())
     for c in song_cards { if c.k == k { return c } }
@@ -1719,6 +1784,7 @@ fn sc_is_demo(){
     false
 }
 fn sc_context_line(){
+    if sc_origin != "home" { return "" }
     if playlist_slot == "" || act_by_id(playlist_act) == nil { return "" }
     playlist_slot + act_name(playlist_act) + "时为你挑的"
 }
@@ -1737,8 +1803,35 @@ fn sc_cover_path(){
     else if sc_front_exists { return path }
     ""
 }
+fn sc_from_playlist(pos){
+    sc_origin = "home"
+    sc_queue = []
+    for p in playlist { sc_queue.push(p.i) }
+    sc_open(pos)
+}
+fn library_order(){
+    let out = []
+    for i s in songs { if s.src != "seed" { out.push(i) } }
+    for i s in songs { if s.src == "seed" { out.push(i) } }
+    out
+}
+fn sc_from_library(index){
+    sc_origin = "library"
+    sc_queue = library_order()
+    for pos i in sc_queue { if i == index { sc_open(pos) return } }
+}
+fn sc_return(){
+    show(sc_origin)
+    if sc_origin == "home" { home_step(3) }
+}
+fn has_story(i){
+    let k = key_of(songs[i])
+    for c in song_cards { if c.k == k { return true } }
+    false
+}
+fn song_title(i){ songs[i].t + if songs[i].fb.g > 0 " ♥" else "" }
 fn sc_open(pos){
-    if !booted || pos < 0 || pos >= playlist.len() { return }
+    if !booted || pos < 0 || pos >= sc_queue.len() { return }
     sc_pos = pos
     sc_page = 0
     sc_back = false
@@ -1801,7 +1894,7 @@ fn sc_load_image(gen, path){
     ui.sc_image.load_image_from_data_async(bytes)
 }
 fn sc_render(){
-    if sc_pos < 0 || sc_pos >= playlist.len() { return }
+    if sc_pos < 0 || sc_pos >= sc_queue.len() { return }
     sc_gen = sc_gen + 1
     ui.sc_heading.set_text(sc_song().t + " · " + sc_song().a)
     ui.sc_demo.set_visible(sc_is_demo())
@@ -1821,7 +1914,7 @@ fn sc_render(){
     ui.sc_cover_label.set_text(if sc_back "" else if cover == "" "暂无封面" else "官方封面")
     ui.sc_flip_label.set_text(if sc_back "你的照片" else if sc_photo() "轻点翻面" else "")
     ui.sc_dots.render()
-    ui.sc_count.set_text("第 " + (sc_pos + 1) + " 首，共 " + playlist.len() + " 首")
+    ui.sc_count.set_text("第 " + (sc_pos + 1) + " 首，共 " + sc_queue.len() + " 首")
     ui.sc_notice.set_text(sc_notice)
     if sc_page == 0 {
         let gen = sc_gen
@@ -1845,12 +1938,12 @@ fn sc_flip(){
     sc_render()
 }
 fn sc_next(delta){
-    if playlist.len() == 0 { return }
-    sc_open((sc_pos + delta + playlist.len()) % playlist.len())
+    if sc_queue.len() == 0 { return }
+    sc_open((sc_pos + delta + sc_queue.len()) % sc_queue.len())
 }
 fn sc_feedback(v){
     if !booted { return }
-    let i = playlist[sc_pos].i
+    let i = sc_queue[sc_pos]
     feedback(i, v)
     if v < 0 { sc_next(1) }
     else {
@@ -1864,7 +1957,7 @@ fn sc_refresh_enc(){
 }
 fn sc_play(){
     sc_player_return = true
-    play(playlist[sc_pos].i)
+    play(sc_queue[sc_pos])
 }
 fn sc_local_time(at){
     // card-host 默认 UTC，其他宿主可能已设本地偏移；消除该偏移后统一显示 UTC+8。
@@ -1888,7 +1981,7 @@ fn sc_moment_text(m, title){
     if m.city != "" { out.push(m.city) }
     let text = join(out, " · ")
     if m.intent != "" { text = text + "\n你说：" + m.intent }
-    if m.sim { text = text + "\n测试数据" }
+
     text
 }
 fn sc_stats(){
@@ -1935,6 +2028,40 @@ fn sc_lyric_lines(){
     out
 }
 
+// ---- 三步卡片；切换不读取文件、不启动天气或定位 ----
+let REQUIREMENTS = ["甜一点" "安静一点" "带劲一点" "不要人声" "只听中文" "来点没听过的"]
+let home_page = 1
+let context_expanded = false
+fn flow_summary(){
+    let text = act_name(flow_activity)
+    if flow_activity == "" { text = "按情境推断" }
+    if here.place != nil { text = text + " · " + here.place.name }
+    if weather_usable() { text = text + " · " + weather.text + " " + round(weather.temp) + "°C" }
+    text
+}
+fn home_step(page){
+    home_page = page
+    ui.step1.set_visible(page == 1)
+    ui.step2.set_visible(page == 2)
+    ui.step3.set_visible(page == 3)
+    ui.home_back.set_visible(page > 1)
+    ui.home_dots.render()
+    ui.activity_chip.set_text(flow_summary())
+    ui.play_activity.set_text(flow_summary())
+    let raw = ui.intent.text().trim()
+    ui.play_intent.set_text(if raw == "" "没有额外要求" else raw)
+}
+fn flow_restart(){
+    if busy { return }
+    flow_labels_before = nil
+    flow_activity = ""
+    ui.intent.set_text("")
+    home_step(1)
+}
+fn toggle_context(){
+    context_expanded = !context_expanded
+    ui.context_edit.set_visible(context_expanded)
+}
 // ---- 页面切换与播放 ----
 fn show(name){
     screen = name
@@ -1944,6 +2071,7 @@ fn show(name){
     ui.player_pane.set_visible(name == "player")
     ui.song_card.set_visible(name == "songcard")
     if name == "home" {
+        home_step(home_page)
         sync_context()
         sync_home()
     }
@@ -1951,7 +2079,9 @@ fn show(name){
     if name == "library" { ui.lib_list.render() }
 }
 fn play(i){
-    start_timeout(0.01, || enc_event(i, "heard"))
+    let event_act = playlist_act
+    if screen == "songcard" && sc_origin == "library" { event_act = "" }
+    start_timeout(0.01, || enc_event_for(i, "heard", event_act))
     playing = songs[i]
     ui.player_title.set_text(playing.t + " — " + playing.a)
     ui.player_fail.set_text("")
@@ -1974,7 +2104,7 @@ fn pick_source(i){
 fn close_player(){
     ui.reader.close()
     playing = nil
-    if sc_player_return && sc_pos >= 0 && sc_pos < playlist.len() {
+    if sc_player_return && sc_pos >= 0 && sc_pos < sc_queue.len() {
         sc_player_return = false
         show("songcard")
         sc_render()
@@ -1992,36 +2122,36 @@ start_interval(BOOT_STALL_S, || boot_watch())
 start_interval(GPS_POLL_S, || gps_poll())
 
 // ---- 外观 ----
-let ground = #x14161a
-let card = #x1f232a
-let raised = #x2a2f38
-let ink = #xf2f2f2
-let secondary = #x9aa3ad
-let accent = #xffb02e
-let good = #x3ddc84
-let bad = #xff6b6b
+let ground = SC_GROUND
+let card = SC_CARD
+let raised = SC_RAISED
+let ink = SC_INK
+let secondary = SC_MUTED
+let accent = SC_ACCENT
+let good = SC_INK
+let bad = SC_INK
 
-let Chip = ButtonFlat{height: 32 padding: Inset{left: 12 right: 12}
-    draw_bg +: {border_radius: 16.0 color: raised color_hover: #x353b46 color_down: #x404753 border_size: 0.0}
+let Chip = ButtonFlat{height: 44 padding: Inset{left: 12 right: 12}
+    draw_bg +: {border_radius: 16.0 color: raised color_hover: SC_BORDER color_down: SC_BORDER border_size: 0.0}
     draw_text +: {color: ink color_hover: ink color_down: ink text_style +: {font_size: 13}}
 }
 let ChipOn = Chip{
-    draw_bg +: {color: accent color_hover: #xffc05a color_down: #xe09a20}
-    draw_text +: {color: #x14161a color_hover: #x14161a color_down: #x14161a}
+    draw_bg +: {color: accent color_hover: SC_ACCENT color_down: SC_ACCENT}
+    draw_text +: {color: SC_GROUND color_hover: SC_GROUND color_down: SC_GROUND}
 }
-let Small = ButtonFlat{height: 30 padding: Inset{left: 10 right: 10}
-    draw_bg +: {border_radius: 8.0 color: raised color_hover: #x353b46 color_down: #x404753 border_size: 0.0}
+let Small = ButtonFlat{height: 44 padding: Inset{left: 10 right: 10}
+    draw_bg +: {border_radius: 22.0 color: raised color_hover: SC_BORDER color_down: SC_BORDER border_size: 0.0}
     draw_text +: {color: ink color_hover: ink color_down: ink text_style +: {font_size: 12}}
 }
-let Primary = ButtonFlat{height: 40 padding: Inset{left: 18 right: 18}
-    draw_bg +: {border_radius: 20.0 color: accent color_hover: #xffc05a color_down: #xe09a20 border_size: 0.0}
-    draw_text +: {color: #x14161a color_hover: #x14161a color_down: #x14161a text_style +: {font_size: 14}}
+let Primary = ButtonFlat{height: 44 padding: Inset{left: 18 right: 18}
+    draw_bg +: {border_radius: 22.0 color: accent color_hover: SC_ACCENT color_down: SC_ACCENT border_size: 0.0}
+    draw_text +: {color: SC_GROUND color_hover: SC_GROUND color_down: SC_GROUND text_style +: {font_size: 14}}
 }
-let Bar = ButtonFlat{height: 36 padding: Inset{left: 10 right: 10}
-    draw_bg +: {color: #x00000000 color_hover: #xffffff14 color_down: #xffffff24 border_size: 0.0}
+let Bar = ButtonFlat{height: 44 padding: Inset{left: 10 right: 10}
+    draw_bg +: {color: SC_CLEAR color_hover: SC_RAISED color_down: SC_BORDER border_size: 0.0}
     draw_text +: {color: accent color_hover: accent color_down: accent text_style +: {font_size: 14}}
 }
-let Field = TextInput{width: Fill height: 40
+let Field = TextInput{width: Fill height: 44
     draw_bg +: {color: raised color_hover: raised color_focus: raised color_empty: raised border_radius: 10.0}
     draw_text +: {color: ink color_hover: ink color_focus: ink color_empty: secondary color_empty_hover: secondary}
 }
@@ -2039,104 +2169,101 @@ let ScPrimary = ScButton{
     draw_text +: {color: SC_GROUND color_hover: SC_GROUND color_down: SC_GROUND text_style +: {font_size: 14}}
 }
 
+let Notice = RoundedView{width: Fill height: Fit flow: Down padding: 8 draw_bg.color: SC_WARNING_BG draw_bg.border_radius: 16.0}
+let Activity = Chip{width: Fill height: 52 draw_bg.border_radius: 16.0 draw_text.text_style.font_size: 14}
+let ActivityTop = Activity{draw_bg +: {border_size: 1.0 border_color: SC_ACCENT}}
+
 SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
-    home := SolidView{width: Fill height: Fill flow: Down spacing: 8 padding: Inset{left: 14 right: 14 top: 10 bottom: 8} draw_bg.color: ground
-        View{width: Fill height: Fit flow: Right align: Align{y: 0.5}
-            Label{width: Fill text: "情境 DJ" draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 24}}
+    home := SolidView{width: Fill height: Fill flow: Down spacing: 12 padding: 16 draw_bg.color: SC_GROUND
+        View{width: Fill height: 52 flow: Right spacing: 8 align: Align{y: 0.5}
+            home_back := Bar{visible: false width: 44 text: "‹" on_click: || home_step(home_page - 1)}
+            Label{width: Fill text: "情境 DJ" draw_text.color: SC_INK draw_text.text_style: theme.font_bold{font_size: 24}}
             Bar{text: "感知" on_click: || show("sense")}
             Bar{text: "曲库" on_click: || show("library")}
         }
-        sim_banner := Label{visible: false width: Fill text: "模拟定位中：移动和地点来自模拟数据，不是真实感知" draw_text.color: accent draw_text.text_style.font_size: 12}
-        RoundedView{width: Fill height: Fit flow: Down spacing: 5 padding: 12 draw_bg.color: card draw_bg.border_radius: 12.0
-            Label{text: "此刻的情境（都可以改）" draw_text.color: accent draw_text.text_style: theme.font_bold{font_size: 13}}
-            View{width: Fill height: Fit flow: Right spacing: 8
-                Label{width: 40 text: "时段" draw_text.color: secondary draw_text.text_style.font_size: 12}
-                ctx_time := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style.font_size: 13}
-            }
-            View{width: Fill height: Fit flow: Right spacing: 8
-                Label{width: 40 text: "天气" draw_text.color: secondary draw_text.text_style.font_size: 12}
-                ctx_weather := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style.font_size: 13}
-            }
-            View{width: Fill height: Fit flow: Right spacing: 8
-                Label{width: 40 text: "移动" draw_text.color: secondary draw_text.text_style.font_size: 12}
-                ctx_motion := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style.font_size: 13}
-            }
-            View{width: Fill height: Fit flow: Right spacing: 8
-                Label{width: 40 text: "地点" draw_text.color: secondary draw_text.text_style.font_size: 12}
-                ctx_place := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style.font_size: 13}
-            }
-            View{width: Fill height: Fit flow: Right spacing: 8
-                Label{width: 40 text: "活动" draw_text.color: secondary draw_text.text_style.font_size: 12}
-                ctx_act := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 13}}
-            }
-            ctx_why := Label{width: Fill text: "" draw_text.color: secondary draw_text.text_style.font_size: 11}
-            cand_title := Label{width: Fill text: "" draw_text.color: accent draw_text.text_style.font_size: 12}
-            cands := View{width: Fill height: Fit flow: Down spacing: 6
-                on_render: || {
-                    View{width: Fill height: Fit flow: Right spacing: 6
-                        for c in cand_top3() {
-                            if prefs.act == c.id && manual_left() > 0 { ChipOn{text: act_name(c.id) + " " + pct(c.p) on_click: || confirm_act(c.id, "tap")} }
-                            else { Chip{text: act_name(c.id) + " " + pct(c.p) on_click: || confirm_act(c.id, "tap")} }
+        home_dots := View{width: Fill height: 24 flow: Right spacing: 8 align: Align{x: 0.5 y: 0.5} on_render: || {
+            for n in 3 { RoundedView{width: if n + 1 == home_page 20 else 8 height: 8 draw_bg.color: if n + 1 == home_page SC_ACCENT else SC_BORDER draw_bg.border_radius: 4.0} }
+        }}
+        sim_banner := Notice{visible: false ScMuted{width: Fill text: "模拟定位中：移动和地点来自模拟数据" draw_text.color: SC_WARNING}}
+        step1 := ScrollYView{width: Fill height: Fill flow: Down spacing: 14
+            ScTitle{text: "① 你在做什么"}
+            RoundedView{width: Fill height: Fit flow: Down padding: 16 spacing: 6 draw_bg.color: SC_CARD draw_bg.border_radius: 24.0
+                Bar{width: Fill text: "改情境 ›" on_click: || toggle_context()}
+                ctx_time := ScMuted{width: Fill text: ""}
+                ctx_weather := ScMuted{width: Fill text: ""}
+                ctx_motion := ScMuted{width: Fill text: ""}
+                ctx_place := ScMuted{width: Fill text: ""}
+                context_edit := View{visible: false width: Fill height: Fit flow: Down spacing: 8
+                    toggles := View{width: Fill height: 50 flow: Right spacing: 6 on_render: || {
+                        if prefs.use_gps { ChipOn{text: "用定位" on_click: || toggle_gps()} } else { Chip{text: "用定位" on_click: || toggle_gps()} }
+                        if prefs.use_time { ChipOn{text: "用时段" on_click: || toggle_time()} } else { Chip{text: "用时段" on_click: || toggle_time()} }
+                        if prefs.use_weather { ChipOn{text: "用天气" on_click: || toggle_weather()} } else { Chip{text: "用天气" on_click: || toggle_weather()} }
+                    }}
+                    cities := ScrollXView{width: Fill height: 50 flow: Right spacing: 6 on_render: || {
+                        for i c in CITIES {
+                            if prefs.city == i { ChipOn{text: c.n on_click: || set_city(i)} } else { Chip{text: c.n on_click: || set_city(i)} }
                         }
-                        if show_all_acts { Chip{text: "收起" on_click: || toggle_all_acts()} }
-                        else { Chip{text: "其他" on_click: || toggle_all_acts()} }
-                    }
-                    if show_all_acts {
-                        ScrollXView{width: Fill height: 38 flow: Right spacing: 6
-                            for a in ACTS {
-                                if prefs.act == a.id && manual_left() > 0 { ChipOn{text: a.n on_click: || confirm_act(a.id, "manual")} }
-                                else { Chip{text: a.n on_click: || confirm_act(a.id, "manual")} }
-                            }
+                    }}
+                }
+            }
+            ScText{width: Fill text: "你现在在做什么？"}
+            ctx_act := ScMuted{width: Fill text: ""}
+            cand_title := ScMuted{width: Fill text: ""}
+            cands := View{width: Fill height: Fit flow: Down spacing: 8 on_render: || {
+                for r in 4 {
+                    View{width: Fill height: 52 flow: Right spacing: 8
+                        for col in 2 {
+                            let j = r * 2 + col
+                            if j < ACTS.len() {
+                                let a = ACTS[j]
+                                if prefs.act == a.id && manual_left() > 0 {
+                                    Activity{ text: a.n draw_bg.color: SC_ACCENT draw_bg.color_hover: SC_ACCENT draw_bg.color_down: SC_ACCENT draw_text.color: SC_GROUND draw_text.color_hover: SC_GROUND draw_text.color_down: SC_GROUND on_click: || confirm_act(a.id, "tap") }
+                                } else if last_rank != nil && last_rank.list[0].id == a.id {
+                                    ActivityTop{text: a.n on_click: || confirm_act(a.id, "tap")}
+                                } else { Activity{text: a.n on_click: || confirm_act(a.id, "tap")} }
+                            } else { View{width: Fill height: 52} }
                         }
                     }
                 }
-            }
-            toggles := View{width: Fill height: Fit flow: Right spacing: 6
-                on_render: || {
-                    if prefs.use_gps { ChipOn{text: "用定位" on_click: || toggle_gps()} }
-                    else { Chip{text: "用定位" on_click: || toggle_gps()} }
-                    if prefs.use_time { ChipOn{text: "用时段" on_click: || toggle_time()} }
-                    else { Chip{text: "用时段" on_click: || toggle_time()} }
-                    if prefs.use_weather { ChipOn{text: "用天气" on_click: || toggle_weather()} }
-                    else { Chip{text: "用天气" on_click: || toggle_weather()} }
-                }
-            }
-            cities := ScrollXView{width: Fill height: 36 flow: Right spacing: 6
-                on_render: || {
-                    for i c in CITIES {
-                        if prefs.city == i { ChipOn{text: c.n on_click: || set_city(i)} }
-                        else { Chip{text: c.n on_click: || set_city(i)} }
+            }}
+            ctx_why := ScMuted{width: Fill text: ""}
+            Bar{width: Fill text: "不确定，先按推断继续 →" on_click: || flow_uncertain()}
+        }
+        step2 := ScrollYView{visible: false width: Fill height: Fill flow: Down spacing: 16
+            activity_chip := Chip{width: Fill text: "" on_click: || home_step(1)}
+            ScTitle{text: "② 有什么要求"}
+            ScText{width: Fill text: "还有什么要求吗？"}
+            View{width: Fill height: Fit flow: Down spacing: 10
+                for row in 3 {
+                    View{width: Fill height: 48 flow: Right spacing: 8
+                        for col in 2 { let req = REQUIREMENTS[row * 2 + col] Chip{width: Fill height: 48 text: req on_click: || choose_requirement(req)} }
                     }
                 }
             }
+            intent := Field{empty_text: "也可以自己写一句" on_return: |text| recommend()}
+            Primary{width: Fill text: "选歌" on_click: || recommend()}
+            Bar{width: Fill text: "没有要求，直接选" on_click: || choose_requirement("")}
         }
-        View{width: Fill height: Fit flow: Right spacing: 8 align: Align{y: 0.5}
-            intent := Field{empty_text: "② 补充要求（可留空）：例 不要人声" on_return: |text| recommend()}
-            Primary{text: "下一步" on_click: || recommend()}
-        }
-        plan := Label{width: Fill text: "" draw_text.color: secondary draw_text.text_style.font_size: 12}
-        list := ScrollYView{width: Fill height: Fill flow: Down spacing: 8
-            on_render: || {
-                if playlist.len() == 0 {
-                    View{width: Fill height: 120 align: Align{x: 0.5 y: 0.5}
-                        Label{width: Fill align: Align{x: 0.5} text: "① 确认情境 → ② 写要求（可留空）→ 点「下一步」" draw_text.color: secondary draw_text.text_style.font_size: 13}
-                    }
-                }
+        step3 := View{visible: false width: Fill height: Fill flow: Down spacing: 12
+            ScTitle{text: "③ 歌单"}
+            play_activity := Chip{width: Fill text: "" on_click: || home_step(1)}
+            play_intent := Chip{width: Fill text: "" on_click: || home_step(2)}
+            plan := ScMuted{width: Fill text: ""}
+            list := ScrollYView{width: Fill height: Fill flow: Down spacing: 10 on_render: || {
+                if playlist.len() == 0 { ScMuted{width: Fill text: "还没有歌单"} }
                 for n p in playlist {
-                    RoundedView{width: Fill height: Fit flow: Down spacing: 6 padding: 12 draw_bg.color: card draw_bg.border_radius: 10.0
-                        GestureView{width: Fill height: 44 align: Align{y: 0.5} on_tap: |x, y| sc_open(n)
-                            Label{width: Fill text: "" + (n + 1) + ". " + songs[p.i].t + " — " + songs[p.i].a draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 14}}
+                    RoundedView{width: Fill height: Fit flow: Right padding: 16 spacing: 8 draw_bg.color: SC_CARD draw_bg.border_radius: 24.0
+                        GestureView{width: Fill height: Fit flow: Down spacing: 6 on_tap: |x, y| sc_from_playlist(n)
+                            ScText{width: Fill height: 44 text: "" + (n + 1) + ". " + song_title(p.i) + " ›"}
+                            ScMuted{width: Fill text: songs[p.i].a}
+                            ScMuted{width: Fill text: p.why}
+                            ScMuted{width: Fill text: fb_text(songs[p.i])}
                         }
-                        Label{width: Fill text: p.why draw_text.color: secondary draw_text.text_style.font_size: 12}
-                        View{width: Fill height: Fit flow: Right spacing: 8
-                            Label{width: Fill text: fb_text(songs[p.i]) draw_text.color: accent draw_text.text_style.font_size: 11}
-                            Small{text: "喜欢" on_click: || feedback(p.i, 1)}
-                            Small{text: "不喜欢" on_click: || feedback(p.i, -1)}
-                            Small{text: "去听" on_click: || play(p.i)}
-                        }
+                        Small{text: "去听" on_click: || play(p.i)}
                     }
                 }
-            }
+            }}
+            Bar{width: Fill text: "从头再选一次" on_click: || flow_restart()}
         }
     }
     sense := SolidView{visible: false width: Fill height: Fill flow: Down spacing: 10 padding: Inset{left: 14 right: 14 top: 12 bottom: 8} draw_bg.color: ground
@@ -2144,17 +2271,17 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
             Bar{text: "‹ 返回" on_click: || show("home")}
             Label{width: Fill text: "感知" draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 20}}
         }
-        sense_banner := Label{visible: false width: Fill text: "模拟定位中：下面的数据是模拟的，不是真实感知" draw_text.color: accent draw_text.text_style.font_size: 12}
-        RoundedView{width: Fill height: Fit flow: Down spacing: 6 padding: 12 draw_bg.color: card draw_bg.border_radius: 12.0
-            Label{text: "移动状态（GPS 每 10 秒采样一次）" draw_text.color: accent draw_text.text_style: theme.font_bold{font_size: 13}}
+        sense_banner := Notice{visible: false ScMuted{width: Fill text: "模拟定位中：下面的数据是模拟的，不是真实感知" draw_text.color: SC_WARNING}}
+        RoundedView{width: Fill height: Fit flow: Down spacing: 6 padding: 12 draw_bg.color: card draw_bg.border_radius: 24.0
+            Label{text: "移动状态（GPS 每 10 秒采样一次）" draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 13}}
             sense_motion := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 14}}
             sense_note := Label{width: Fill text: "" draw_text.color: secondary draw_text.text_style.font_size: 11}
             sense_here := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style.font_size: 13}
             Label{text: "最近的定位点（只在内存里，不保存）" draw_text.color: secondary draw_text.text_style.font_size: 11}
             sense_fixes := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style.font_size: 11}
         }
-        RoundedView{width: Fill height: Fit flow: Down spacing: 6 padding: 12 draw_bg.color: card draw_bg.border_radius: 12.0
-            Label{text: "把当前位置标记为" draw_text.color: accent draw_text.text_style: theme.font_bold{font_size: 13}}
+        RoundedView{width: Fill height: Fit flow: Down spacing: 6 padding: 12 draw_bg.color: card draw_bg.border_radius: 24.0
+            Label{text: "把当前位置标记为" draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 13}}
             kinds := View{width: Fill height: Fit flow: Right spacing: 6
                 on_render: || {
                     for x in PLACE_KINDS { Chip{text: x.n on_click: || mark_place(x.k)} }
@@ -2174,8 +2301,8 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
                 }
             }
         }
-        RoundedView{width: Fill height: Fit flow: Down spacing: 6 padding: 12 draw_bg.color: card draw_bg.border_radius: 12.0
-            Label{text: "模拟定位（测试和演示用，重启后自动关闭）" draw_text.color: accent draw_text.text_style: theme.font_bold{font_size: 13}}
+        RoundedView{width: Fill height: Fit flow: Down spacing: 6 padding: 12 draw_bg.color: card draw_bg.border_radius: 24.0
+            Label{text: "模拟定位（测试和演示用，重启后自动关闭）" draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 13}}
             sims := View{width: Fill height: Fit flow: Right spacing: 6
                 on_render: || {
                     for x in SIMS {
@@ -2197,39 +2324,28 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
             new_song := Field{empty_text: "歌名 - 歌手" on_return: |text| add_song()}
             Primary{text: "添加" on_click: || add_song()}
         }
-        lib_status := Label{width: Fill text: "内置 46 首为人工粗标注；你添加的歌可删除" draw_text.color: secondary draw_text.text_style.font_size: 12}
-        lib_list := ScrollYView{width: Fill height: Fill flow: Down spacing: 0
-            on_render: || {
-                for i s in songs {
-                    if s.src != "seed" {
-                        View{width: Fill height: Fit flow: Right spacing: 8 padding: Inset{top: 8 bottom: 8} align: Align{y: 0.5}
-                            View{width: Fill height: Fit flow: Down spacing: 2
-                                Label{width: Fill text: s.t + " — " + s.a draw_text.color: ink draw_text.text_style.font_size: 13}
-                                Label{width: Fill text: "你添加的 · " + tag_line(s) draw_text.color: accent draw_text.text_style.font_size: 11}
-                            }
-                            Small{text: "删除" on_click: || remove_song(i)}
-                        }
-                        SolidView{width: Fill height: 1 draw_bg.color: raised}
+        lib_status := Label{width: Fill text: "每首歌都可以打开歌曲卡 · 标签为人工粗标或 AI 推断" draw_text.color: secondary draw_text.text_style.font_size: 12}
+        lib_list := ScrollYView{width: Fill height: Fill flow: Down spacing: 10 on_render: || {
+            for i in library_order() {
+                let s = songs[i]
+                RoundedView{width: Fill height: Fit flow: Right padding: 16 spacing: 8 draw_bg.color: SC_CARD draw_bg.border_radius: 24.0
+                    GestureView{width: Fill height: Fit flow: Down spacing: 6 on_tap: |x, y| sc_from_library(i)
+                        ScText{width: Fill height: 44 text: song_title(i) + " ›"}
+                        ScMuted{width: Fill text: tag_line(s)}
+                        if has_story(i) { ScMuted{width: Fill text: "有故事"} }
+                        if s.src == "user_ai" { ScMuted{text: "AI 推断标签"} }
                     }
-                }
-                for s in songs {
-                    if s.src == "seed" {
-                        View{width: Fill height: Fit flow: Down spacing: 2 padding: Inset{top: 8 bottom: 8}
-                            Label{width: Fill text: s.t + " — " + s.a draw_text.color: ink draw_text.text_style.font_size: 13}
-                            Label{width: Fill text: tag_line(s) draw_text.color: secondary draw_text.text_style.font_size: 11}
-                        }
-                        SolidView{width: Fill height: 1 draw_bg.color: raised}
-                    }
+                    if s.src != "seed" { Small{text: "删除" on_click: || remove_song(i)} }
                 }
             }
-        }
+        }}
     }
     song_card := SolidView{visible: false width: Fill height: Fill flow: Down padding: 16 spacing: 8 draw_bg.color: SC_GROUND
         View{width: Fill height: 50 flow: Right spacing: 8 align: Align{y: 0.5}
-            ScButton{width: 64 text: "‹ 歌单" on_click: || show("home")}
+            ScButton{width: 64 text: "‹" on_click: || sc_return()}
             sc_heading := ScMuted{width: Fill text: ""}
         }
-        sc_demo := ScMuted{visible: false width: Fill text: "演示数据 · 含测试记录" draw_text.color: SC_ACCENT}
+        sc_demo := Notice{visible: false width: Fill ScMuted{width: Fill text: "演示数据 · 含测试记录" draw_text.color: SC_WARNING}}
         sc_gesture := GestureView{width: Fill height: Fill flow: Down on_swipe: |dx, dy| sc_swipe(dx, dy)
             sc_front := View{width: Fill height: Fill flow: Down spacing: 14
                 cover_tap := GestureView{width: Fill height: 350 on_tap: |x, y| sc_flip() on_swipe: |dx, dy| sc_swipe(dx, dy)
@@ -2272,7 +2388,7 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
                         ScTitle{text: "故事和档案"}
                         if c.facts.len() == 0 && c.reading == "" { ScText{width: Fill text: "还没有这首歌的故事"} }
                         if c.facts.len() > 0 {
-                            ScMuted{text: "事实 · 每条附出处" draw_text.color: SC_ACCENT}
+                            ScMuted{text: "事实 · 每条附出处" draw_text.color: SC_INK}
                             for f in c.facts {
                                 RoundedView{width: Fill height: Fit flow: Down spacing: 6 padding: 16 draw_bg.color: SC_CARD draw_bg.border_radius: 16.0
                                     ScText{width: Fill text: f.text}
@@ -2281,7 +2397,7 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
                             }
                         }
                         if c.reading != "" {
-                            ScText{width: Fill text: "解读（AI 整理，可能不准）" draw_text.color: SC_ACCENT}
+                            ScText{width: Fill text: "解读（AI 整理，可能不准）" draw_text.color: SC_INK}
                             ScMuted{width: Fill text: if c.by == "preset" "预制内容" else if c.by == "ai" "应用内生成" else "生成方式未注明"}
                             ScText{width: Fill text: c.reading}
                         }
@@ -2298,14 +2414,15 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
                             ScText{width: Fill text: "你们还没有正式见过面"}
                         }
                         if e.seen != nil || e.heard != nil || e.liked != nil {
-                            let moments = [{title: "初见" m: e.seen} {title: "初听" m: e.heard} {title: "心动" m: e.liked}]
+                            let moments = [{title: "初见" m: e.seen} {title: "第一次去听" m: e.heard} {title: "心动" m: e.liked}]
                             for row in moments {
                                 RoundedView{width: Fill height: Fit flow: Down padding: 16 spacing: 8 draw_bg.color: SC_CARD draw_bg.border_radius: 16.0
-                                    ScText{width: Fill text: row.title + "  ·  " + sc_date(row.m) draw_text.color: SC_ACCENT}
+                                    ScText{width: Fill text: row.title + "  ·  " + sc_date(row.m) draw_text.color: SC_INK}
                                     ScText{width: Fill text: sc_moment_text(row.m, row.title)}
+                                    if row.m != nil && row.m.sim { Notice{ScMuted{width: Fill text: "测试数据" draw_text.color: SC_WARNING}} }
                                 }
                             }
-                            ScText{width: Fill text: "相遇统计" draw_text.color: SC_ACCENT}
+                            ScText{width: Fill text: "相遇统计" draw_text.color: SC_INK}
                             ScMuted{width: Fill text: sc_stats()}
                         }
                     }

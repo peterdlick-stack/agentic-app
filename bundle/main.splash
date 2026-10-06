@@ -1292,7 +1292,8 @@ fn recommend(){ choose_requirement(ui.intent.text()) }
 // 选歌看门狗：选歌途中处理函数被中断（慢盘上撞墙钟上限）或模型一直不回，
 // busy 会一直为真、歌单一直隐藏、三步卡片全部点不动。超时后解锁并提示重试；
 // rec_gen 让超时之后才到的模型回调直接作废，不会覆盖用户之后的操作。
-let REC_TIMEOUT_S = 45
+// 45 秒太紧：G13 彩排里 MiniMax-M3 有 41、43 秒才成功的，18 次中 6 次在 45 秒处被判超时（10-06）
+let REC_TIMEOUT_S = 90
 let rec_gen = 0
 fn choose_requirement(raw){
     if busy || !booted { return }

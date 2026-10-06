@@ -23,7 +23,7 @@
 ### 1.1 你的电脑
 
 ```
-F:\context-dj-work\                 ← 本轮所有新文件的根目录（只用 F 盘）
+<本机工作目录>\                 ← 本轮所有新文件的根目录（只用 F 盘）
 ├─ repo\                            agentic-app 的 git 工作副本（GPT 用）
 ├─ downloads\                       OctoSense 安装包、APK
 ├─ octosense-win\                   Windows 版 OctoSense 安装目录（安装程序允许选目录时）
@@ -38,10 +38,10 @@ F:\context-dj-work\                 ← 本轮所有新文件的根目录（只�
 **C 盘规则**
 
 1. 开始前记录 C 盘和 F 盘的剩余空间（`G0`）。**本轮 C 盘总共最多多用 1 GB；C 盘剩余空间一旦低于 5 GB，立刻停下并报告**，不要自行清理。
-2. **WSL 不编译、不克隆大仓库、不往 WSL 的 home 里写大文件。** WSL 的虚拟磁盘（ext4.vhdx）在 C 盘上，**写进去的空间删了也不会还给 C 盘**。WSL 里的命令如果有输出，一律写到 `/mnt/f/context-dj-work/...`。
+2. **WSL 不编译、不克隆大仓库、不往 WSL 的 home 里写大文件。** WSL 的虚拟磁盘（ext4.vhdx）在 C 盘上，**写进去的空间删了也不会还给 C 盘**。WSL 里的命令如果有输出，一律写到 `<本机工作目录>/...`。
 3. 可以调用 WSL 里已有的工具（`~/octosense-ws` 里的 `octo`、`hub`、桌面版），但**不重新编译**。需要重新编译的话，先停下来问。
 4. 下载的文件放 `downloads\`，不放 C 盘的"下载"文件夹。
-5. 不动这些已有目录：`F:\context-player-cache-20261004`（旧缓存，23 GB）、`C:\Users\admin\Downloads\Agentic Apps`（旧的 GPT 工程）。要清理的话以后单独决定。
+5. 不动这些已有目录：`<旧缓存目录>`（旧缓存，23 GB）、`<旧工程目录>`（旧的 GPT 工程）。要清理的话以后单独决定。
 
 ### 1.2 仓库里每个文件归谁
 
@@ -51,8 +51,8 @@ F:\context-dj-work\                 ← 本轮所有新文件的根目录（只�
 | `docs/PLAN.md` | Claude | GPT 想改的话，经 Fano 转达 |
 | `tools/**`、`docs/test-reports/**` | **GPT** | 本机部署和测试脚本、测试报告 |
 
-- Claude 直接推送 `main`。GPT **不推 `main`**：它的脚本推到 `gpt/tools` 分支，报告写在 `F:\context-dj-work\evidence\`。
-- 交接方式：GPT 写完 `REPORT.md` → Fano 告诉 Claude 路径 → Claude 读取（需要 Fano 把 `F:\context-dj-work` 授权给 Claude）。
+- Claude 直接推送 `main`。GPT **不推 `main`**：它的脚本推到 `gpt/tools` 分支，报告写在 `<本机工作目录>\evidence\`。
+- 交接方式：GPT 写完 `REPORT.md` → Fano 告诉 Claude 路径 → Claude 读取（需要 Fano 把 `<本机工作目录>` 授权给 Claude）。
 
 ---
 
@@ -242,15 +242,15 @@ Ctx = {at: number  hour: int  minute: int  weekday: int(0 = 周日)  slot: strin
 **G0 准备工作区（15 分钟）**
 1. 建好 1.1 节的目录。
 2. 记录 C 盘和 F 盘的剩余空间，以及 WSL 虚拟磁盘 ext4.vhdx 的大小，写入 `evidence\G0-disk\disk.txt`。
-3. 把 `https://github.com/peterdlick-stack/agentic-app` 克隆到 `F:\context-dj-work\repo`。
-4. 告诉 Fano：把 `F:\context-dj-work` 授权给 Claude。
+3. 把 `https://github.com/peterdlick-stack/agentic-app` 克隆到 `<本机工作目录>\repo`。
+4. 告诉 Fano：把 `<本机工作目录>` 授权给 Claude。
 
 **G1 在真实 AI 服务上验证（先用 v0.1 把流程跑通，等 C3 通知后再测 v0.2）**
 1. 判断 WSL 里那套桌面版能不能用 `model.complete`：在 `~/octosense-ws` 下的 OctoSense 源码目录里查是否包含 OctoSense PR #95（`git log --oneline | grep -i "model"`，或者检查 `apps/ai-providers/host-service/src/complete/` 是否存在）。
    - 包含 → 用 WSL 桌面版（已接 MiniMax）。
-   - 不包含 → 下载 Windows 版 `octosense_0.1.0-beta.1_x64-setup.exe` 到 `downloads\`，安装到 `F:\context-dj-work\octosense-win\`（安装程序不能选目录的话，先停下问）。在桌面版的 AI 设置里由 **Fano 本人**填 MiniMax 密钥。**密钥不得写进任何文件、日志或截图。**
-2. 按 OctoScript-App-Design-Flow `docs/PUBLISHING.md` §4，用**一次性测试密钥**建本地目录 `F:\context-dj-work\mirror`，用 `hub publish` 发布 `repo\bundle`。
-3. 用 `OCTOSENSE_HUB` 和 `OCTOSENSE_HUB_ANCHOR` 指向这个目录启动桌面版，`OCTOSENSE_APP_DATA` 设为 `F:\context-dj-work\octosense-data`，在 App Hub 里安装并打开情境 DJ。
+   - 不包含 → 下载 Windows 版 `octosense_0.1.0-beta.1_x64-setup.exe` 到 `downloads\`，安装到 `<本机工作目录>\octosense-win\`（安装程序不能选目录的话，先停下问）。在桌面版的 AI 设置里由 **Fano 本人**填 MiniMax 密钥。**密钥不得写进任何文件、日志或截图。**
+2. 按 OctoScript-App-Design-Flow `docs/PUBLISHING.md` §4，用**一次性测试密钥**建本地目录 `<本机工作目录>\mirror`，用 `hub publish` 发布 `repo\bundle`。
+3. 用 `OCTOSENSE_HUB` 和 `OCTOSENSE_HUB_ANCHOR` 指向这个目录启动桌面版，`OCTOSENSE_APP_DATA` 设为 `<本机工作目录>\octosense-data`，在 App Hub 里安装并打开情境 DJ。
 4. 依次跑场景（v0.2 版本）：
    - A：不输入任何话，点"推荐"
    - B："写代码，不要人声"
@@ -271,7 +271,7 @@ Ctx = {at: number  hour: int  minute: int  weekday: int(0 = 周日)  slot: strin
 ### Fano
 
 - 把这份计划里 G0–G2 的部分交给 GPT。
-- G0 完成后，把 `F:\context-dj-work` 授权给 Claude。
+- G0 完成后，把 `<本机工作目录>` 授权给 Claude。
 - 在桌面版里填 MiniMax 密钥（G1 第 1 步需要时）。
 - 收到报告后把路径告诉 Claude。
 
@@ -423,7 +423,7 @@ AI 定期：总结"你的规律"、建议新模板
 ### GPT（在 Fano 的电脑上，第 1 节的磁盘和目录规则继续有效；**不改 `bundle/`，不推 `main`**）
 
 **G0–G2 照第 3 节继续做。** 说明两点：
-- G1 的 MiniMax 已经配在 WSL 桌面版里（见 `C:\Users\admin\Downloads\Agentic Apps\MINIMAX-SETUP-STATUS.txt`）。第 1 步只需要确认这个桌面版**有没有 `model` 服务**，也就是是否包含 OctoSense PR #95，不需要重新配置密钥。
+- G1 的 MiniMax 已经配在 WSL 桌面版里（见 `<旧工程目录>\MINIMAX-SETUP-STATUS.txt`）。第 1 步只需要确认这个桌面版**有没有 `model` 服务**，也就是是否包含 OctoSense PR #95，不需要重新配置密钥。
 - 不得读取、复制、打印或转存任何密钥文件的内容。
 
 **G3 网络可达性（30 分钟）**
@@ -442,12 +442,12 @@ AI 定期：总结"你的规律"、建议新模板
 - 给出建议的接口，例如 `sys.audio_route()` 返回 `"speaker"|"wired"|"bluetooth"|"unknown"`，以及隐私说明。
 
 **G5 每日使用记录（10-06 起，配合 Fano）**
-每天结束时，把 WSL 或桌面版里情境 DJ 的 `accounts/device/labels.json` 和 `history.json` **复制**一份到 `F:\context-dj-work\evidence\G5-usage\<日期>\`（只复制，不改），并统计条数写进 `count.txt`。等 Fano 真正开始用桌面版里的情境 DJ 再开始。
+每天结束时，把 WSL 或桌面版里情境 DJ 的 `accounts/device/labels.json` 和 `history.json` **复制**一份到 `<本机工作目录>\evidence\G5-usage\<日期>\`（只复制，不改），并统计条数写进 `count.txt`。等 Fano 真正开始用桌面版里的情境 DJ 再开始。
 
 ### Fano
 
 - 把这份计划第 10 节里 GPT 的部分（G0–G5）交给 GPT。
-- `F:\context-dj-work` 建好后授权给 Claude。
+- `<本机工作目录>` 建好后授权给 Claude。
 - 10-06 起每天真实用几次（通勤、学习、睡前各用一次就够），每次都点一下候选活动确认。这些就是决赛演示的真实数据。
 - G4 的 issue 由你自己提交。
 
@@ -511,7 +511,7 @@ AI 定期：总结"你的规律"、建议新模板
 
 ## 14. 启动加固（2026-10-05 深夜，`main`）
 
-起因见 `docs/HANDOFF-CLAUDE.md` ③-补2：数据目录放在 `/mnt/f` 时，启动链中任何一步撞上 64 ms 墙钟上限，`booted` 就永远是 false，界面卡死在"正在加载…"。A/B 已证实原因是 F 盘读写路径，不是 D4；这里只让代码在慢盘上也不卡死。不改界面结构，只多了重试时的状态行文字。
+起因：数据目录放在 `/mnt/f` 时，启动链中任何一步撞上 64 ms 墙钟上限，`booted` 就永远是 false，界面卡死在"正在加载…"。A/B 已证实原因是 F 盘读写路径，不是 D4；这里只让代码在慢盘上也不卡死。不改界面结构，只多了重试时的状态行文字。
 
 - **一个处理函数最多一次文件读写**。启动拆成 `dir → prefs → places → library → feedback → labels → encounters → last → done`，每步一个处理函数；读文件和分批处理分开（`boot_read` → `boot_chunks`）。天气和定位挪到 `done` 之后各自的处理函数里。
 - **看门狗** `boot_watch`：每 1 秒看一次 `boot_tick`，一个周期没有进展就整步重试，状态行显示"读取××超时，第 n 次重试"；第 3 次起加一句"数据所在的磁盘可能太慢"。每步开头先清空自己要填的数据，`boot_gen` 让旧链上残留的回调退出，所以重试不会重复记录。启动完成后，如果重试过，状态行写"启动时读写超时，重试了 n 次"，方便测试核对。
@@ -535,7 +535,7 @@ Claude 在云端 Linux 上自己编译 card-host（Xvfb、`--hidden`），数据
 
 ## 15. G12 合并（2026-10-06，`main`）
 
-Fano 10-06 决定 G12 当天合并，由 Claude 执行。G12 由 GPT 在 `demo/unify` 实现（`db1c768`，基于 `dc7f95d`），报告在本机 `F:\context-dj-work\demo-iloveu\G12-unify\`。Claude 审查后修了两处，加了 `.gitattributes`，再合并。合并前的 `main` 打了标签 `v0.3.0-pre-unify`（`ef9a4f8`）。
+Fano 10-06 决定 G12 当天合并，由 Claude 执行。G12 由 GPT 在 `demo/unify` 实现（`db1c768`，基于 `dc7f95d`），报告在本机 `<本机工作目录>\demo-iloveu\G12-unify\`。Claude 审查后修了两处，加了 `.gitattributes`，再合并。合并前的 `main` 打了标签 `v0.3.0-pre-unify`（`ef9a4f8`）。
 
 - **选歌看门狗**：G12 在进入 ③ 时就把 `busy` 设为真并隐藏歌单，只有 `finish()` 会恢复。选歌途中处理函数被中断（慢盘上撞 64 ms 墙钟上限）或模型一直不回，界面就永久停在"正在选歌"，三步卡片全部点不动。现在每次选歌有编号 `rec_gen`，45 秒（`REC_TIMEOUT_S`）没完成就解锁、显示歌单区并提示"这次选歌没有完成……可以再试一次"；之后才到的模型回调直接作废。`add_label` 的写文件挪进单独的处理函数。
 - **重复确认去重**：G12 的 `confirm_act` 自己拼确认列表，丢掉了 `add_label` 的"同一情境桶 30 分钟内同一活动只算一次"。"从头再选一次"后再点同一活动会多记一条，放大规律统计。已恢复。
@@ -553,11 +553,11 @@ Fano 10-06 决定 G12 当天合并，由 Claude 执行。G12 由 GPT 在 `demo/u
 | — | card-host 无 model 服务时选歌 | 走"AI 不可用"回退并出歌单 | — | ✅（验证了带编号的模型回调路径） |
 | — | 干净 LF 检出上 `hub check`（不重新盖戳） | PASSED | `ef9a4f8`：REFUSED | PASSED ✅ |
 
-**没测**：真实 MiniMax 下迟到回调被作废（card-host 没有 model 服务）；桌面版复测、F 盘 T20 交给 GPT-B（`F:\context-dj-work\demo-iloveu\CLAUDE-TO-GPT-2026-10-06.md`）。
+**没测**：真实 MiniMax 下迟到回调被作废（card-host 没有 model 服务）；桌面版复测、F 盘 T20 交给 GPT-B（`<本机工作目录>\demo-iloveu\CLAUDE-TO-GPT-2026-10-06.md`）。
 
 ### 15.2 F 盘 T20 失败后的修复（2026-10-06 下午）
 
-GPT-B 在 F 盘慢路径上测 `5463687`（报告在本机 `F:\context-dj-work\evidence\2026-10-06\T20-5463687\`）：ext4 全部通过；F 盘上点活动不进 ②。第一轮日志有两条 `script time budget exceeded`（一条在 `sync_context`），并且写了 `prefs.json`；第二轮没有报错、没有写入、也没有跳转。
+GPT-B 在 F 盘慢路径上测 `5463687`（报告在本机 `<本机工作目录>\evidence\2026-10-06\T20-5463687\`）：ext4 全部通过；F 盘上点活动不进 ②。第一轮日志有两条 `script time budget exceeded`（一条在 `sync_context`），并且写了 `prefs.json`；第二轮没有报错、没有写入、也没有跳转。
 
 - **第一轮的原因**：G12 的 `confirm_act()` 在同一个处理函数里先同步写 `prefs.json`、再重算情境，最后才跳到 ②，违反"一个处理函数最多一次读写"。慢盘上写文件吃掉大半 64 ms，后面撞墙钟上限，跳转丢了。审查时漏看了这一处。**修法**：先跳转，`prefs`、`labels` 的写入和情境重算各自放进单独的处理函数（`confirm_act`、撤销、`flow_uncertain`）。`feedback()` 同理，写 `feedback.json` 延后，并去掉每次重画整张曲库列表。
 - **第二轮看不出原因**：最可能是启动还没读完（`booted` 为假，点击被静默忽略），但 G12 把显示启动进度和重试的状态行只放在 ③，① 上看不到；也可能是远程点击没落到按钮上。**修法**：① 顶部加启动提示（"正在加载…（读取××超时，第 n 次重试）"），启动没完成时点活动或"不确定"会补一句"还在读取数据，读完才能选择"；启动完成后，若重试过，提示保留重试次数。下一次 F 盘 T20 可以直接从 ① 上看出是哪种情况。
@@ -568,7 +568,7 @@ GPT-B 在 F 盘慢路径上测 `5463687`（报告在本机 `F:\context-dj-work\e
 | N14 | 启动"确认记录"一步每次都中断，点"不确定" | ① 上没有任何提示，点击无反应 | ① 显示"读取确认记录超时，第 n 次重试"，点击后补"还在读取数据" ✅ |
 | 回归 | N11 去重、N8 替换/撤销、选歌看门狗、♥ 后返回歌单出现心形且 `feedback`、`encounters.liked` 写入 | — | 全部通过 ✅ |
 
-**桌面版验证（GPT-B，10-06 下午，报告在本机 `F:\context-dj-work\evidence\2026-10-06\T20-cf9cc9b\`）**：`cf9cc9b` 在 F 盘上 T20 通过（重启时 ① 显示"读取偏好超时，第 1…3 次重试"，之后恢复，看门狗按设计工作）；ext4 上 N4、N8、去重、♥ 返回歌单 / 曲库出现心形、重启恢复都通过。之后 Fano 的日常桌面版升级到 `cf9cc9b`，并放入《I LOVE U》的卡片内容、歌词、封面（不进 git），原有使用记录不变。
+**桌面版验证（GPT-B，10-06 下午，报告在本机 `<本机工作目录>\evidence\2026-10-06\T20-cf9cc9b\`）**：`cf9cc9b` 在 F 盘上 T20 通过（重启时 ① 显示"读取偏好超时，第 1…3 次重试"，之后恢复，看门狗按设计工作）；ext4 上 N4、N8、去重、♥ 返回歌单 / 曲库出现心形、重启恢复都通过。之后 Fano 的日常桌面版升级到 `cf9cc9b`，并放入《I LOVE U》的卡片内容、歌词、封面（不进 git），原有使用记录不变。
 
 ### 15.3 选歌超时放宽到 90 秒，版本 0.3.1（2026-10-06 傍晚）
 

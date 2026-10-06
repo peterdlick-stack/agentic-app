@@ -2400,17 +2400,17 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
         }
         sc_demo := Notice{visible: false width: Fill ScMuted{width: Fill text: "演示数据 · 含测试记录" draw_text.color: SC_WARNING}}
         sc_gesture := GestureView{width: Fill height: Fill flow: Down on_swipe: |dx, dy| sc_swipe(dx, dy)
-            sc_front := View{width: Fill height: Fill flow: Down spacing: 14
-                cover_tap := GestureView{width: Fill height: 350 on_tap: |x, y| sc_flip() on_swipe: |dx, dy| sc_swipe(dx, dy)
-                    RoundedView{width: Fill height: Fill flow: Down padding: 16 spacing: 4 draw_bg.color: SC_CARD draw_bg.border_radius: 24.0
-                        View{width: Fill height: 300 flow: Overlay align: Align{x: 0.5 y: 0.5}
-                            sc_picture := View{visible: false width: 300 height: 300
-                                sc_image := Image{width: 300 height: 300 fit: ImageFit.CropToFill}
+            sc_front := ScrollYView{width: Fill height: Fill flow: Down spacing: 10
+                cover_tap := GestureView{width: Fill height: 246 on_tap: |x, y| sc_flip() on_swipe: |dx, dy| sc_swipe(dx, dy)
+                    RoundedView{width: Fill height: Fill flow: Down padding: 12 spacing: 4 draw_bg.color: SC_CARD draw_bg.border_radius: 20.0
+                        View{width: Fill height: 196 flow: Overlay align: Align{x: 0.5 y: 0.5}
+                            sc_picture := RoundedView{visible: false width: Fill height: Fill draw_bg.color: SC_RAISED draw_bg.border_radius: 12.0
+                                sc_image := Image{width: Fill height: Fill fit: ImageFit.CropToFill}
                             }
-                            sc_disc := RoundedView{width: 300 height: 300 align: Align{x: 0.5 y: 0.5} draw_bg.color: SC_RAISED draw_bg.border_radius: 150.0
-                                RoundedView{width: 204 height: 204 align: Align{x: 0.5 y: 0.5} draw_bg.color: SC_BORDER draw_bg.border_radius: 102.0
-                                    RoundedView{width: 96 height: 96 align: Align{x: 0.5 y: 0.5} draw_bg.color: SC_ACCENT draw_bg.border_radius: 48.0
-                                        sc_letter := Label{text: "♪" draw_text.color: SC_GROUND draw_text.text_style: theme.font_bold{font_size: 28}}
+                            sc_disc := RoundedView{width: 176 height: 176 align: Align{x: 0.5 y: 0.5} draw_bg.color: SC_RAISED draw_bg.border_radius: 88.0
+                                RoundedView{width: 120 height: 120 align: Align{x: 0.5 y: 0.5} draw_bg.color: SC_BORDER draw_bg.border_radius: 60.0
+                                    RoundedView{width: 56 height: 56 align: Align{x: 0.5 y: 0.5} draw_bg.color: SC_ACCENT draw_bg.border_radius: 28.0
+                                        sc_letter := Label{text: "♪" draw_text.color: SC_GROUND draw_text.text_style: theme.font_bold{font_size: 20}}
                                     }
                                 }
                             }
@@ -2421,9 +2421,10 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
                         }
                     }
                 }
-                sc_title := Label{width: Fill text: "" draw_text.color: SC_INK draw_text.text_style: theme.font_bold{font_size: 28}}
+                sc_title := Label{width: Fill text: "" draw_text.color: SC_INK draw_text.text_style: theme.font_bold{font_size: 24}}
                 sc_artist := ScMuted{width: Fill text: ""}
                 sc_context := ScMuted{visible: false width: Fill text: "" draw_text.text_style.font_size: 13}
+                View{width: Fill height: 8}
             }
             sc_content := View{width: Fill height: Fill flow: Down on_render: || {
                 let c = sc_data()

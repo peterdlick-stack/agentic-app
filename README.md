@@ -20,7 +20,7 @@
 | **Agent 做了哪几步** | 读状态（定位、时段、天气、你的历史确认）→ 推断活动并请你确认 → 理解你的话、选歌、写理由 → 核验 AI 的返回 → 按你的喜欢 / 不喜欢更新偏好 → 记录相遇。[详见下文](#一次完整的任务) |
 | **你保留哪些控制** | 你的确认永远优先，AI 不能覆盖；每一项情境都写明来源和可信度，可以单独关掉；确认可以撤销；模拟定位、预制内容、AI 解读在界面上都有标注 |
 | **出了问题会怎样** | AI 不可用或报错 → 改用本地规则并写明原因；AI 90 秒没回 → 解锁界面、提示再试，迟到的结果作废；没有定位、天气失败 → 该项不参与推荐；启动读文件超时 → 看门狗整步重试并显示原因，不会卡死 |
-| **提交版本** | **0.3.3**，提交 [`3345814`](https://github.com/peterdlick-stack/agentic-app/commit/3345814)。应用包在 [`bundle/`](bundle/)，`tools/octo check bundle` 结果 `context-dj 0.3.3 — PASSED`，摘要 `32e193e7…`。之后的提交只改了文档、截图和视频，`bundle/` 没有改动 |
+| **提交版本** | **0.3.3**，提交 [`3345814`](https://github.com/peterdlick-stack/agentic-app/commit/3345814)。应用包在 [`bundle/`](bundle/)，`tools/octo check bundle` 结果 `context-dj 0.3.3 — PASSED`，摘要 `32e193e7…`。**0.3.4**（App Hub 提交版）只更新了商店信息（`listing.json`）和商店截图，`main.splash` 与 0.3.3 逐字节相同（SHA-256 `14bd5281…`）；用 App Hub 最新 `main`（`78dfda5`）的 `hub check` 结果 `context-dj 0.3.4 — PASSED`，摘要 `5e407ee6…` |
 | **在哪里跑过** | OctoSense 桌面版 0.1.0（WSL2 + Ubuntu 24.04，接 MiniMax-M3）：完整流程含真实 AI 选歌；`card-host`：全部界面和失败路径。手机尚未验证。具体版本见[运行环境](#运行环境)，结果见[验证情况](#验证情况) |
 | **怎么跑** | [运行与复现](#运行与复现)：读源码 → 门禁检查 → `card-host` 运行 → 桌面版完整体验 |
 
@@ -223,6 +223,8 @@ flowchart LR
 | 应用支持平台 | `listing.json` 声明 `linux`；Android、macOS 未验证 |
 
 另有一部分 `card-host` 回归测试（故障注入、指令上限）由 Claude 在云端 Linux 容器里用 Xvfb 隐藏窗口跑，那台机器的 App-Hub 提交号没有记录。
+
+0.3.4 的商店截图和门禁检查（2026-10-06）在云端 Linux 容器里完成，用的是当天各仓库的 `main`：App Hub `78dfda5`（`hub`、`card-host`）、OctoScript-App-Design-Flow `a5a87d3`（`tools/octo`）、运行时按其 `native-runtime.lock.json`（Octoscript-Makepad `2cc5ef37`）。截图环境没有 `model` 服务和网络天气，所以截图里显示“AI 不可用”“天气不可用”，定位用的是模拟步行。
 
 ### 四条路
 

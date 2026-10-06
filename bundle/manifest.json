@@ -21,7 +21,7 @@
   ],
   "id": "context-dj",
   "integrity": {
-    "bundle_blake3": "32e193e7a679269c67873f04a10c7b52bf78893057545e12de9610eb1490b2ca"
+    "bundle_blake3": "5e407ee60e0bd19f4a3e6452ac5622887290b9b95860192c95f36d4475d831db"
   },
   "name": "情境 DJ",
   "network": {
@@ -33,5 +33,5 @@
   "storage": {
     "max_bytes": 16777216
   },
-  "version": "0.3.3"
+  "version": "0.3.4"
 }

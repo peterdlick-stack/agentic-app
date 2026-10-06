@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Hackathon](https://img.shields.io/badge/GOSIM_Agentic_App_黑客松-2026-orange)](https://github.com/gosimfoundation/hackathon-agenticapp26)
 [![Track](https://img.shields.io/badge/场景-音乐-66CCFF)](#对照官方评审口径)
-[![Version](https://img.shields.io/badge/版本-0.3.3-0B1526)](https://github.com/peterdlick-stack/agentic-app/tree/v0.3.3/bundle)
+[![Version](https://img.shields.io/badge/版本-0.3.3-0B1526)](https://github.com/peterdlick-stack/agentic-app/tree/3345814/bundle)
 [![Built with](https://img.shields.io/badge/OctoSense-脚本应用-lightgrey)](https://github.com/OctoSense-org/OctoScript-App-Design-Flow)
 
 一个 OctoSense 脚本应用（`bundle/main.splash` 一个文件），GOSIM 智能体应用黑客松 2026 音乐场景参赛作品，队伍 KYBER。
@@ -20,7 +20,7 @@
 | **Agent 做了哪几步** | 读状态（定位、时段、天气、你的历史确认）→ 推断活动并请你确认 → 理解你的话、选歌、写理由 → 核验 AI 的返回 → 按你的喜欢 / 不喜欢更新偏好 → 记录相遇。[详见下文](#一次完整的任务) |
 | **你保留哪些控制** | 你的确认永远优先，AI 不能覆盖；每一项情境都写明来源和可信度，可以单独关掉；确认可以撤销；模拟定位、预制内容、AI 解读在界面上都有标注 |
 | **出了问题会怎样** | AI 不可用或报错 → 改用本地规则并写明原因；AI 90 秒没回 → 解锁界面、提示再试，迟到的结果作废；没有定位、天气失败 → 该项不参与推荐；启动读文件超时 → 看门狗整步重试并显示原因，不会卡死 |
-| **提交版本** | **0.3.3**，提交 [`3345814`](https://github.com/peterdlick-stack/agentic-app/commit/3345814)（标签 `v0.3.3`）。应用包在 [`bundle/`](bundle/)，`tools/octo check bundle` 结果 `context-dj 0.3.3 — PASSED`，摘要 `32e193e7…` |
+| **提交版本** | **0.3.3**，提交 [`3345814`](https://github.com/peterdlick-stack/agentic-app/commit/3345814)应用包在 [`bundle/`](bundle/)，`tools/octo check bundle` 结果 `context-dj 0.3.3 — PASSED`，摘要 `32e193e7…` |
 | **在哪里跑过** | OctoSense 桌面版（Linux / WSL，接赛方 MiniMax）：完整流程含真实 AI 选歌；`card-host`（Linux + Xvfb）：全部界面和失败路径。手机未验证，[见验证情况](#验证情况) |
 | **怎么跑** | [运行与复现](#运行与复现)：读源码 → 门禁检查 → `card-host` 运行 → 桌面版完整体验 |
 
@@ -210,7 +210,7 @@ flowchart LR
 ```sh
 OCTO=<OctoScript-App-Design-Flow 路径>/tools/octo
 git clone https://github.com/peterdlick-stack/agentic-app && cd agentic-app
-git checkout v0.3.3
+git checkout 3345814    # 0.3.3，初赛提交版本
 $OCTO check bundle        # 期望：context-dj 0.3.3 — PASSED
 ```
 

@@ -2404,8 +2404,8 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
                 cover_tap := GestureView{width: Fill height: 246 on_tap: |x, y| sc_flip() on_swipe: |dx, dy| sc_swipe(dx, dy)
                     RoundedView{width: Fill height: Fill flow: Down padding: 12 spacing: 4 draw_bg.color: SC_CARD draw_bg.border_radius: 20.0
                         View{width: Fill height: 196 flow: Overlay align: Align{x: 0.5 y: 0.5}
-                            sc_picture := RoundedView{visible: false width: Fill height: Fill draw_bg.color: SC_RAISED draw_bg.border_radius: 12.0
-                                sc_image := Image{width: Fill height: Fill fit: ImageFit.CropToFill}
+                            sc_picture := View{visible: false width: Fill height: Fill align: Align{x: 0.5 y: 0.5}
+                                sc_image := Image{width: Fill height: Fill fit: ImageFit.Smallest}
                             }
                             sc_disc := RoundedView{width: 176 height: 176 align: Align{x: 0.5 y: 0.5} draw_bg.color: SC_RAISED draw_bg.border_radius: 88.0
                                 RoundedView{width: 120 height: 120 align: Align{x: 0.5 y: 0.5} draw_bg.color: SC_BORDER draw_bg.border_radius: 60.0

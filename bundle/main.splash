@@ -979,9 +979,21 @@ fn confirm_act(id, how){
     let b = cur_bucket()
     let top = []
     if last_rank != nil { for k in 3 { if k < last_rank.list.len() { top.push(last_rank.list[k].id) } } }
+    // 和 add_label 一样：同一情境桶 30 分钟内重复确认同一个活动只算一次
+    //（例如「从头再选一次」后又点了同一个活动），用新记录顶替旧的那条，避免放大统计
+    let n_before = flow_labels_before.len()
+    let dup = false
+    if n_before > 0 {
+        let l = flow_labels_before[n_before - 1]
+        if l.chosen == id && l.day == b.day && l.slot == b.slot && l.place_kind == b.place && l.motion == b.motion {
+            if time_now() - l.at < 1800 { dup = true }
+        }
+    }
     let next = []
-    let start = max(0, flow_labels_before.len() - LABEL_MAX + 1)
-    for j x in flow_labels_before { if j >= start { next.push(x) } }
+    let start = max(0, n_before - LABEL_MAX + 1)
+    let stop = n_before
+    if dup { stop = n_before - 1 }
+    for j x in flow_labels_before { if j >= start && j < stop { next.push(x) } }
     next.push({at: time_now() day: b.day slot: b.slot place_kind: b.place motion: b.motion chosen: id top: top how: how})
     labels = next
     prefs.act = id
@@ -1011,7 +1023,7 @@ fn add_label(b, id, top, how){
         let l = labels[labels.len() - 1]
         if l.chosen == id && l.day == b.day && l.slot == b.slot && l.place_kind == b.place && l.motion == b.motion && time_now() - l.at < 1800 {
             l.at = time_now()
-            save_labels()
+            start_timeout(0.01, || save_labels())
             return
         }
     }
@@ -1021,7 +1033,8 @@ fn add_label(b, id, top, how){
     for j x in labels { if j >= start { next.push(x) } }
     next.push({at: time_now() day: b.day slot: b.slot place_kind: b.place motion: b.motion chosen: id top: top how: how})
     labels = next
-    save_labels()
+    // 选歌的处理函数里不直接写文件（一个处理函数最多一次读写，见 AGENTS.md）
+    start_timeout(0.01, || save_labels())
 }
 fn toggle_all_acts(){
     show_all_acts = !show_all_acts
@@ -1266,18 +1279,36 @@ fn ctx_text(ctx){
 }
 
 fn recommend(){ choose_requirement(ui.intent.text()) }
+// 选歌看门狗：选歌途中处理函数被中断（慢盘上撞墙钟上限）或模型一直不回，
+// busy 会一直为真、歌单一直隐藏、三步卡片全部点不动。超时后解锁并提示重试；
+// rec_gen 让超时之后才到的模型回调直接作废，不会覆盖用户之后的操作。
+let REC_TIMEOUT_S = 45
+let rec_gen = 0
 fn choose_requirement(raw){
     if busy || !booted { return }
     ui.intent.set_text(raw)
     flow_labels_before = nil
+    rec_gen = rec_gen + 1
+    let gen = rec_gen
     busy = true
     plan_note = "AI 正在理解情境并选歌…"
     ui.plan.set_text(plan_note)
     ui.list.set_visible(false)
     home_step(3)
-    start_timeout(0.03, || recommend_run(raw))
+    start_timeout(0.03, || recommend_run(raw, gen))
+    start_timeout(REC_TIMEOUT_S, || rec_watch(gen))
 }
-fn recommend_run(raw){
+fn rec_watch(gen){
+    if gen != rec_gen || !busy { return }
+    rec_gen = rec_gen + 1
+    busy = false
+    plan_note = "这次选歌没有完成（AI 没有响应或读写太慢），可以再试一次"
+    ui.plan.set_text(plan_note)
+    ui.list.set_visible(true)
+    ui.list.render()
+}
+fn recommend_run(raw, gen){
+    if gen != rec_gen { return }
     let it = parse_intent(raw)
     let ctx = build_ctx(it)
     if ctx.activity.source == "intent" {
@@ -1293,7 +1324,7 @@ fn recommend_run(raw){
         busy = true
         plan_note = "AI 正在理解情境并选歌…"
         ui.plan.set_text(plan_note)
-        ask_model(raw, it, ctx)
+        ask_model(raw, it, ctx, gen)
     } else {
         finish(local_pick(ctx, it), "本地规则", raw, it, ctx, "")
     }
@@ -1313,7 +1344,7 @@ fn signals_for_ai(ctx){
         rule_activity: ctx.activity.id + "（" + source_word(ctx.activity.source) + "，可信度 " + round(ctx.activity.conf * 100) / 100 + "：" + join(ctx.activity.why, "；") + "）"
         manual: manual}
 }
-fn ask_model(raw, it, ctx){
+fn ask_model(raw, it, ctx, gen){
     let cands = []
     for i s in songs {
         let like = s.fb.g
@@ -1332,10 +1363,11 @@ fn ask_model(raw, it, ctx){
                     items: {type: "object" required: ["i" "why"] additionalProperties: false
                         properties: {i: {type: "integer" minimum: 0 maximum: n} why: {type: "string" maxLength: 40}}}}}}
         class: "fast"
-    }, fn(r){ model_answer(r, raw, it, ctx) })
+    }, fn(r){ model_answer(r, raw, it, ctx, gen) })
 }
 
-fn model_answer(r, raw, it, ctx){
+fn model_answer(r, raw, it, ctx, gen){
+    if gen != rec_gen { return }
     busy = false
     if !r.is_ok {
         finish(local_pick(ctx, it), "本地规则", raw, it, ctx, "AI 不可用：" + r.error)

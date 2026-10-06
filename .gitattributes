@@ -1,0 +1,7 @@
+# bundle/ 的文本文件一律用 LF。manifest 里的 bundle_blake3 按文件字节计算，
+# Windows 检出时换成 CRLF 会让 octo check 盖出不同的戳（2026-10-06 合并时遇到过）。
+bundle/*.splash text eol=lf
+bundle/*.json text eol=lf
+bundle/*.md text eol=lf
+bundle/assets/*.svg text eol=lf
+bundle/screenshots/*.png binary

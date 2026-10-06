@@ -1,3 +1,12 @@
+// 歌曲卡 A 夜空配色；改方向时只改这组常量。
+let SC_GROUND = #x0B1526
+let SC_CARD = #x14223A
+let SC_RAISED = #x1C2E4D
+let SC_BORDER = #x2A4366
+let SC_ACCENT = #x66CCFF
+let SC_INK = #xE6F1FA
+let SC_MUTED = #x8FA3BC
+
 // 情境 DJ v0.2：把「此刻的情境 + 一句话意图 + 过去的反馈」变成一组歌，并说明理由。
 // 情境来源只用平台真正开放的：GPS（速度 + 你标记的地点）、设备时钟、Open-Meteo 天气、
 // 你说的那句话、你的手动选择。设计与接口见仓库 docs/PLAN.md 第 2 节。
@@ -8,6 +17,7 @@ let DATA = "accounts/device/"
 
 // ---- 内置曲库：人工粗标注。en 能量 1-5，vo 是否人声，md 情绪，lg 语种 ----
 let SEED = [
+    {t: "I LOVE U" a: "洛天依" en: 4 vo: true md: "欢快" lg: "zh"}
     {t: "Summer" a: "久石让" en: 3 vo: false md: "欢快" lg: "instr"}
     {t: "One Summer's Day" a: "久石让" en: 1 vo: false md: "怀旧" lg: "instr"}
     {t: "Nuvole Bianche" a: "Ludovico Einaudi" en: 2 vo: false md: "平静" lg: "instr"}
@@ -138,7 +148,7 @@ let last_ctx = nil
 let last_keys = []      // 上一批，用于「换一批」
 let plan_note = ""
 let busy = false
-let screen = "home"     // home | sense | library | player
+let screen = "home"     // home | sense | library | songcard | player
 let playing = nil
 let source = 0
 let SOURCES = [
@@ -250,6 +260,8 @@ fn boot_label(step){
     if step == "feedback" { return "反馈" }
     if step == "labels" { return "确认记录" }
     if step == "encounters" { return "相遇记录" }
+    if step == "cards" { return "歌曲卡" }
+    if step == "card_history" { return "歌曲卡历史" }
     if step == "last" { return "上次的歌单" }
     "收尾"
 }
@@ -341,7 +353,13 @@ fn boot_run(gen, step){
     } else if step == "encounters" {
         encounters = []
         // 每条要整理 3 个时刻、每个 11 个字段，比确认记录重，所以每批只读 20 条
-        boot_read(gen, "encounters.json", 20, |x| load_enc(x), "last")
+        boot_read(gen, "encounters.json", 20, |x| load_enc(x), "cards")
+    } else if step == "cards" {
+        song_cards = []
+        boot_read(gen, "cards.json", 5, |x| load_song_card(x), "card_history")
+    } else if step == "card_history" {
+        card_history = []
+        boot_read(gen, "history.json", 10, |x| load_card_history(x), "last")
     } else if step == "last" {
         boot_last()
         boot_next("done")
@@ -1615,6 +1633,286 @@ fn sync_home(){
     ui.list.render()
 }
 
+// ---- 歌曲卡：只读取本机文案和图片；反馈/初听沿用原有入口 ----
+let song_cards = []
+let card_history = []
+let sc_history_gen = 0
+let sc_pos = -1
+let sc_page = 0
+let sc_back = false
+let sc_gen = 0
+let sc_lyrics = ""
+let sc_lyrics_state = "empty"
+let sc_notice = ""
+let sc_player_return = false
+
+fn empty_song_card(){
+    {k: "" facts: [] reading: "" by: "" credits: "" date: "" where: "" note: ""
+        lyrics: "" front: "" user: "" demo: false}
+}
+fn load_song_card(row){
+    let story = pick(row, "story", nil)
+    let archive = pick(row, "archive", nil)
+    let covers = pick(row, "covers", nil)
+    let facts = []
+    for f in pick(story, "facts", []) {
+        let text = pick(f, "text", "")
+        let src = pick(f, "src", "")
+        let url = pick(f, "url", "")
+        // 没有出处的条目不呈现为事实。
+        if text != "" && src != "" && url != "" { facts.push({text: text src: src url: url}) }
+    }
+    let k = pick(row, "k", "")
+    if k != "" {
+        song_cards.push({k: k facts: facts reading: pick(story, "reading", "") by: pick(story, "by", "")
+            credits: pick(archive, "credits", "") date: pick(archive, "date", "") where: pick(archive, "where", "") note: pick(archive, "note", "")
+            lyrics: pick(row, "lyrics", "") front: pick(covers, "front", "") user: pick(covers, "user", "") demo: pick(row, "sim", false) == true})
+    }
+}
+fn load_card_history(row){
+    card_history.push({picks: pick(row, "picks", []) act: pick(row, "act", "") sim: pick(row, "sim", false) == true})
+}
+fn sc_read_history(){
+    sc_history_gen = sc_history_gen + 1
+    let gen = sc_history_gen
+    let rows = as_list(read_json("history.json"))
+    card_history = []
+    start_timeout(0.01, || sc_history_chunk(gen, rows, 0))
+}
+fn sc_history_chunk(gen, rows, start){
+    if gen != sc_history_gen { return }
+    let end = min(start + 10, rows.len())
+    for i in end - start { load_card_history(rows[start + i]) }
+    if end < rows.len() { start_timeout(0.01, || sc_history_chunk(gen, rows, end)) }
+    else if screen == "songcard" && sc_page == 3 { sc_render() }
+}
+fn sc_song(){ songs[playlist[sc_pos].i] }
+fn sc_data(){
+    let k = key_of(sc_song())
+    for c in song_cards { if c.k == k { return c } }
+    empty_song_card()
+}
+fn sc_enc(){
+    let j = enc_find(key_of(sc_song()))
+    if j >= 0 { return encounters[j] }
+    {seen: nil heard: nil liked: nil}
+}
+fn sc_is_demo(){
+    if sc_data().demo || sim.kind != "off" { return true }
+    let e = sc_enc()
+    if e.seen != nil && e.seen.sim { return true }
+    if e.heard != nil && e.heard.sim { return true }
+    if e.liked != nil && e.liked.sim { return true }
+    let k = key_of(sc_song())
+    for row in card_history {
+        if row.sim { for key in row.picks { if key == k { return true } } }
+    }
+    false
+}
+fn sc_energy_word(n){
+    if n == 1 { return "安静" }
+    if n == 2 { return "舒缓" }
+    if n == 3 { return "适中" }
+    if n == 4 { return "轻快" }
+    if n == 5 { return "激烈" }
+    ""
+}
+fn sc_reason(){
+    let why = playlist[sc_pos].why
+    // 兼容旧歌单的数字理由；不改推荐算法或其存储。
+    for n in 5 { why = why.replace("能量" + (n + 1) + "/5", "节奏" + sc_energy_word(n + 1)) }
+    if why == "" { return "这份歌单没有保存推荐理由。" }
+    why
+}
+fn sc_first_letter(){
+    let chars = sc_song().t.split("")
+    for ch in chars { if ch != "" { return ch } }
+    "♪"
+}
+fn sc_photo(){
+    let path = sc_data().user
+    path != "" && fs.exists(path)
+}
+fn sc_cover_path(){
+    let c = sc_data()
+    let path = c.front
+    if sc_back { path = c.user }
+    if path != "" && fs.exists(path) { return path }
+    ""
+}
+fn sc_open(pos){
+    if !booted || pos < 0 || pos >= playlist.len() { return }
+    sc_pos = pos
+    sc_page = 0
+    sc_back = false
+    sc_lyrics = ""
+    sc_lyrics_state = "empty"
+    sc_notice = ""
+    show("songcard")
+    sc_render()
+    let gen = sc_gen
+    start_timeout(0.02, || sc_read_lyrics(gen))
+    start_timeout(0.03, || sc_read_history())
+}
+fn sc_read_lyrics(gen){
+    if gen != sc_gen || screen != "songcard" { return }
+    let path = sc_data().lyrics
+    if path != "" && fs.exists(path) {
+        sc_lyrics = fs.read(path)
+        sc_lyrics_state = "ready"
+    }
+}
+fn sc_load_image(gen, path){
+    if gen != sc_gen || screen != "songcard" || sc_page != 0 { return }
+    if path == "" || !fs.exists(path) { return }
+    let bytes = fs.read_bytes(path)
+    if bytes.len() > 300000 {
+        ui.sc_picture.set_visible(false)
+        ui.sc_disc.set_visible(true)
+        ui.sc_notice.set_text("图片超过 300 KB，请压缩后重新打开歌曲卡")
+        return
+    }
+    ui.sc_image.load_image_from_data_async(bytes)
+}
+fn sc_render(){
+    if sc_pos < 0 || sc_pos >= playlist.len() { return }
+    sc_gen = sc_gen + 1
+    ui.sc_heading.set_text(sc_song().t + " · " + sc_song().a)
+    ui.sc_demo.set_visible(sc_is_demo())
+    ui.sc_front.set_visible(sc_page == 0)
+    ui.sc_content.set_visible(sc_page != 0)
+    if sc_page != 0 { ui.sc_content.render() }
+    ui.sc_title.set_text(sc_song().t)
+    ui.sc_artist.set_text(sc_song().a)
+    ui.sc_why.set_text(sc_reason())
+    ui.sc_letter.set_text(sc_first_letter())
+    let cover = sc_cover_path()
+    ui.sc_image.set_src(nil)
+    ui.sc_picture.set_visible(cover != "")
+    ui.sc_disc.set_visible(cover == "")
+    ui.sc_cover_label.set_text(if sc_back "" else if cover == "" "暂无封面" else "官方封面")
+    ui.sc_flip_label.set_text(if sc_back "你的照片" else if sc_photo() "轻点翻面" else "")
+    ui.sc_dots.render()
+    ui.sc_count.set_text("第 " + (sc_pos + 1) + " 首，共 " + playlist.len() + " 首")
+    ui.sc_notice.set_text(sc_notice)
+    if sc_page == 0 {
+        let gen = sc_gen
+        let path = sc_cover_path()
+        if path != "" { start_timeout(0.01, || sc_load_image(gen, path)) }
+    }
+}
+fn sc_turn(page){
+    let next = clamp(page, 0, 3)
+    if next == sc_page { return }
+    sc_page = next
+    sc_render()
+    // 快速翻页可能取消了打开时的歌词读取，在歌词页补读一次。
+    if sc_page == 1 && sc_lyrics_state != "ready" {
+        let gen = sc_gen
+        start_timeout(0.01, || sc_lyrics_page(gen))
+    }
+}
+fn sc_lyrics_page(gen){
+    sc_read_lyrics(gen)
+    if gen == sc_gen && screen == "songcard" && sc_page == 1 { ui.sc_content.render() }
+}
+fn sc_swipe(dx, dy){
+    if dx < 0 { sc_turn(sc_page + 1) }
+    if dx > 0 { sc_turn(sc_page - 1) }
+}
+fn sc_flip(){
+    if !sc_photo() { return }
+    sc_back = !sc_back
+    sc_render()
+}
+fn sc_next(delta){
+    if playlist.len() == 0 { return }
+    sc_open((sc_pos + delta + playlist.len()) % playlist.len())
+}
+fn sc_feedback(v){
+    if !booted { return }
+    let i = playlist[sc_pos].i
+    feedback(i, v)
+    if v < 0 { sc_next(1) }
+    else {
+        sc_notice = "已记下喜欢"
+        ui.sc_notice.set_text(sc_notice)
+        start_timeout(0.05, || sc_refresh_enc())
+    }
+}
+fn sc_refresh_enc(){
+    if screen == "songcard" { sc_render() }
+}
+fn sc_play(){
+    sc_player_return = true
+    play(playlist[sc_pos].i)
+}
+fn sc_date(m){
+    if m == nil || m.at <= 0 { return "尚未记录" }
+    // card-host 默认 UTC，其他宿主可能已设本地偏移；消除该偏移后统一显示 UTC+8。
+    let origin = local_time(0)
+    let offset = origin.hour * 3600 + origin.minute * 60 + origin.second
+    if origin.year < 1970 { offset = offset - 86400 }
+    let p = local_time(m.at + 28800 - offset)
+    "" + p.year + "." + p.month + "." + p.day
+}
+fn sc_moment_text(m, title){
+    if m == nil { return "还没有" + title + "记录" }
+    let out = []
+    if m.slot != "" { out.push(m.slot) }
+    if m.act != "" { out.push(act_name(m.act)) }
+    if m.place_kind != "" { out.push(kind_name(m.place_kind)) }
+    if m.weather != "" { out.push(m.weather) }
+    if m.city != "" { out.push(m.city) }
+    let text = join(out, " · ")
+    if m.intent != "" { text = text + "\n你说：" + m.intent }
+    if m.sim { text = text + "\n测试数据" }
+    text
+}
+fn sc_stats(){
+    let k = key_of(sc_song())
+    let count = 0
+    let demo = false
+    for row in card_history {
+        for key in row.picks { if key == k { count = count + 1 if row.sim { demo = true } } }
+    }
+    let text = "最近 " + card_history.len() + " 条历史中推荐 " + count + " 次"
+    if demo { text = text + "（含测试数据）" }
+    let top = []
+    let top_count = 0
+    for a in ACTS {
+        let n = 0
+        for row in card_history {
+            if row.act == a.id { for key in row.picks { if key == k { n = n + 1 } } }
+        }
+        if n > top_count { top_count = n top = [] }
+        if n == top_count && n > 0 { top.push(a.n) }
+    }
+    if top.len() > 0 {
+        text = text + "\n这些记录中最常在：" + join(top, "、")
+        if top.len() > 1 { text = text + "（并列）" }
+    }
+    let e = sc_enc()
+    if e.seen != nil && e.seen.at > 0 {
+        text = text + "\n距初见 " + max(0, floor((time_now() - e.seen.at) / 86400)) + " 天"
+    }
+    text + "\n历史最多保留 30 条，不代表累计播放次数"
+}
+fn sc_lyric_lines(){
+    let out = []
+    for line in sc_lyrics.split("\n") {
+        let text = line.trim()
+        if text.search("[ti:") != 0 && text.search("[ar:") != 0 && text.search("[al:") != 0 && text.search("[au:") != 0 && text.search("[by:") != 0 && text.search("[offset:") != 0 {
+            if text.search("[") == 0 && text.search("]") > 0 {
+                let parts = text.split("]")
+                text = parts[parts.len() - 1]
+            }
+            if text != "" { out.push(text) }
+        }
+    }
+    out
+}
+
 // ---- 页面切换与播放 ----
 fn show(name){
     screen = name
@@ -1622,6 +1920,7 @@ fn show(name){
     ui.sense.set_visible(name == "sense")
     ui.library.set_visible(name == "library")
     ui.player_pane.set_visible(name == "player")
+    ui.song_card.set_visible(name == "songcard")
     if name == "home" {
         sync_context()
         sync_home()
@@ -1653,7 +1952,11 @@ fn pick_source(i){
 fn close_player(){
     ui.reader.close()
     playing = nil
-    show("home")
+    if sc_player_return && sc_pos >= 0 && sc_pos < playlist.len() {
+        sc_player_return = false
+        show("songcard")
+        sc_render()
+    } else { show("home") }
 }
 
 fn boot(){
@@ -1701,6 +2004,18 @@ let Field = TextInput{width: Fill height: 40
     draw_text +: {color: ink color_hover: ink color_focus: ink color_empty: secondary color_empty_hover: secondary}
 }
 
+
+let ScText = Label{draw_text.color: SC_INK draw_text.text_style.font_size: 14}
+let ScMuted = Label{draw_text.color: SC_MUTED draw_text.text_style.font_size: 12}
+let ScTitle = Label{width: Fill draw_text.color: SC_INK draw_text.text_style: theme.font_bold{font_size: 22}}
+let ScButton = ButtonFlat{height: 44 padding: 4
+    draw_bg +: {border_radius: 28.0 border_size: 0.0 color: SC_CARD color_hover: SC_RAISED color_down: SC_BORDER}
+    draw_text +: {color: SC_MUTED color_hover: SC_INK color_down: SC_INK text_style +: {font_size: 12}}
+}
+let ScPrimary = ScButton{
+    draw_bg +: {color: SC_ACCENT color_hover: SC_ACCENT color_down: SC_ACCENT}
+    draw_text +: {color: SC_GROUND color_hover: SC_GROUND color_down: SC_GROUND text_style +: {font_size: 14}}
+}
 
 SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
     home := SolidView{width: Fill height: Fill flow: Down spacing: 8 padding: Inset{left: 14 right: 14 top: 10 bottom: 8} draw_bg.color: ground
@@ -1787,7 +2102,9 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
                 }
                 for n p in playlist {
                     RoundedView{width: Fill height: Fit flow: Down spacing: 6 padding: 12 draw_bg.color: card draw_bg.border_radius: 10.0
-                        Label{width: Fill text: "" + (n + 1) + ". " + songs[p.i].t + " — " + songs[p.i].a draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 14}}
+                        GestureView{width: Fill height: 44 align: Align{y: 0.5} on_tap: |x, y| sc_open(n)
+                            Label{width: Fill text: "" + (n + 1) + ". " + songs[p.i].t + " — " + songs[p.i].a draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 14}}
+                        }
                         Label{width: Fill text: p.why draw_text.color: secondary draw_text.text_style.font_size: 12}
                         View{width: Fill height: Fit flow: Right spacing: 8
                             Label{width: Fill text: fb_text(songs[p.i]) draw_text.color: accent draw_text.text_style.font_size: 11}
@@ -1858,7 +2175,7 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
             new_song := Field{empty_text: "歌名 - 歌手" on_return: |text| add_song()}
             Primary{text: "添加" on_click: || add_song()}
         }
-        lib_status := Label{width: Fill text: "内置 45 首为人工粗标注；你添加的歌可删除" draw_text.color: secondary draw_text.text_style.font_size: 12}
+        lib_status := Label{width: Fill text: "内置 46 首为人工粗标注；你添加的歌可删除" draw_text.color: secondary draw_text.text_style.font_size: 12}
         lib_list := ScrollYView{width: Fill height: Fill flow: Down spacing: 0
             on_render: || {
                 for i s in songs {
@@ -1885,6 +2202,117 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
             }
         }
     }
+    song_card := SolidView{visible: false width: Fill height: Fill flow: Down padding: 16 spacing: 8 draw_bg.color: SC_GROUND
+        View{width: Fill height: 50 flow: Right spacing: 8 align: Align{y: 0.5}
+            ScButton{width: 64 text: "‹ 歌单" on_click: || show("home")}
+            sc_heading := ScMuted{width: Fill text: ""}
+        }
+        sc_demo := ScMuted{visible: false width: Fill text: "演示数据 · 含测试记录" draw_text.color: SC_ACCENT}
+        sc_gesture := GestureView{width: Fill height: Fill flow: Down on_swipe: |dx, dy| sc_swipe(dx, dy)
+            sc_front := ScrollYView{width: Fill height: Fill flow: Down spacing: 14
+                cover_tap := GestureView{width: Fill height: 284 on_tap: |x, y| sc_flip() on_swipe: |dx, dy| sc_swipe(dx, dy)
+                    RoundedView{width: Fill height: Fill flow: Down padding: 16 spacing: 4 draw_bg.color: SC_CARD draw_bg.border_radius: 24.0
+                        View{width: Fill height: 234 flow: Overlay align: Align{x: 0.5 y: 0.5}
+                            sc_picture := View{visible: false width: 234 height: 234
+                                sc_image := Image{width: 234 height: 234 fit: ImageFit.CropToFill}
+                            }
+                            sc_disc := RoundedView{width: 234 height: 234 align: Align{x: 0.5 y: 0.5} draw_bg.color: SC_RAISED draw_bg.border_radius: 117.0
+                                RoundedView{width: 204 height: 204 align: Align{x: 0.5 y: 0.5} draw_bg.color: SC_BORDER draw_bg.border_radius: 102.0
+                                    RoundedView{width: 96 height: 96 align: Align{x: 0.5 y: 0.5} draw_bg.color: SC_ACCENT draw_bg.border_radius: 48.0
+                                        sc_letter := Label{text: "♪" draw_text.color: SC_GROUND draw_text.text_style: theme.font_bold{font_size: 28}}
+                                    }
+                                }
+                            }
+                        }
+                        View{width: Fill height: Fit flow: Right
+                            sc_cover_label := ScMuted{width: Fill text: ""}
+                            sc_flip_label := ScMuted{text: "" draw_text.color: SC_ACCENT}
+                        }
+                    }
+                }
+                sc_title := Label{width: Fill text: "" draw_text.color: SC_INK draw_text.text_style: theme.font_bold{font_size: 28}}
+                sc_artist := ScMuted{width: Fill text: ""}
+                RoundedView{width: Fill height: Fit flow: Down spacing: 8 padding: 16 draw_bg.color: SC_RAISED draw_bg.border_radius: 16.0
+                    ScMuted{text: "为什么现在推荐它" draw_text.color: SC_ACCENT}
+                    sc_why := ScText{width: Fill text: ""}
+                }
+            }
+            sc_content := View{width: Fill height: Fill flow: Down on_render: || {
+                let c = sc_data()
+                ScrollYView{width: Fill height: Fill flow: Down spacing: 14
+                    if sc_page == 1 {
+                        ScTitle{text: "歌词"}
+                        ScMuted{width: Fill text: "静态全文 · 不跟随播放进度"}
+                        if sc_lyrics.trim() == "" {
+                            ScText{width: Fill text: "还没有歌词"}
+                            ScMuted{width: Fill text: "将歌词文本放入本机应用存储，再在歌曲卡内容中指定歌词文件。"}
+                        }
+                        for line in sc_lyric_lines() { ScText{width: Fill text: line} }
+                    }
+                    if sc_page == 2 {
+                        ScTitle{text: "故事和档案"}
+                        if c.facts.len() == 0 && c.reading == "" { ScText{width: Fill text: "还没有这首歌的故事"} }
+                        if c.facts.len() > 0 {
+                            ScMuted{text: "事实 · 每条附出处" draw_text.color: SC_ACCENT}
+                            for f in c.facts {
+                                RoundedView{width: Fill height: Fit flow: Down spacing: 6 padding: 16 draw_bg.color: SC_CARD draw_bg.border_radius: 16.0
+                                    ScText{width: Fill text: f.text}
+                                    ScMuted{width: Fill text: "出处：" + f.src}
+                                    ScMuted{width: Fill text: f.url}
+                                }
+                            }
+                        }
+                        if c.reading != "" {
+                            ScText{width: Fill text: "解读（AI 整理，可能不准）" draw_text.color: SC_ACCENT}
+                            ScMuted{width: Fill text: if c.by == "preset" "预制内容" else if c.by == "ai" "应用内生成" else "生成方式未注明"}
+                            ScText{width: Fill text: c.reading}
+                        }
+                        if c.credits != "" || c.date != "" || c.where != "" || c.note != "" { ScTitle{text: "歌曲档案"} }
+                        if c.credits != "" { ScText{width: Fill text: c.credits} }
+                        if c.date != "" { ScMuted{width: Fill text: "首发：" + c.date} }
+                        if c.where != "" { ScMuted{width: Fill text: "平台：" + c.where} }
+                        if c.note != "" { ScMuted{width: Fill text: c.note} }
+                    }
+                    if sc_page == 3 {
+                        let e = sc_enc()
+                        ScTitle{text: "你和这首歌"}
+                        if e.seen == nil && e.heard == nil && e.liked == nil {
+                            ScText{width: Fill text: "你们还没有正式见过面"}
+                        }
+                        if e.seen != nil || e.heard != nil || e.liked != nil {
+                            let moments = [{title: "初见" m: e.seen} {title: "初听" m: e.heard} {title: "心动" m: e.liked}]
+                            for row in moments {
+                                RoundedView{width: Fill height: Fit flow: Down padding: 16 spacing: 8 draw_bg.color: SC_CARD draw_bg.border_radius: 16.0
+                                    ScText{width: Fill text: row.title + "  ·  " + sc_date(row.m) draw_text.color: SC_ACCENT}
+                                    ScText{width: Fill text: sc_moment_text(row.m, row.title)}
+                                }
+                            }
+                            ScText{width: Fill text: "相遇统计" draw_text.color: SC_ACCENT}
+                            ScMuted{width: Fill text: sc_stats()}
+                        }
+                    }
+                    View{width: Fill height: 12}
+                }
+            }}
+        }
+        sc_dots := View{width: Fill height: 44 flow: Right align: Align{x: 0.5 y: 0.5} on_render: || {
+            for p in 4 {
+                GestureView{width: 44 height: 44 align: Align{x: 0.5 y: 0.5} on_tap: |x, y| sc_turn(p)
+                    RoundedView{width: if p == sc_page 20 else 8 height: 8 draw_bg.color: if p == sc_page SC_ACCENT else SC_BORDER draw_bg.border_radius: 4.0}
+                }
+            }
+        }}
+        sc_notice := ScMuted{width: Fill height: 20 text: "" align: Align{x: 0.5}}
+        View{width: Fill height: 60 flow: Right spacing: 5 align: Align{y: 0.5}
+            ScButton{width: Fill height: 56 text: "‹\n上一首" on_click: || sc_next(-1)}
+            ScButton{width: Fill height: 56 text: "✕\n不喜欢" on_click: || sc_feedback(-1)}
+            ScPrimary{width: 88 height: 56 text: "▶ 去听" on_click: || sc_play()}
+            ScButton{width: Fill height: 56 text: "♥\n喜欢" draw_text.color: SC_ACCENT on_click: || sc_feedback(1)}
+            ScButton{width: Fill height: 56 text: "›\n下一首" on_click: || sc_next(1)}
+        }
+        sc_count := ScMuted{width: Fill height: 24 text: "" align: Align{x: 0.5}}
+    }
+
     player_pane := SolidView{visible: false width: Fill height: Fill flow: Down draw_bg.color: ground
         View{width: Fill height: Fit flow: Right align: Align{y: 0.5} spacing: 6 padding: Inset{left: 4 right: 12 top: 6 bottom: 6}
             Bar{text: "‹ 返回" on_click: || close_player()}

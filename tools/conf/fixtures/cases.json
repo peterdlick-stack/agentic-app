@@ -5292,6 +5292,235 @@
       }
     },
     {
+      "id": "network_retry",
+      "title": "首轮契约失败、重试网络失败，归入最终失败",
+      "setup": {
+        "sim": true,
+        "now_unix": 1791529200,
+        "local_time": "2026-10-09T15:00:00+08:00",
+        "prefs": {
+          "use_time": true,
+          "use_weather": false,
+          "use_gps": false
+        },
+        "weather": {
+          "state": "unavailable",
+          "at": 0
+        },
+        "motion": {
+          "state": "unknown",
+          "source": "sim",
+          "conf": 0
+        },
+        "here": {
+          "place": null
+        },
+        "ctx": {
+          "activity": {
+            "id": "walk",
+            "source": "manual",
+            "conf": 1
+          },
+          "hour": 15,
+          "weekday": 5,
+          "slot": "下午"
+        },
+        "raw": "随便选几首",
+        "it": {
+          "instr": 0,
+          "energy": 0,
+          "mood": "",
+          "lang": "",
+          "fresh": false,
+          "act": "",
+          "act_word": ""
+        },
+        "avail": {
+          "slot": true,
+          "weather": false,
+          "motion": false,
+          "place": false,
+          "act": true,
+          "intent": true
+        },
+        "library_append": [],
+        "likes": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "fresh_keys": [],
+        "has_model": true,
+        "catalog_mutation": null
+      },
+      "catalog_size": 46,
+      "hard": [],
+      "eligible_indices": [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24,
+        25,
+        26,
+        27,
+        28,
+        29,
+        30,
+        31,
+        32,
+        33,
+        34,
+        35,
+        36,
+        37,
+        38,
+        39,
+        40,
+        41,
+        42,
+        43,
+        44,
+        45
+      ],
+      "queue_offset": 44,
+      "queue_count": 2,
+      "response_names": [
+        "network_retry.attempt1",
+        "network_retry.attempt2"
+      ],
+      "expect": {
+        "e1": [
+          {
+            "code": "E_COUNT",
+            "pick": 0,
+            "ref": ""
+          }
+        ],
+        "e2": [],
+        "res": "local_fail",
+        "model_calls": 2,
+        "attempts_logged": 2,
+        "playlist_count": 6,
+        "playlist_unique": true,
+        "playlist_indices_subset_of": [
+          0,
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11,
+          12,
+          13,
+          14,
+          15,
+          16,
+          17,
+          18,
+          19,
+          20,
+          21,
+          22,
+          23,
+          24,
+          25,
+          26,
+          27,
+          28,
+          29,
+          30,
+          31,
+          32,
+          33,
+          34,
+          35,
+          36,
+          37,
+          38,
+          39,
+          40,
+          41,
+          42,
+          43,
+          44,
+          45
+        ],
+        "plan_note": "AI 结果没通过检查（<首个错误码中文说明>），改用本地规则",
+        "plan_note_match": "prefix_and_suffix",
+        "late_callback_discarded": false,
+        "net": "fixture-retry-network-error"
+      }
+    },
+    {
       "id": "invalid_70s",
       "title": "70 秒返回不合格，不重试",
       "setup": {
@@ -5446,7 +5675,7 @@
         44,
         45
       ],
-      "queue_offset": 44,
+      "queue_offset": 46,
       "queue_count": 1,
       "response_names": [
         "invalid_70s.attempt1"
@@ -5673,7 +5902,7 @@
         44,
         45
       ],
-      "queue_offset": 45,
+      "queue_offset": 47,
       "queue_count": 1,
       "response_names": [
         "late_100s.attempt1"
@@ -5897,7 +6126,7 @@
         44,
         45
       ],
-      "queue_offset": 46,
+      "queue_offset": 48,
       "queue_count": 1,
       "response_names": [
         "valid_70s.attempt1"
@@ -6126,7 +6355,7 @@
         44,
         45
       ],
-      "queue_offset": 47,
+      "queue_offset": 49,
       "queue_count": 2,
       "response_names": [
         "invalid_60s.attempt1",
@@ -6363,7 +6592,7 @@
         44,
         45
       ],
-      "queue_offset": 49,
+      "queue_offset": 51,
       "queue_count": 2,
       "response_names": [
         "retry_late_100s.attempt1",
@@ -6601,7 +6830,7 @@
         44,
         45
       ],
-      "queue_offset": 51,
+      "queue_offset": 53,
       "queue_count": 1,
       "response_names": [
         "catalog_changed.attempt1"
@@ -6785,7 +7014,7 @@
         "lang:en"
       ],
       "eligible_indices": [],
-      "queue_offset": 52,
+      "queue_offset": 54,
       "queue_count": 0,
       "response_names": [],
       "expect": {
@@ -6957,7 +7186,7 @@
         44,
         45
       ],
-      "queue_offset": 52,
+      "queue_offset": 54,
       "queue_count": 0,
       "response_names": [],
       "expect": {
@@ -7159,7 +7388,7 @@
         15,
         46
       ],
-      "queue_offset": 52,
+      "queue_offset": 54,
       "queue_count": 1,
       "response_names": [
         "unknown_metadata_retained.attempt1"
@@ -7341,7 +7570,7 @@
         15,
         46
       ],
-      "queue_offset": 53,
+      "queue_offset": 55,
       "queue_count": 2,
       "response_names": [
         "ref_song_absent.attempt1",
@@ -7547,7 +7776,7 @@
         44,
         45
       ],
-      "queue_offset": 55,
+      "queue_offset": 57,
       "queue_count": 1,
       "response_names": [
         "injection_intent.attempt1"
@@ -7790,7 +8019,7 @@
         45,
         46
       ],
-      "queue_offset": 56,
+      "queue_offset": 58,
       "queue_count": 1,
       "response_names": [
         "injection_song_title.attempt1"
@@ -8022,7 +8251,7 @@
         44,
         45
       ],
-      "queue_offset": 57,
+      "queue_offset": 59,
       "queue_count": 1,
       "response_names": [
         "injection_url_why.attempt1"
@@ -8253,7 +8482,7 @@
         44,
         45
       ],
-      "queue_offset": 58,
+      "queue_offset": 60,
       "queue_count": 2,
       "response_names": [
         "injection_outside_index.attempt1",

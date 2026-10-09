@@ -52,6 +52,7 @@ ai/ai_retry 的歌曲顺序则必须与 playlist_indices_exact 一致。
 | `retry_success` | 首轮五首，第二轮六首 | E_COUNT | — | 2 | `ai_retry` |
 | `retry_exhausted` | 两轮都是五首，最多重试一次 | E_COUNT | E_COUNT | 2 | `local_fail` |
 | `network_first` | 首轮网络失败，不重试 | — | — | 1 | `local_net` |
+| `network_retry` | 首轮契约失败、重试网络失败，归入最终失败 | E_COUNT | — | 2 | `local_fail` |
 | `invalid_70s` | 70 秒返回不合格，不重试 | E_COUNT | — | 1 | `local_fail` |
 | `late_100s` | 100 秒返回合法结果，90 秒看门狗先回退 | — | — | 1 | `local_timeout` |
 | `valid_70s` | 70 秒返回合格结果，正常采用 | — | — | 1 | `ai` |
@@ -82,6 +83,7 @@ ai/ai_retry 的歌曲顺序则必须与 playlist_indices_exact 一致。
 local_fail 的首错误中文说明由 A 的映射表给出；若同一首同时违反可选集和硬条件，两个码都要记录。
 状态、JSON 顶层和越界索引错误不继续访问无法判定的歌曲字段，以免产生无依据的连带错误。
 `network_first` 不做输出校验，`late_100s` 的过期结果不做输出校验。
+`network_retry` 保留 e1=E_COUNT、e2=[]、att=2 和 net=fixture-retry-network-error，res=local_fail；只有首轮网络失败才用 local_net。
 `catalog_changed` 优先返回 E_CAT，无论候选键仍在曲库里都不得采用旧索引结果。
 
 `local_insuff_0`/`local_nomodel` 不调用模型，但日志格式 att 只有 1|2，因此 expect.attempts_logged=1；实际调用数为 0。

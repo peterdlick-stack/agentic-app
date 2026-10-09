@@ -147,6 +147,7 @@ def check_case(case, queue, catalog):
     assert it["lang"] == ("en" if "英文" in setup["raw"] else "")
     assert it["mood"] == ("欢快" if "开心" in setup["raw"] else "")
     errors = [set(), set()]
+    actual_net = ""
     if len(eligible) < 6:
         actual_res = "local_insuff"
         assert count == 0
@@ -164,7 +165,8 @@ def check_case(case, queue, catalog):
                 assert ex["late_callback_discarded"] and attempt + 1 == count
                 break
             if not reply["is_ok"]:
-                actual_res = "local_net"
+                actual_res = "local_net" if attempt == 0 else "local_fail"
+                actual_net = reply["error"][:40]
                 assert attempt + 1 == count
                 break
             errors[attempt] = oracle(reply["data"]["output"], case, catalog)
@@ -178,6 +180,8 @@ def check_case(case, queue, catalog):
                 break
             assert count == 2, "locatable first-attempt contract error must have a retry"
     assert actual_res == ex["res"], (case["id"], actual_res, ex["res"])
+    if "net" in ex:
+        assert actual_net == ex["net"], (case["id"], actual_net, ex["net"])
     assert errors[0] == normalized(ex["e1"]), (case["id"], errors[0], ex["e1"])
     assert errors[1] == normalized(ex["e2"]), (case["id"], errors[1], ex["e2"])
     if actual_res in {"ai", "ai_retry"}:

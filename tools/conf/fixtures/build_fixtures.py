@@ -153,6 +153,8 @@ def make_cases(catalog):
     add("retry_success", "首轮五首，第二轮六首", [response(bad5), response(output())], [[err("E_COUNT")], []], "ai_retry")
     add("retry_exhausted", "两轮都是五首，最多重试一次", [response(bad5), response(bad5)], [[err("E_COUNT")], [err("E_COUNT")]], "local_fail")
     add("network_first", "首轮网络失败，不重试", [response(None, is_ok=False, error="fixture-network-error")], [[]], "local_net")
+    add("network_retry", "首轮契约失败、重试网络失败，归入最终失败", [response(bad5), response(None, is_ok=False, error="fixture-retry-network-error")],
+        [[err("E_COUNT")], []], "local_fail", checks={"net": "fixture-retry-network-error"})
     add("invalid_70s", "70 秒返回不合格，不重试", [response(bad5, delay=70)], [[err("E_COUNT")]], "local_fail")
     add("late_100s", "100 秒返回合法结果，90 秒看门狗先回退", [response(output(), delay=100)], [[]], "local_timeout",
         checks={"late_callback_discarded": True, "watchdog_s": 90, "observe_until_s": 105, "rec_event_count": 1})
@@ -257,6 +259,7 @@ def markdown(catalog, cases, queue):
     lines += ["", "local_fail 的首错误中文说明由 A 的映射表给出；若同一首同时违反可选集和硬条件，两个码都要记录。",
               "状态、JSON 顶层和越界索引错误不继续访问无法判定的歌曲字段，以免产生无依据的连带错误。",
               "`network_first` 不做输出校验，`late_100s` 的过期结果不做输出校验。",
+              "`network_retry` 保留 e1=E_COUNT、e2=[]、att=2 和 net=fixture-retry-network-error，res=local_fail；只有首轮网络失败才用 local_net。",
               "`catalog_changed` 优先返回 E_CAT，无论候选键仍在曲库里都不得采用旧索引结果。", "",
               "`local_insuff_0`/`local_nomodel` 不调用模型，但日志格式 att 只有 1|2，因此 expect.attempts_logged=1；实际调用数为 0。", "",
               "## 固定曲库索引", "", "| i | 歌曲键 | en | vo | md | lg |", "|---:|---|---:|---|---|---|"]

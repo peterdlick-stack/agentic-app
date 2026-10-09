@@ -50,3 +50,4 @@ labels_seed.json 具有 chosen/top 等旧标签字段，没有确认前的 q/pr/
 - malformed output 顶层缺字段或不是对象统一用 E_JSON；索引非法后不访问歌曲字段。
 - 每项 ev 数量均在 2–4 范围；任务书没有冻结数量本身错误的专用码，本夹具不自行规定这个映射。
 - local_nomodel/local_insuff 的模型调用数为 0，事件 att 因冻结格式只允许 1|2，期望为 1；不要用 att 统计是否发起过模型调用。
+- 首次契约失败、第二次网络失败用 att=2、res=local_fail，保留 net 摘要和 e1，e2 为空；仅首次网络失败才归 local_net，避免把重试失败计入“首轮网络失败”。

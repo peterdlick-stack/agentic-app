@@ -2627,6 +2627,71 @@
     }
   },
   {
+    "name": "network_retry.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "network_retry.attempt2",
+    "delay_s": 0.01,
+    "is_ok": false,
+    "error": "fixture-retry-network-error",
+    "data": {
+      "output": null
+    }
+  },
+  {
     "name": "invalid_70s.attempt1",
     "delay_s": 70,
     "is_ok": true,

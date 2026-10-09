@@ -18,6 +18,57 @@ let SC_CLEAR = #x00000000
 
 let DATA = "accounts/device/"
 
+// ==== [W0] 冻结接口与共享状态 ====
+let POLICY_VER = "act-v1"
+let PROMPT_VER = "rec-v2"
+let DLOG_VER = 1
+let TIER_LOW_Q = 0.50
+let TIER_GAP = 0.20
+let TIER_HIGH_Q = 0.80
+let TIER_HIGH_ON = false
+let DEV_FAKE_MODEL = false
+let jitter_on = true
+let REC_N = 6
+let RETRY_MAX_FIRST_S = 60
+let DLOG_SHARD_N = 50
+let DLOG_SHARDS = 16
+let cur_act_id = 0
+let playlist_rec = 0
+let playlist_fit = []
+
+// ==== [A] 选歌契约 ====
+fn dlog_rec(picks, how, ctx){}
+
+// ==== [B] 活动支持度 ====
+fn dlog_act(chosen, how){}
+fn dlog_act_undo(){}
+
+// ==== [C] 调试页 ====
+let debug_expanded = false
+fn sync_debug(){}
+fn toggle_debug(){
+    debug_expanded = !debug_expanded
+    ui.debug.set_visible(debug_expanded)
+    ui.debug_toggle.set_text(if debug_expanded "调试信息（开发用）▾" else "调试信息（开发用）▸")
+    if debug_expanded { sync_debug() }
+}
+
+// ==== [D] 决策日志 ====
+fn dlog_push(ev){}
+fn dlog_new_id(){ 0 }
+fn dlog_recent(n){ [] }
+fn dlog_stats(want_sim){ nil }
+fn boot_dstats(gen){ boot_next("dshard") }
+fn boot_dshard(gen){ boot_next("encounters") }
+
+// ==== [E] 契合档 ====
+fn fit_snapshot(ctx, it, elig){ [] }
+fn dlog_rate(i, v){}
+fn dlog_click(i){}
+
+// ==== [F] 读回 ====
+fn readback_check(name, expect_n){}
+
 // ---- 内置曲库：人工粗标注。en 能量 1-5，vo 是否人声，md 情绪，lg 语种 ----
 let SEED = [
     {t: "I LOVE U" a: "洛天依" en: 4 vo: true md: "欢快" lg: "zh"}
@@ -264,6 +315,8 @@ fn boot_label(step){
     if step == "library" { return "曲库" }
     if step == "feedback" { return "反馈" }
     if step == "labels" { return "确认记录" }
+    if step == "dstats" { return "决策汇总" }
+    if step == "dshard" { return "决策事件" }
     if step == "encounters" { return "相遇记录" }
     if step == "cards" { return "歌曲卡" }
     if step == "card_history" { return "歌曲卡历史" }
@@ -356,7 +409,11 @@ fn boot_run(gen, step){
         boot_read(gen, "feedback.json", 30, |row| load_fb_row(row), "labels")
     } else if step == "labels" {
         labels = []
-        boot_read(gen, "labels.json", 50, |x| load_label(x), "encounters")
+        boot_read(gen, "labels.json", 50, |x| load_label(x), "dstats")
+    } else if step == "dstats" {
+        boot_dstats(gen) // [W0 hook / D]
+    } else if step == "dshard" {
+        boot_dshard(gen) // [W0 hook / D]
     } else if step == "encounters" {
         encounters = []
         // 每条要整理 3 个时刻、每个 11 个字段，比确认记录重，所以每批只读 20 条
@@ -972,6 +1029,7 @@ fn confirm_act(id, how){
     if !booted { boot_hint() return }
     if busy { return }
     if flow_labels_before != nil && prefs.act == id && manual_left() > 0 {
+        dlog_act_undo() // [W0 hook / B]
         undo_flow_label()
         prefs.act = ""
         prefs.act_until = 0
@@ -980,6 +1038,7 @@ fn confirm_act(id, how){
         defer_save_prefs_and_refresh()
         return
     }
+    dlog_act(id, how) // [W0 hook / B]
     if flow_labels_before == nil { flow_labels_before = labels }
     let b = cur_bucket()
     let top = []
@@ -1020,6 +1079,7 @@ fn flow_uncertain(){
     if !booted { boot_hint() return }
     if busy { return }
     undo_flow_label()
+    dlog_act("", "skip") // [W0 hook / B]
     prefs.act = ""
     prefs.act_until = 0
     session_act = nil
@@ -1246,7 +1306,7 @@ fn score_song(s, ctx, it){
     if it.fresh {
         for k in last_keys { if k == key_of(s) { sc = sc - 6.0 } }
     }
-    sc = sc + random() * 0.35
+    if jitter_on { sc = sc + random() * 0.35 }
     let text = join(why, " · ")
     if text == "" { text = "综合情境的折中选择" }
     {sc: sc why: text}
@@ -1325,6 +1385,7 @@ fn recommend_run(raw, gen){
     if ctx.activity.source == "intent" {
         let top = []
         if last_rank != nil { for k in 3 { if k < last_rank.list.len() { top.push(last_rank.list[k].id) } } }
+        dlog_act(ctx.activity.id, "intent") // [W0 hook / A]
         add_label(cur_bucket(), ctx.activity.id, top, "intent")
     }
     if playlist.len() > 0 {
@@ -1445,6 +1506,7 @@ fn finish(picks, how, raw, it, ctx, note){
     start_timeout(0.01, || save_last())
     start_timeout(0.02, || log_history(how, raw, ctx, keys, air))
     start_timeout(0.03, || enc_seen(ctx, picks))
+    start_timeout(0.04, || dlog_rec(picks, how, ctx)) // [W0 hook / A]
 }
 
 // ---- 第一次相遇（DEMO-ILOVEU 4.2）----
@@ -1529,6 +1591,7 @@ fn feedback(i, v){
     else { ui.plan.set_text("记下了：在" + where + "里少推《" + s.t + "》") }
     ui.list.render()
     // 曲库列表在 show("library") 时重画，这里不再重画整张 46 行的列表
+    dlog_rate(i, v) // [W0 hook / E]
 }
 
 // ---- 曲库 ----
@@ -1734,6 +1797,7 @@ fn sync_sense(){
     ui.sims.render()
     ui.kinds.render()
     ui.place_list.render()
+    sync_debug() // [W0 hook / C]
 }
 fn refresh_views(){
     if screen == "home" { sync_context() }
@@ -2096,6 +2160,7 @@ fn home_step(page){
 }
 fn flow_restart(){
     if busy { return }
+    cur_act_id = 0 // [W0 hook / B]: 新一轮不沿用上一轮的确认事件。
     flow_labels_before = nil
     flow_activity = ""
     ui.intent.set_text("")
@@ -2122,6 +2187,7 @@ fn show(name){
     if name == "library" { ui.lib_list.render() }
 }
 fn play(i){
+    dlog_click(i) // [W0 hook / E]
     let event_act = playlist_act
     if screen == "songcard" && sc_origin == "library" { event_act = "" }
     start_timeout(0.01, || enc_event_for(i, "heard", event_act))
@@ -2366,6 +2432,10 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
             }
         }
         sense_status := Label{width: Fill text: "" draw_text.color: secondary draw_text.text_style.font_size: 12}
+        debug_toggle := Bar{width: Fill text: "调试信息（开发用）▸" on_click: || toggle_debug()}
+        debug := View{visible: false width: Fill height: Fit flow: Down spacing: 6
+            // ==== [C] 调试容器 ====
+        }
     }
     library := SolidView{visible: false width: Fill height: Fill flow: Down spacing: 10 padding: Inset{left: 14 right: 14 top: 12 bottom: 8} draw_bg.color: ground
         View{width: Fill height: Fit flow: Right align: Align{y: 0.5}

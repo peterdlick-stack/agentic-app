@@ -1,0 +1,3630 @@
+[
+  {
+    "name": "valid_6.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "count_5.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "count_5.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "duplicate.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "duplicate.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "range_high.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 46,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "range_high.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "range_negative.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": -1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "range_negative.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "range_fractional.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1.5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "range_fractional.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "hard_vocal.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 0,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "hard_vocal.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "hard_lang.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 0,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 34,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 35,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 36,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 37,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 38,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "hard_lang.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 34,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 35,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 36,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 37,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 38,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 39,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "ref_enum.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy",
+              "system.override"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "ref_enum.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "ref_weather_absent.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy",
+              "weather"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "ref_weather_absent.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "ref_mood_mismatch.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "intent.mood",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "ref_mood_mismatch.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "ref_no_context.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "song.energy",
+              "song.mood"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "ref_no_context.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "ref_no_song.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "slot"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "ref_no_song.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "ref_like_mismatch.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy",
+              "history.like"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "ref_like_mismatch.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "why_long.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "why_long.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "why_empty.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "why_empty.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "status_invalid.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "approved",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "status_invalid.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "insuff_false.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "insufficient_candidates",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": []
+      }
+    }
+  },
+  {
+    "name": "insuff_false.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "json_not_object.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": "this is not an object"
+    }
+  },
+  {
+    "name": "json_not_object.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "json_missing_field.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "json_missing_field.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "retry_success.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "retry_success.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "retry_exhausted.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "retry_exhausted.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "network_first.attempt1",
+    "delay_s": 0.01,
+    "is_ok": false,
+    "error": "fixture-network-error",
+    "data": {
+      "output": null
+    }
+  },
+  {
+    "name": "invalid_70s.attempt1",
+    "delay_s": 70,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "late_100s.attempt1",
+    "delay_s": 100,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "valid_70s.attempt1",
+    "delay_s": 70,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "invalid_60s.attempt1",
+    "delay_s": 60,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "invalid_60s.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "retry_late_100s.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "retry_late_100s.attempt2",
+    "delay_s": 100,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "catalog_changed.attempt1",
+    "delay_s": 1,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "unknown_metadata_retained.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 46,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "history.like"
+            ]
+          },
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "ref_song_absent.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 46,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "history.like",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "ref_song_absent.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 46,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "history.like"
+            ]
+          },
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "injection_intent.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "injection_song_title.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 46,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "injection_url_why.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 1,
+            "why": "https://example.invalid/x",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 6,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "injection_outside_index.attempt1",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 999,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "injection_outside_index.attempt2",
+    "delay_s": 0.01,
+    "is_ok": true,
+    "error": "",
+    "data": {
+      "output": {
+        "status": "ok",
+        "understood": "按当前情境选六首歌",
+        "activity": "walk",
+        "activity_why": "用户已确认散步",
+        "picks": [
+          {
+            "i": 999,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 1,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 2,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 3,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 4,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          },
+          {
+            "i": 5,
+            "why": "节奏适合当前散步情境",
+            "ev": [
+              "act",
+              "song.energy"
+            ]
+          }
+        ]
+      }
+    }
+  }
+]

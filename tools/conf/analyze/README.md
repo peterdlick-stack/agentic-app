@@ -12,7 +12,7 @@ python -m unittest discover -s tools/conf/analyze -p test_analyze.py -v
 
 输出包含中文 `REPORT.md`、完整机器可读指标/差异 `metrics.json`、三箱可靠性图 `reliability.png`。图上为空箱写“无数据”；无可用中文字体时图中使用 `No data / n=0`，报告仍写“无数据”。缺 matplotlib 时先保存数字和报告，再报图形缺失并退出 2，不能当完整交付。
 
-退出码：0 = 指标生成完成，且如请求核验则完整历史 PASS；2 = 输入/依赖错误；3 = 核验 FAIL 或 HISTORY_INCOMPLETE。默认排除 `sim:true` 的展示指标；核验始终分别复算 `real` 和 `sim` 两组。
+退出码：0 = 指标生成完成，且如请求核验则完整历史 PASS；2 = 输入/依赖错误；3 = 核验 FAIL 或 HISTORY_INCOMPLETE。默认展示先排除 `sim:true` 事件再重放，模拟撤销/改票不能改变真实记录；核验始终使用完整历史分别复算 `real` 和 `sim` 两组。
 
 ## 累计统计和环形快照
 
@@ -26,7 +26,7 @@ python -m unittest discover -s tools/conf/analyze -p test_analyze.py -v
 
 ## 计数口径
 
-- `dup:true` 的 act 只贡献 dup；跳过贡献 n、skip、展示档，标签和 Brier 不计；撤销将目标 act 的全部贡献减回，并给目标所属 real/sim 的 undo 加一。重复撤销只减一次且报异常；撤销目标不在历史中也报异常。全部快照合并后处理，因此跨片与重启边界不会改变离线结果。
+- `dup:true` 的 act 只贡献 dup；跳过贡献 n、skip、展示档，标签和 Brier 不计；撤销将目标 act 的全部贡献减回，并给目标所属 real/sim 的 undo 加一。重复撤销只减一次且报异常；撤销目标不在历史中也报异常。act_undo 与其目标的 sim 不同、或 rate/click 与曝光的 sim 不同均为异常，累计核验不能 PASS；含模拟展示保留完整历史效果，默认展示只重放真实事件。全部快照合并后处理，因此跨片与重启边界不会改变离线结果。
 - top-1、规则、多数类均用冻结预测与 y 独立算命中；dstats 复算按事件内 hit/rhit/mhit、br/bp 累加，并检查它们与向量的明显矛盾。q/pr 是三位小数，完整七维向量 Brier 与在线原精度标量允许量化差异；图表分别列全向量重算和日志标量均值。只有三项的截短向量不补零、不重新归一化、不冒充完整 Brier。
 - 三档覆盖率分母是撤销/去重后全部 act，错误率分母是该档有标签的 act；跳过保留在覆盖分母中，未确认单列。空分母为 N/A。eh 独立于展示高档开关，不开启任何产品功能。
 - 首轮返回文本由 `e1` 非空、`res=ai/ai_retry` 或 `att=2` 识别；首轮不合格由 `e1` 非空识别。首轮网络失败为 `res=local_net && att=1`。**总调度已约定：第二次网络失败使用 `local_fail`，net 保留错误摘要；`local_net` 只给首次网络失败。** 输入校验拒绝 att=2/local_net，避免 C 的回退计数与首轮网络计数冲突。研究比例分母排除 `local_nomodel/local_insuff`；调试页 net/n 另列，避免混用。重试成功 `ai_retry/att=2`。最终回退分子为 fail/net/timeout/insuff，分母为全部已结束 rec；nomodel 单列。仅有结束事件，pending=UNKNOWN。

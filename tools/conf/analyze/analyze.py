@@ -174,6 +174,8 @@ def replay(events):
                 target_group["undo"] += 1
                 active.pop(ev["a"])
                 undone.add(ev["a"])
+                if target["sim"] != ev["sim"]:
+                    warnings.append(f"act_undo {ev['id']}: target sim differs; cross-group reversal")
         elif kind == "rec":
             recs[ev["id"]] = ev
             counts = group["rec"]
@@ -250,6 +252,10 @@ def full_brier(vector, y):
 
 def describe(events, active, groups, include_sim=False):
     selected = [ev for ev in events if include_sim or not ev["sim"]]
+    # Filtering only the final counters would let a simulated undo or changed
+    # vote erase a real observation. Filter events before the displayed replay.
+    if not include_sim:
+        groups, active, _, _ = replay(selected)
     acts = [ev for ev in active if not ev["dup"] and (include_sim or not ev["sim"])]
     labels = [ev for ev in acts if ev["y"]]
     hits = {"q": lambda ev: ev["q"][0][0] == ev["y"],

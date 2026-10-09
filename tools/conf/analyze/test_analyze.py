@@ -85,7 +85,15 @@ class ActivityTests(unittest.TestCase):
         self.assertEqual(groups["sim"]["act"]["n"], 0)
         self.assertEqual(groups["sim"]["act"]["undo"], 1)
         self.assertEqual(groups["real"]["act"]["undo"], 0)
-        self.assertEqual(warnings, [])
+        self.assertIn("target sim differs", warnings[0])
+
+    def test_simulated_undo_cannot_erase_default_real_activity(self):
+        rows = [act(1), event(2, "act_undo", a=1, sim=True)]
+        groups, active, _, warnings = analyze.replay(rows)
+        self.assertEqual(analyze.describe(rows, active, groups)["label_n"], 1)
+        self.assertEqual(analyze.describe(rows, active, groups, True)["label_n"], 0)
+        self.assertIn("target sim differs", warnings[0])
+        self.assertEqual(analyze.check_dstats(rows, groups, dstats(rows), warnings)["status"], "FAIL")
 
     def test_duplicate_undo_does_not_subtract_twice(self):
         events = [act(1), event(2, "act_undo", a=1), event(3, "act_undo", a=1)]
@@ -181,6 +189,17 @@ class RecommendationTests(unittest.TestCase):
 
 
 class FeedbackTests(unittest.TestCase):
+    def test_simulated_vote_change_cannot_erase_default_real_vote(self):
+        rows = [rec(1), event(2, "rate", r=1, k="song|artist", v=1, fb="H", pos=1),
+                event(3, "rate", r=1, k="song|artist", v=-1, fb="H", pos=1, sim=True)]
+        groups, active, _, warnings = analyze.replay(rows)
+        default = analyze.describe(rows, active, groups)["songs"]["H"]
+        combined = analyze.describe(rows, active, groups, True)["songs"]["H"]
+        self.assertEqual((default["like"], default["dis"]), (1, 0))
+        self.assertEqual((combined["like"], combined["dis"]), (0, 1))
+        self.assertIn("exposure tier/position/sim differs", warnings[0])
+        self.assertEqual(analyze.check_dstats(rows, groups, dstats(rows), warnings)["status"], "FAIL")
+
     def test_vote_changes_cross_shard_and_library_feedback_is_excluded(self):
         rows = [rec(1), event(2, "rate", r=1, k="song|artist", v=1, fb="H", pos=1),
                 event(51, "rate", r=1, k="song|artist", v=-1, fb="H", pos=1),

@@ -45,4 +45,4 @@ Add this app's own requirements, data sources and tests below.
 - 启动加载必须分批：500 条确认记录一次性读入，会超过 20 万条指令的上限（已实测）；曲库、反馈也会随使用增长。新增会增长的数据文件时，在 `boot_run` 里加一步，用 `boot_read` 读、自动分批，每步开头先清空自己要填的数据（看门狗会整步重试）。
 - 除了指令上限，每个处理函数还有 **64 ms 的墙钟上限**（`script time budget exceeded`）。慢盘上（WSL 访问 `/mnt/f` 走 9P）一次读写就可能吃掉大半，所以**一个处理函数里最多做一次文件读写**，多的用 `start_timeout` 拆开（见 `finish()`、`log_history()`）。启动有看门狗（`boot_watch`）：1 秒没有进展就整步重试，并在状态行显示原因。
 - 会增长的文件（library、feedback、labels、encounters）在 `booted` 之前一律不写：启动没读完时写，会用一半数据覆盖文件。
-- 原话里说明的情境或 AI 判断出的情境，会在同一情境桶里沿用 30 分钟（`session_act`），保证情境卡和歌单显示同一个活动。
+- 原话里说明的情境（intent 来源）会在同一情境桶里沿用 30 分钟（`session_act`）；模型判断只写入 `rec.mact` 和未校准说明，不改变有效活动、反馈归属或下轮候选。

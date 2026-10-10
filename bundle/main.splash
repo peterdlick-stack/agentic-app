@@ -156,7 +156,7 @@ let LABEL_MAX = 500
 let ALPHA = 3           // 先验的权重（相当于 3 条虚拟记录）
 let last_rank = nil     // 最近一次排序结果 {list n level bucket}
 let show_all_acts = false
-// 你在原话里说明的情境、或 AI 从你的话里判断出的情境，在同一情境桶里沿用 30 分钟，
+// 你在原话里明确说明的情境（intent 来源）在同一情境桶里沿用 30 分钟，
 // 这样情境卡和刚生成的歌单显示的是同一个活动（G1 报告的不一致问题）
 let session_act = nil   // {id source conf why at bucket}
 let SESSION_S = 1800
@@ -1649,6 +1649,7 @@ fn remove_place(kind){
     refresh_views()
 }
 fn sim_set(kind){
+    b_mode_boundary()
     let was = sim.kind
     if kind == "off" {
         sim = {kind: "off" lat: 0.0 lon: 0.0 t: 0}
@@ -2515,6 +2516,7 @@ fn choose_requirement(raw){
     if busy || !booted { return }
     ui.intent.set_text(raw)
     flow_labels_before = nil
+    b_commit_act()
     rec_gen = rec_gen + 1
     let gen = rec_gen
     rec_att = 0
@@ -2557,6 +2559,7 @@ fn recommend_run(raw, gen){
         if last_rank != nil { for k in 3 { if k < last_rank.list.len() { top.push(last_rank.list[k].id) } } }
         dlog_act(ctx.activity.id, "intent") // [W0 hook / A]
         add_label(cur_bucket(), ctx.activity.id, top, "intent")
+        b_commit_act() // The intent label now belongs to this recommendation.
     }
     if playlist.len() > 0 {
         last_keys = []
@@ -3736,7 +3739,7 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
             Bar{width: Fill text: "从头再选一次" on_click: || flow_restart()}
         }
     }
-    sense := SolidView{visible: false width: Fill height: Fill flow: Down spacing: 10 padding: Inset{left: 14 right: 14 top: 12 bottom: 8} draw_bg.color: ground
+    sense := ScrollYView{visible: false width: Fill height: Fill flow: Down spacing: 10 padding: Inset{left: 14 right: 14 top: 12 bottom: 8} draw_bg.color: ground
         View{width: Fill height: Fit flow: Right align: Align{y: 0.5}
             Bar{text: "‹ 返回" on_click: || show("home")}
             Label{width: Fill text: "感知" draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 20}}

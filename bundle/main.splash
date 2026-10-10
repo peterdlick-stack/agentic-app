@@ -58,9 +58,6 @@ fn fit_snapshot(ctx, it, elig){ [] }
 fn dlog_rate(i, v){}
 fn dlog_click(i){}
 
-// ==== [F] 读回 ====
-fn readback_check(name, expect_n){}
-
 // ---- 内置曲库：人工粗标注。en 能量 1-5，vo 是否人声，md 情绪，lg 语种 ----
 let SEED = [
     {t: "I LOVE U" a: "洛天依" en: 4 vo: true md: "欢快" lg: "zh"}
@@ -505,7 +502,86 @@ fn save_prefs(){ write_json("prefs.json", prefs) }
 let PLACES_FILE = "places.json"
 fn save_places(){ fs.write(PLACES_FILE, places.to_json()) }
 // 会增长的文件：启动没读完之前不写，否则慢盘上一边重试读、一边被只有一半数据的内存覆盖
-fn save_labels(){ if booted { write_json("labels.json", labels) } }
+// ==== [F] 读回 ====
+let f_labels = {gen: 0 text: "" n: 0 last: "" retried: false}
+let f_encounters = {gen: 0 text: "" n: 0 last: "" retried: false}
+fn f_state(name){ if name == "labels.json" { return f_labels } f_encounters }
+fn f_last(name, rows, saved){
+    if rows.len() == 0 { return "" }
+    let row = rows[rows.len() - 1]
+    if name == "labels.json" { return "" + (if saved pick(row, "at", 0) else row.at) }
+    let seen = if saved pick(row, "seen", nil) else row.seen
+    let heard = if saved pick(row, "heard", nil) else row.heard
+    let liked = if saved pick(row, "liked", nil) else row.liked
+    let a = if seen == nil 0 else (if saved pick(seen, "at", 0) else seen.at)
+    let b = if heard == nil 0 else (if saved pick(heard, "at", 0) else heard.at)
+    let c = if liked == nil 0 else (if saved pick(liked, "at", 0) else liked.at)
+    "" + a + "/" + b + "/" + c
+}
+fn f_notice(text){
+    ui.plan.set_text(text)
+    ui.boot_note_text.set_text(text)
+    ui.boot_note.set_visible(true)
+    if screen == "songcard" { ui.sc_notice.set_text(text) }
+}
+fn f_check_current(name, gen, n){
+    if !booted || f_state(name).gen != gen { return }
+    readback_check(name, n)
+}
+fn f_write_current(name, gen){
+    if !booted || f_state(name).gen != gen { return }
+    let state = f_state(name)
+    let n = state.n
+    // 先登记下一处理函数，即使这次写入中断，读回仍有机会发现未落盘。
+    start_timeout(0.01, || f_check_current(name, gen, n))
+    if state.retried { f_notice("保存可能没成功，已重试一次") }
+    fs.write(DATA + name, state.text)
+}
+fn f_read_failed(name, gen){
+    if !booted || f_state(name).gen != gen { return }
+    let state = f_state(name)
+    if state.retried { f_notice("保存仍未通过读回检查，请稍后再试") return }
+    state.retried = true
+    start_timeout(0.01, || f_write_current(name, gen))
+}
+fn f_read_watch(name, gen, done){
+    if done.value { return }
+    done.value = true
+    f_read_failed(name, gen)
+}
+fn readback_check(name, expect_n){
+    if !booted { return }
+    let state = f_state(name)
+    let gen = state.gen
+    let done = {value: false}
+    // fs.read 的异常会中断回调；兜底只处理本次未完成的读回。
+    start_timeout(0.02, || f_read_watch(name, gen, done))
+    let text = ""
+    if fs.exists(DATA + name) { text = fs.read(DATA + name) }
+    done.value = true
+    let same = text == state.text
+    if same {
+        let rows = text.parse_json()
+        same = rows != nil && rows.len() == expect_n && f_last(name, rows, true) == state.last
+    }
+    if same {
+        if state.retried { f_notice("已重试保存，读回一致") }
+        return
+    }
+    f_read_failed(name, gen)
+}
+fn f_save(name, rows){
+    if !booted { return }
+    let state = f_state(name)
+    state.gen = state.gen + 1
+    state.text = rows.to_json()
+    state.n = rows.len()
+    state.last = f_last(name, rows, false)
+    state.retried = false
+    f_write_current(name, state.gen)
+}
+
+fn save_labels(){ f_save("labels.json", labels) }
 fn save_library(){
     if !booted { return }
     let out = []
@@ -529,7 +605,7 @@ fn save_last(){
     }
     write_json("last.json", {keys: keys whys: whys act: playlist_act slot: playlist_slot intent: playlist_intent at: time_now()})
 }
-fn save_encounters(){ if booted { write_json("encounters.json", encounters) } }
+fn save_encounters(){ f_save("encounters.json", encounters) }
 
 // ---- 时间 ----
 fn local_parts(){

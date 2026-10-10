@@ -49,11 +49,6 @@ fn toggle_debug(){
     if debug_expanded { sync_debug() }
 }
 
-// ==== [E] 契合档 ====
-fn fit_snapshot(ctx, it, elig){ [] }
-fn dlog_rate(i, v){}
-fn dlog_click(i){}
-
 // ==== [F] 读回 ====
 fn readback_check(name, expect_n){}
 
@@ -2169,6 +2164,32 @@ fn score_song(s, ctx, it){
     {sc: sc why: text}
 }
 
+// ==== [E] 契合档 ====
+fn fit_snapshot(ctx, it, elig){
+    let fit = []
+    let scored = []
+    jitter_on = false
+    for i s in songs {
+        fit.push("")
+        if elig == nil || (i < elig.len() && elig[i]) { scored.push({i: i sc: score_song(s, ctx, it).sc}) }
+    }
+    jitter_on = true
+    let n = scored.len()
+    for rank in n {
+        let best = -1
+        let value = -1000000.0
+        for j item in scored { if item.sc > value { best = j value = item.sc } }
+        if best >= 0 {
+            let tier = "L"
+            if rank * 3 < n { tier = "H" }
+            else if rank * 3 < 2 * n { tier = "M" }
+            fit[scored[best].i] = tier
+            scored[best].sc = -1000000.0
+        }
+    }
+    fit
+}
+
 fn local_pick(ctx, it){
     let scored = []
     for i s in songs {
@@ -2682,6 +2703,28 @@ let sc_lyrics_exists = false
 let sc_lyrics = ""
 let sc_notice = ""
 let sc_player_return = false
+
+// ==== [E] 反馈与点击归属 ====
+fn e_link(i){
+    let link = {r: 0 fb: "" pos: 0}
+    if screen == "library" || (screen == "songcard" && sc_origin == "library") { return link }
+    if playlist_rec <= 0 { return link }
+    if dlog_rec_sim() != (sim.kind != "off") { return link }
+    for pos p in playlist {
+        if p.i == i && i < playlist_fit.len() {
+            link = {r: playlist_rec fb: playlist_fit[i] pos: pos + 1}
+        }
+    }
+    link
+}
+fn dlog_rate(i, v){
+    let link = e_link(i)
+    dlog_push({e: "rate" r: link.r k: key_of(songs[i]) v: v fb: link.fb pos: link.pos})
+}
+fn dlog_click(i){
+    let link = e_link(i)
+    dlog_push({e: "click" r: link.r k: key_of(songs[i]) fb: link.fb pos: link.pos})
+}
 
 fn empty_song_card(){
     {k: "" facts: [] reading: "" by: "" credits: "" date: "" where: "" note: ""

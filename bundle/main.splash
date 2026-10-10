@@ -361,6 +361,7 @@ let DLOG_SHARD_BYTES = 16384
 let dlog_buf = []
 let dlog_prev = []
 let dlog_warn = ""
+let dlog_shown = ""
 let dlog_big = 0
 let dlog_big_max = 0
 let dlog_pending = []
@@ -722,14 +723,19 @@ fn dlog_rec_sim(){
 fn dlog_waiting(){
     dlog_pending.len() > 0 && dlog_pending[dlog_pending.len() - 1].id >= dstats.seq
 }
+fn dlog_show(){
+    if dlog_warn == dlog_shown { return }
+    let first = dlog_shown == ""
+    dlog_shown = dlog_warn
+    ui.boot_note_text.set_text(dlog_warn)
+    ui.boot_note.set_visible(true)
+    if first { ui.plan.set_text(dlog_warn) }
+}
 fn dlog_stop(text){
     dlog_note(text)
     dlog_halt = true
     dlog_busy = false
-    ui.boot_note_text.set_text(dlog_warn)
-    ui.boot_note.set_visible(true)
-    ui.plan.set_text(dlog_warn)
-    ui.debug_note.set_text(dlog_warn)
+    dlog_show()
 }
 fn dlog_dispatch(delay){
     dlog_ticket = dlog_ticket + 1
@@ -783,7 +789,7 @@ fn dlog_run(ticket){
     else if job.step == "advance" { dlog_advance() }
 }
 fn dlog_watch(){
-    if dlog_halt { dlog_stop(dlog_warn) return }
+    if dlog_halt { dlog_show() return }
     if !dlog_busy || dlog_job == nil || time_now() - dlog_progress_at < 1.5 { return }
     if dlog_retries >= 3 {
         dlog_stop("决策日志步骤 " + dlog_job.step + " 连续中断，重试3次后暂停；内存队列已保留")
@@ -907,6 +913,7 @@ fn boot_dstats(gen){
     dlog_ready = false
     dlog_halt = false
     dlog_warn = ""
+    dlog_shown = ""
     start_timeout(0.01, || dlog_boot_stats_read(gen, "dstats.json"))
 }
 // The native JSON parser exposes a partial result even on syntax errors.

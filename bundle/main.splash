@@ -30,7 +30,7 @@ let DEV_FAKE_MODEL = false
 let jitter_on = true
 let REC_N = 6
 let RETRY_MAX_FIRST_S = 60
-let DLOG_SHARD_N = 50
+let DLOG_SHARD_N = 25
 let DLOG_SHARDS = 16
 let cur_act_id = 0
 let playlist_rec = 0
@@ -378,13 +378,770 @@ fn load_label(x){
     }
 }
 // ==== [D] 决策日志 ====
-fn dlog_push(ev){}
-fn dlog_new_id(){ 0 }
-fn dlog_recent(n){ [] }
-fn dlog_stats(want_sim){ nil }
-// 启动挂钩须在 boot_next 所在作用域之后定义。
-fn boot_dstats(gen){ boot_next("dshard") }
-fn boot_dshard(gen){ boot_next("encounters") }
+// D1: 600 bytes is a soft target. Keep every frozen field and all seven q/pr entries.
+let DLOG_SHARD_BYTES = 16384
+let dlog_buf = []
+let dlog_prev = []
+let dlog_warn = ""
+let dlog_big = 0
+let dlog_big_max = 0
+let dlog_pending = []
+let dlog_busy = false
+let dlog_ready = false
+let dlog_next_id = 1
+let dlog_bytes = 2
+let dlog_dirty = false
+let dlog_rotate = false
+let dlog_halt = false
+let dlog_bad_slots = []
+let dlog_stats_file = "dstats.json"
+let dlog_state_file = "dstate.json"
+let dlog_last_act = nil
+let dlog_last_undone = false
+let dlog_last_rec = nil
+let dlog_state_valid = false
+let dlog_commit = nil
+let dstats = nil
+
+fn dlog_note(text){
+    if dlog_warn.search(text) >= 0 { return }
+    if dlog_warn != "" { dlog_warn = dlog_warn + "；" }
+    dlog_warn = dlog_warn + text
+}
+fn ds_blank_act(){ {n: 0 hit: 0 rhit: 0 mhit: 0 lab: 0 br: 0 bp: 0 skip: 0 dup: 0 undo: 0 low: 0 mid: 0 high: 0 eh: 0 eh_lab: 0 eh_hit: 0} }
+fn ds_blank_rec(){ {n: 0 ai: 0 ai_retry: 0 nomodel: 0 net: 0 fail: 0 insuff: 0 timeout: 0 first_ret: 0 first_bad: 0 retry: 0 retry_ok: 0} }
+fn ds_blank_err(){ {E_JSON: 0 E_STATUS: 0 E_COUNT: 0 E_DUP: 0 E_RANGE: 0 E_NOT_ELIG: 0 E_CAT: 0 E_HARD_VOCAL: 0 E_HARD_LANG: 0 E_REF_ENUM: 0 E_REF_ABSENT: 0 E_REF_MISMATCH: 0 E_REF_KIND: 0 E_WHY: 0 E_INSUFF: 0} }
+fn ds_blank_song(){ {exp: 0 like: 0 dis: 0 click: 0} }
+fn ds_blank_group(){ {act: ds_blank_act() rec: ds_blank_rec() err: ds_blank_err()
+    song: {H: ds_blank_song() M: ds_blank_song() L: ds_blank_song()}} }
+fn ds_blank(){ {v: DLOG_VER seq: 1 shard: 0 shard_n: 0 real: ds_blank_group() sim: ds_blank_group()} }
+// Fixed-field access: dynamic assignment creates duplicate JSON keys in this runtime.
+fn ds_get(o, key){
+    if key == "n" { return o.n }
+    if key == "hit" { return o.hit }
+    if key == "rhit" { return o.rhit }
+    if key == "mhit" { return o.mhit }
+    if key == "lab" { return o.lab }
+    if key == "br" { return o.br }
+    if key == "bp" { return o.bp }
+    if key == "skip" { return o.skip }
+    if key == "dup" { return o.dup }
+    if key == "undo" { return o.undo }
+    if key == "low" { return o.low }
+    if key == "mid" { return o.mid }
+    if key == "high" { return o.high }
+    if key == "eh" { return o.eh }
+    if key == "eh_lab" { return o.eh_lab }
+    if key == "eh_hit" { return o.eh_hit }
+    if key == "ai" { return o.ai }
+    if key == "ai_retry" { return o.ai_retry }
+    if key == "nomodel" { return o.nomodel }
+    if key == "net" { return o.net }
+    if key == "fail" { return o.fail }
+    if key == "insuff" { return o.insuff }
+    if key == "timeout" { return o.timeout }
+    if key == "first_ret" { return o.first_ret }
+    if key == "first_bad" { return o.first_bad }
+    if key == "retry" { return o.retry }
+    if key == "retry_ok" { return o.retry_ok }
+    if key == "E_JSON" { return o.E_JSON }
+    if key == "E_STATUS" { return o.E_STATUS }
+    if key == "E_COUNT" { return o.E_COUNT }
+    if key == "E_DUP" { return o.E_DUP }
+    if key == "E_RANGE" { return o.E_RANGE }
+    if key == "E_NOT_ELIG" { return o.E_NOT_ELIG }
+    if key == "E_CAT" { return o.E_CAT }
+    if key == "E_HARD_VOCAL" { return o.E_HARD_VOCAL }
+    if key == "E_HARD_LANG" { return o.E_HARD_LANG }
+    if key == "E_REF_ENUM" { return o.E_REF_ENUM }
+    if key == "E_REF_ABSENT" { return o.E_REF_ABSENT }
+    if key == "E_REF_MISMATCH" { return o.E_REF_MISMATCH }
+    if key == "E_REF_KIND" { return o.E_REF_KIND }
+    if key == "E_WHY" { return o.E_WHY }
+    if key == "E_INSUFF" { return o.E_INSUFF }
+    if key == "exp" { return o.exp }
+    if key == "like" { return o.like }
+    if key == "dis" { return o.dis }
+    if key == "click" { return o.click }
+    0
+}
+fn ds_set(o, key, value){
+    if key == "n" { o.n = value return }
+    if key == "hit" { o.hit = value return }
+    if key == "rhit" { o.rhit = value return }
+    if key == "mhit" { o.mhit = value return }
+    if key == "lab" { o.lab = value return }
+    if key == "br" { o.br = value return }
+    if key == "bp" { o.bp = value return }
+    if key == "skip" { o.skip = value return }
+    if key == "dup" { o.dup = value return }
+    if key == "undo" { o.undo = value return }
+    if key == "low" { o.low = value return }
+    if key == "mid" { o.mid = value return }
+    if key == "high" { o.high = value return }
+    if key == "eh" { o.eh = value return }
+    if key == "eh_lab" { o.eh_lab = value return }
+    if key == "eh_hit" { o.eh_hit = value return }
+    if key == "ai" { o.ai = value return }
+    if key == "ai_retry" { o.ai_retry = value return }
+    if key == "nomodel" { o.nomodel = value return }
+    if key == "net" { o.net = value return }
+    if key == "fail" { o.fail = value return }
+    if key == "insuff" { o.insuff = value return }
+    if key == "timeout" { o.timeout = value return }
+    if key == "first_ret" { o.first_ret = value return }
+    if key == "first_bad" { o.first_bad = value return }
+    if key == "retry" { o.retry = value return }
+    if key == "retry_ok" { o.retry_ok = value return }
+    if key == "E_JSON" { o.E_JSON = value return }
+    if key == "E_STATUS" { o.E_STATUS = value return }
+    if key == "E_COUNT" { o.E_COUNT = value return }
+    if key == "E_DUP" { o.E_DUP = value return }
+    if key == "E_RANGE" { o.E_RANGE = value return }
+    if key == "E_NOT_ELIG" { o.E_NOT_ELIG = value return }
+    if key == "E_CAT" { o.E_CAT = value return }
+    if key == "E_HARD_VOCAL" { o.E_HARD_VOCAL = value return }
+    if key == "E_HARD_LANG" { o.E_HARD_LANG = value return }
+    if key == "E_REF_ENUM" { o.E_REF_ENUM = value return }
+    if key == "E_REF_ABSENT" { o.E_REF_ABSENT = value return }
+    if key == "E_REF_MISMATCH" { o.E_REF_MISMATCH = value return }
+    if key == "E_REF_KIND" { o.E_REF_KIND = value return }
+    if key == "E_WHY" { o.E_WHY = value return }
+    if key == "E_INSUFF" { o.E_INSUFF = value return }
+    if key == "exp" { o.exp = value return }
+    if key == "like" { o.like = value return }
+    if key == "dis" { o.dis = value return }
+    if key == "click" { o.click = value return }
+ }
+fn ds_add(o, key, amount){ ds_set(o, key, ds_get(o, key) + amount) }
+fn ds_clean_act(raw){
+    let out = ds_blank_act()
+    if !raw.is_object() { return out }
+    out.n = dlog_number(pick(raw, "n", 0), 0)
+    out.hit = dlog_number(pick(raw, "hit", 0), 0)
+    out.rhit = dlog_number(pick(raw, "rhit", 0), 0)
+    out.mhit = dlog_number(pick(raw, "mhit", 0), 0)
+    out.lab = dlog_number(pick(raw, "lab", 0), 0)
+    out.br = dlog_number(pick(raw, "br", 0), 0)
+    out.bp = dlog_number(pick(raw, "bp", 0), 0)
+    out.skip = dlog_number(pick(raw, "skip", 0), 0)
+    out.dup = dlog_number(pick(raw, "dup", 0), 0)
+    out.undo = dlog_number(pick(raw, "undo", 0), 0)
+    out.low = dlog_number(pick(raw, "low", 0), 0)
+    out.mid = dlog_number(pick(raw, "mid", 0), 0)
+    out.high = dlog_number(pick(raw, "high", 0), 0)
+    out.eh = dlog_number(pick(raw, "eh", 0), 0)
+    out.eh_lab = dlog_number(pick(raw, "eh_lab", 0), 0)
+    out.eh_hit = dlog_number(pick(raw, "eh_hit", 0), 0)
+    out
+}
+fn ds_clean_rec(raw){
+    let out = ds_blank_rec()
+    if !raw.is_object() { return out }
+    out.n = dlog_number(pick(raw, "n", 0), 0)
+    out.ai = dlog_number(pick(raw, "ai", 0), 0)
+    out.ai_retry = dlog_number(pick(raw, "ai_retry", 0), 0)
+    out.nomodel = dlog_number(pick(raw, "nomodel", 0), 0)
+    out.net = dlog_number(pick(raw, "net", 0), 0)
+    out.fail = dlog_number(pick(raw, "fail", 0), 0)
+    out.insuff = dlog_number(pick(raw, "insuff", 0), 0)
+    out.timeout = dlog_number(pick(raw, "timeout", 0), 0)
+    out.first_ret = dlog_number(pick(raw, "first_ret", 0), 0)
+    out.first_bad = dlog_number(pick(raw, "first_bad", 0), 0)
+    out.retry = dlog_number(pick(raw, "retry", 0), 0)
+    out.retry_ok = dlog_number(pick(raw, "retry_ok", 0), 0)
+    out
+}
+fn ds_clean_err(raw){
+    let out = ds_blank_err()
+    if !raw.is_object() { return out }
+    out.E_JSON = dlog_number(pick(raw, "E_JSON", 0), 0)
+    out.E_STATUS = dlog_number(pick(raw, "E_STATUS", 0), 0)
+    out.E_COUNT = dlog_number(pick(raw, "E_COUNT", 0), 0)
+    out.E_DUP = dlog_number(pick(raw, "E_DUP", 0), 0)
+    out.E_RANGE = dlog_number(pick(raw, "E_RANGE", 0), 0)
+    out.E_NOT_ELIG = dlog_number(pick(raw, "E_NOT_ELIG", 0), 0)
+    out.E_CAT = dlog_number(pick(raw, "E_CAT", 0), 0)
+    out.E_HARD_VOCAL = dlog_number(pick(raw, "E_HARD_VOCAL", 0), 0)
+    out.E_HARD_LANG = dlog_number(pick(raw, "E_HARD_LANG", 0), 0)
+    out.E_REF_ENUM = dlog_number(pick(raw, "E_REF_ENUM", 0), 0)
+    out.E_REF_ABSENT = dlog_number(pick(raw, "E_REF_ABSENT", 0), 0)
+    out.E_REF_MISMATCH = dlog_number(pick(raw, "E_REF_MISMATCH", 0), 0)
+    out.E_REF_KIND = dlog_number(pick(raw, "E_REF_KIND", 0), 0)
+    out.E_WHY = dlog_number(pick(raw, "E_WHY", 0), 0)
+    out.E_INSUFF = dlog_number(pick(raw, "E_INSUFF", 0), 0)
+    out
+}
+fn ds_clean_song(raw){
+    let out = ds_blank_song()
+    if !raw.is_object() { return out }
+    out.exp = dlog_number(pick(raw, "exp", 0), 0)
+    out.like = dlog_number(pick(raw, "like", 0), 0)
+    out.dis = dlog_number(pick(raw, "dis", 0), 0)
+    out.click = dlog_number(pick(raw, "click", 0), 0)
+    out
+}
+fn dlog_number(value, fallback){
+    if value.is_number() && value >= 0 { return value }
+    fallback
+}
+fn dlog_int(value, fallback){
+    if value.is_number() && value >= 0 && value == floor(value) { return value }
+    fallback
+}
+fn ds_clean_group(raw){
+    if !raw.is_object() { return ds_blank_group() }
+    let s = pick(raw, "song", nil)
+    if !s.is_object() { s = nil }
+    {act: ds_clean_act(pick(raw, "act", nil)) rec: ds_clean_rec(pick(raw, "rec", nil))
+     err: ds_clean_err(pick(raw, "err", nil))
+     song: {H: ds_clean_song(pick(s, "H", nil)) M: ds_clean_song(pick(s, "M", nil)) L: ds_clean_song(pick(s, "L", nil))}}
+}
+fn ds_clean(raw){
+    {v: DLOG_VER seq: max(1, dlog_int(pick(raw, "seq", 1), 1))
+     shard: dlog_int(pick(raw, "shard", 0), 0) shard_n: dlog_int(pick(raw, "shard_n", 0), 0)
+     real: ds_clean_group(pick(raw, "real", nil)) sim: ds_clean_group(pick(raw, "sim", nil))}
+}
+fn ds_group(want_sim){ if want_sim { return dstats.sim } dstats.real }
+fn ds_tier(group, tier){
+    if tier == "H" { return group.song.H }
+    if tier == "M" { return group.song.M }
+    if tier == "L" { return group.song.L }
+    nil
+}
+fn ds_act(ev, sign){
+    let a = ds_group(ev.sim).act
+    if ev.dup { ds_add(a, "dup", sign) return }
+    ds_add(a, "n", sign)
+    ds_add(a, ev.tier, sign)
+    if ev.eh { ds_add(a, "eh", sign) }
+    if ev.y == "" { ds_add(a, "skip", sign) return }
+    ds_add(a, "lab", sign)
+    if ev.hit { ds_add(a, "hit", sign) }
+    if ev.rhit { ds_add(a, "rhit", sign) }
+    if ev.mhit { ds_add(a, "mhit", sign) }
+    ds_add(a, "br", sign * ev.br)
+    ds_add(a, "bp", sign * ev.bp)
+    if ev.eh {
+        ds_add(a, "eh_lab", sign)
+        if ev.hit { ds_add(a, "eh_hit", sign) }
+    }
+}
+fn dstats_apply(ev){
+    let group = ds_group(ev.sim)
+    if ev.e == "act" {
+        ds_act(ev, 1)
+        dlog_last_act = ev
+        dlog_last_undone = false
+    } else if ev.e == "act_undo" {
+        if dlog_last_act == nil || dlog_last_act.id != ev.a {
+            dlog_note("撤销目标不在当前活动缓存，汇总未反向修改")
+            ds_add(group.act, "undo", 1)
+        } else if dlog_last_undone {
+            dlog_note("重复撤销已忽略")
+        } else {
+            ds_act(dlog_last_act, -1)
+            ds_add(ds_group(dlog_last_act.sim).act, "undo", 1)
+            dlog_last_undone = true
+            if dlog_last_act.sim != ev.sim { dlog_note("撤销跨模拟分组，需离线核验") }
+        }
+    } else if ev.e == "rec" {
+        let r = group.rec
+        ds_add(r, "n", 1)
+        if ev.res == "ai" { ds_add(r, "ai", 1) }
+        if ev.res == "ai_retry" { ds_add(r, "ai_retry", 1) ds_add(r, "retry_ok", 1) }
+        if ev.res == "local_nomodel" { ds_add(r, "nomodel", 1) }
+        if ev.res == "local_net" && ev.att == 1 { ds_add(r, "net", 1) }
+        if ev.res == "local_fail" { ds_add(r, "fail", 1) }
+        if ev.res == "local_insuff" { ds_add(r, "insuff", 1) }
+        if ev.res == "local_timeout" { ds_add(r, "timeout", 1) }
+        if ev.e1.len() > 0 || ev.res == "ai" || ev.res == "ai_retry" || ev.att == 2 { ds_add(r, "first_ret", 1) }
+        if ev.e1.len() > 0 { ds_add(r, "first_bad", 1) }
+        if ev.att == 2 { ds_add(r, "retry", 1) }
+        for c in ev.e1 { ds_add(group.err, c, 1) }
+        for c in ev.e2 { ds_add(group.err, c, 1) }
+        let votes = []
+        for p in ev.p {
+            let s = ds_tier(group, p[1])
+            if s != nil { ds_add(s, "exp", 1) }
+            votes.push({k: p[0] fb: p[1] pos: p[2] v: 0 sim: ev.sim})
+        }
+        dlog_last_rec = {id: ev.id sim: ev.sim p: ev.p votes: votes}
+    } else if (ev.e == "rate" || ev.e == "click") && ev.fb != "" {
+        let s = ds_tier(group, ev.fb)
+        if s == nil { return }
+        if dlog_last_rec == nil || dlog_last_rec.id != ev.r {
+            dlog_note("反馈引用已结束的歌单，汇总未追加未知旧票")
+            return
+        }
+        let found = false
+        for row in dlog_last_rec.votes {
+            if row.k == ev.k {
+                found = true
+                if row.fb != ev.fb || row.pos != ev.pos || dlog_last_rec.sim != ev.sim {
+                    dlog_note("反馈与曝光分组或位置不一致，需离线核验")
+                }
+                if ev.e == "click" { ds_add(s, "click", 1) }
+                else {
+                    if row.v != 0 {
+                        let old = ds_tier(ds_group(row.sim), row.fb)
+                        if old != nil { ds_add(old, if row.v == 1 "like" else "dis", -1) }
+                    }
+                    ds_add(s, if ev.v == 1 "like" else "dis", 1)
+                    row.v = ev.v
+                    row.sim = ev.sim
+                    row.fb = ev.fb
+                }
+            }
+        }
+        if !found { dlog_note("反馈歌曲不在当前曝光缓存") }
+    }
+}
+
+// Callers receive an id synchronously. Processing is deferred and bounded, including bulk fixtures.
+fn dlog_new_id(){
+    let id = dlog_next_id
+    dlog_next_id = dlog_next_id + 1
+    id
+}
+fn dlog_push(ev){
+    if !dlog_ready || dlog_halt { dlog_note("决策日志尚未就绪，事件未入队") return 0 }
+    ev.id = dlog_new_id()
+    ev.at = time_now()
+    ev.sim = sim.kind != "off"
+    ev.dv = DLOG_VER
+    dlog_pending.push(ev)
+    if !dlog_busy {
+        dlog_busy = true
+        start_timeout(0.3, || dlog_pump())
+    }
+    ev.id
+}
+fn dlog_recent(n){
+    let out = []
+    for i in min(n, dlog_buf.len()) { out.push(dlog_buf[dlog_buf.len() - i - 1]) }
+    let remain = n - out.len()
+    for i in min(remain, dlog_prev.len()) { out.push(dlog_prev[dlog_prev.len() - i - 1]) }
+    out
+}
+fn dlog_stats(want_sim){
+    if dstats == nil { return ds_blank_group() }
+    ds_group(want_sim)
+}
+fn dlog_rec_sim(){
+    for i in dlog_pending.len() {
+        let ev = dlog_pending[dlog_pending.len() - i - 1]
+        if ev.e == "rec" { return ev.sim }
+    }
+    if dlog_last_rec != nil { return dlog_last_rec.sim }
+    nil
+}
+fn dlog_pump(){
+    if dlog_halt { dlog_busy = false return }
+    if !booted { start_timeout(0.1, || dlog_pump()) return }
+    for batch in 4 {
+        if dlog_pending.len() == 0 { break }
+        let ev = dlog_pending[0]
+        let bytes = ev.to_json().len()
+        let extra = bytes + (if dlog_buf.len() > 0 1 else 0)
+        if dlog_buf.len() > 0 && (dlog_buf.len() >= DLOG_SHARD_N || dlog_bytes + extra > DLOG_SHARD_BYTES) {
+            dlog_rotate = true
+            dlog_prepare_write()
+            return
+        }
+        dlog_pending.remove(0)
+        if bytes > 600 { dlog_big = dlog_big + 1 dlog_big_max = max(dlog_big_max, bytes) }
+        if bytes + 2 > DLOG_SHARD_BYTES { dlog_note("单条完整事件超出分片字节目标，单独保存且未截断") }
+        dlog_buf.push(ev)
+        dlog_bytes = dlog_bytes + extra
+        dstats_apply(ev)
+        dstats.seq = ev.id + 1
+        dstats.shard_n = dlog_buf.len()
+        dlog_dirty = true
+        if dlog_buf.len() >= DLOG_SHARD_N || dlog_bytes >= DLOG_SHARD_BYTES {
+            dlog_rotate = true
+            dlog_prepare_write()
+            return
+        }
+    }
+    if dlog_pending.len() > 0 { start_timeout(0.01, || dlog_pump()) }
+    else if dlog_dirty { dlog_rotate = false dlog_prepare_write() }
+    else { dlog_busy = false }
+}
+fn dlog_file(shard){ "decisions-" + (shard % DLOG_SHARDS) + ".json" }
+fn dlog_prepare_write(){
+    // The buffer stays intact through all three writes; no empty/full-piece overwrite.
+    dlog_commit = {log: dlog_buf.to_json() stats: dstats.to_json()
+        state: {v: 1 seq: dstats.seq act: dlog_last_act undone: dlog_last_undone rec: dlog_last_rec}.to_json()}
+    start_timeout(0.01, || dlog_write_piece())
+}
+fn dlog_write_piece(){
+    if !booted || dlog_halt { return }
+    let result = fs.write(DATA + dlog_file(dstats.shard), dlog_commit.log)
+    if result != nil { dlog_note("决策分片写入失败，已保留内存队列") dlog_halt = true dlog_busy = false return }
+    start_timeout(0.01, || dlog_write_state())
+}
+fn dlog_write_state(){
+    if !booted || dlog_halt { return }
+    let result = fs.write(DATA + dlog_state_file, dlog_commit.state)
+    if result != nil { dlog_note("决策缓存写入失败，汇总未提交") dlog_halt = true dlog_busy = false return }
+    start_timeout(0.01, || dlog_write_stats())
+}
+fn dlog_write_stats(){
+    if !booted || dlog_halt { return }
+    let result = fs.write(DATA + dlog_stats_file, dlog_commit.stats)
+    if result != nil { dlog_note("决策汇总写入失败，需离线核验") dlog_halt = true dlog_busy = false return }
+    dlog_dirty = false
+    dlog_state_valid = true
+    if dlog_rotate && dlog_pending.len() > 0 { start_timeout(0.01, || dlog_advance(0)) }
+    else { start_timeout(0.01, || dlog_pump()) }
+}
+fn dlog_advance(skipped){
+    if skipped >= DLOG_SHARDS { dlog_note("全部决策分片损坏，未覆盖任何文件") dlog_halt = true dlog_busy = false return }
+    let next = dstats.shard + 1
+    dstats.shard = next
+    if dlog_bad_slots[next % DLOG_SHARDS] { start_timeout(0.01, || dlog_advance(skipped + 1)) return }
+    // Only now, after the full piece and its cumulative stats are on disk, clear it.
+    dlog_prev = dlog_buf
+    dlog_buf = []
+    dlog_bytes = 2
+    dstats.shard_n = 0
+    dlog_rotate = false
+    start_timeout(0.01, || dlog_pump())
+}
+
+// Parsed objects are normalized with pick exactly once, then use fixed-field reads.
+fn dlog_clean_event(raw){
+    if !raw.is_object() { return nil }
+    let kind = pick(raw, "e", "")
+    let out = nil
+    if kind == "act" {
+        out = {e: kind pv: pick(raw, "pv", "") b: pick(raw, "b", "") lvl: pick(raw, "lvl", "full") n: pick(raw, "n", 0)
+            q: pick(raw, "q", []) pr: pick(raw, "pr", []) rule: pick(raw, "rule", "") maj: pick(raw, "maj", "")
+            tier: pick(raw, "tier", "low") eh: pick(raw, "eh", false) low: pick(raw, "low", "")
+            how: pick(raw, "how", "skip") y: pick(raw, "y", "") dup: pick(raw, "dup", false)
+            hit: pick(raw, "hit", nil) rhit: pick(raw, "rhit", nil) mhit: pick(raw, "mhit", nil)
+            br: pick(raw, "br", nil) bp: pick(raw, "bp", nil)}
+    } else if kind == "act_undo" { out = {e: kind a: pick(raw, "a", 0)} }
+    else if kind == "rec" {
+        out = {e: kind pv: pick(raw, "pv", "") a: pick(raw, "a", 0) act: pick(raw, "act", "") asrc: pick(raw, "asrc", "none")
+            hard: pick(raw, "hard", []) ne: pick(raw, "ne", 0) nc: pick(raw, "nc", 0) att: pick(raw, "att", 1)
+            e1: pick(raw, "e1", []) e2: pick(raw, "e2", []) net: pick(raw, "net", "") res: pick(raw, "res", "local_nomodel")
+            ms1: pick(raw, "ms1", 0) ms2: pick(raw, "ms2", nil) mact: pick(raw, "mact", "") p: pick(raw, "p", [])}
+    } else if kind == "rate" || kind == "click" {
+        out = {e: kind r: pick(raw, "r", 0) k: pick(raw, "k", "") fb: pick(raw, "fb", "") pos: pick(raw, "pos", 0)}
+        if kind == "rate" { out.v = pick(raw, "v", 0) }
+    }
+    if out == nil { return nil }
+    out.id = dlog_int(pick(raw, "id", 0), 0)
+    out.at = dlog_number(pick(raw, "at", 0), 0)
+    out.sim = pick(raw, "sim", false) == true
+    out.dv = pick(raw, "dv", DLOG_VER)
+    if out.id == 0 { return nil }
+    out
+}
+fn boot_dstats(gen){
+    if gen != boot_gen { return }
+    dstats = ds_blank()
+    dlog_stats_file = "dstats.json"
+    dlog_ready = false
+    dlog_halt = false
+    dlog_warn = ""
+    start_timeout(0.01, || dlog_boot_stats_read(gen, "dstats.json"))
+}
+// The native JSON parser exposes a partial result even on syntax errors.
+// Validate syntax in bounded batches before accepting a saved file for reuse.
+fn dlog_json_digit(c){ c >= 48 && c <= 57 }
+fn dlog_json_hex(c){ dlog_json_digit(c) || (c >= 65 && c <= 70) || (c >= 97 && c <= 102) }
+fn dlog_json_value(st){
+    let top = st.stack.len() - 1
+    let cur = st.stack[top]
+    if cur == 0 { st.stack[top] = 9 return true }
+    if cur == 4 { st.stack[top] = 5 return true }
+    if cur == 6 || cur == 7 { st.stack[top] = 8 return true }
+    false
+}
+fn dlog_json_number_end(n){ n == 2 || n == 3 || n == 5 || n == 8 }
+fn dlog_json_char(st, c){
+    if st.mode == "string" {
+        if st.unicode > 0 {
+            if !dlog_json_hex(c) { st.valid = false }
+            st.unicode = st.unicode - 1
+        } else if st.escape {
+            st.escape = false
+            if c == 117 { st.unicode = 4 }
+            else if c != 34 && c != 92 && c != 47 && c != 98 && c != 102 && c != 110 && c != 114 && c != 116 { st.valid = false }
+        } else if c == 92 { st.escape = true }
+        else if c == 34 {
+            st.mode = ""
+            if st.key { st.stack[st.stack.len() - 1] = 3 }
+        } else if c < 32 { st.valid = false }
+        return 1
+    }
+    if st.mode == "literal" {
+        if c != st.literal[st.literal_pos] { st.valid = false return 1 }
+        st.literal_pos = st.literal_pos + 1
+        if st.literal_pos == st.literal.len() { st.mode = "" }
+        return 1
+    }
+    if st.mode == "number" {
+        let n = st.number
+        if n == 1 {
+            if c == 48 { st.number = 2 return 1 }
+            if c >= 49 && c <= 57 { st.number = 3 return 1 }
+        } else if n == 2 || n == 3 {
+            if n == 3 && dlog_json_digit(c) { return 1 }
+            if c == 46 { st.number = 4 return 1 }
+            if c == 69 || c == 101 { st.number = 6 return 1 }
+        } else if n == 4 || n == 5 {
+            if dlog_json_digit(c) { st.number = 5 return 1 }
+            if n == 5 && (c == 69 || c == 101) { st.number = 6 return 1 }
+        } else if n == 6 {
+            if c == 43 || c == 45 { st.number = 7 return 1 }
+            if dlog_json_digit(c) { st.number = 8 return 1 }
+        } else if n == 7 || n == 8 {
+            if dlog_json_digit(c) { st.number = 8 return 1 }
+        }
+        if !dlog_json_number_end(n) { st.valid = false return 1 }
+        st.mode = ""
+        return 0
+    }
+    if c == 32 || c == 9 || c == 10 || c == 13 { return 1 }
+    let top = st.stack.len() - 1
+    let cur = st.stack[top]
+    if c == 125 {
+        if cur != 1 && cur != 5 { st.valid = false }
+        else { st.stack.pop() }
+        return 1
+    }
+    if c == 93 {
+        if cur != 6 && cur != 8 { st.valid = false }
+        else { st.stack.pop() }
+        return 1
+    }
+    if c == 44 {
+        if cur == 5 { st.stack[top] = 2 }
+        else if cur == 8 { st.stack[top] = 7 }
+        else { st.valid = false }
+        return 1
+    }
+    if c == 58 {
+        if cur == 3 { st.stack[top] = 4 }
+        else { st.valid = false }
+        return 1
+    }
+    if c == 34 {
+        st.key = cur == 1 || cur == 2
+        if !st.key && !dlog_json_value(st) { st.valid = false }
+        st.mode = "string"
+        return 1
+    }
+    if !dlog_json_value(st) { st.valid = false return 1 }
+    if c == 123 { st.stack.push(1) }
+    else if c == 91 { st.stack.push(6) }
+    else if c == 116 || c == 102 || c == 110 {
+        st.literal = (if c == 116 "true" else if c == 102 "false" else "null").to_chars()
+        st.literal_pos = 1
+        st.mode = "literal"
+    } else if c == 45 || dlog_json_digit(c) {
+        st.mode = "number"
+        st.number = if c == 45 1 else if c == 48 2 else 3
+    } else { st.valid = false }
+    1
+}
+fn dlog_json_begin(gen, text, kind, name, slot){
+    let st = {text: text chars: text.to_chars() pos: 0 stack: [0] mode: "" number: 0 literal: [] literal_pos: 0
+        escape: false unicode: 0 key: false valid: true kind: kind name: name slot: slot}
+    start_timeout(0.01, || dlog_json_step(gen, st))
+}
+fn dlog_json_step(gen, st){
+    if gen != boot_gen { return }
+    for batch in 200 {
+        if st.pos >= st.chars.len() || !st.valid { break }
+        st.pos = st.pos + dlog_json_char(st, st.chars[st.pos])
+    }
+    boot_tick = boot_tick + 1
+    if st.valid && st.pos < st.chars.len() { start_timeout(0.01, || dlog_json_step(gen, st)) return }
+    if st.mode == "number" && dlog_json_number_end(st.number) { st.mode = "" }
+    let raw = nil
+    if st.valid && st.mode == "" && st.stack.len() == 1 && st.stack[0] == 9 { raw = st.text.parse_json() }
+    if st.kind == "stats" { start_timeout(0.01, || dlog_boot_stats_clean(gen, st.name, true, raw)) }
+    else if st.kind == "state" { start_timeout(0.01, || dlog_boot_state_clean(gen, st.name, true, raw)) }
+    else { start_timeout(0.01, || dlog_boot_slot_chunk(gen, st.slot, raw, 0, [])) }
+}
+
+fn dlog_boot_stats_read(gen, name){
+    if gen != boot_gen { return }
+    let raw = nil
+    let exists = fs.exists(DATA + name)
+    if exists {
+        let text = fs.read(DATA + name)
+        boot_tick = boot_tick + 1
+        start_timeout(0.01, || dlog_json_begin(gen, text, "stats", name, 0))
+        return
+    }
+    boot_tick = boot_tick + 1
+    start_timeout(0.01, || dlog_boot_stats_clean(gen, name, exists, raw))
+}
+fn dlog_boot_stats_clean(gen, name, exists, raw){
+    if gen != boot_gen { return }
+    if exists && !raw.is_object() {
+        dlog_note(name + " 无法解析，保留坏文件")
+        if name == "dstats.json" {
+            dlog_stats_file = "dstats-new.json"
+            start_timeout(0.01, || dlog_boot_stats_read(gen, dlog_stats_file))
+            return
+        }
+        dlog_halt = true
+        dlog_note("dstats-new.json 也损坏，暂停决策写入")
+    } else if exists { dstats = ds_clean(raw) }
+    dlog_next_id = dstats.seq
+    boot_next("dshard")
+}
+fn boot_dshard(gen){
+    if gen != boot_gen { return }
+    dlog_buf = []
+    dlog_prev = []
+    dlog_bytes = 2
+    dlog_bad_slots = []
+    for slot in DLOG_SHARDS { dlog_bad_slots.push(false) }
+    dlog_last_act = nil
+    dlog_last_rec = nil
+    dlog_last_undone = false
+    dlog_state_valid = false
+    dlog_state_file = "dstate.json"
+    start_timeout(0.01, || dlog_boot_slot(gen, 0))
+}
+fn dlog_boot_slot(gen, slot){
+    if gen != boot_gen { return }
+    if slot >= DLOG_SHARDS { start_timeout(0.01, || dlog_boot_state_read(gen, "dstate.json")) return }
+    let raw = []
+    let name = dlog_file(slot)
+    if fs.exists(DATA + name) {
+        let text = fs.read(DATA + name)
+        boot_tick = boot_tick + 1
+        start_timeout(0.01, || dlog_json_begin(gen, text, "slot", name, slot))
+        return
+    }
+    boot_tick = boot_tick + 1
+    start_timeout(0.01, || dlog_boot_slot_chunk(gen, slot, raw, 0, []))
+}
+fn dlog_boot_slot_chunk(gen, slot, raw, start, clean){
+    if gen != boot_gen { return }
+    if !raw.is_array() {
+        dlog_bad_slots[slot] = true
+        dlog_note(dlog_file(slot) + " 无法解析，保留并跳过")
+        start_timeout(0.01, || dlog_boot_slot(gen, slot + 1))
+        return
+    }
+    let end = min(start + 3, raw.len())
+    for i in end - start {
+        let ev = dlog_clean_event(raw[start + i])
+        if ev == nil { dlog_bad_slots[slot] = true dlog_note(dlog_file(slot) + " 事件无效，保留并跳过") }
+        else {
+            clean.push(ev)
+            dlog_next_id = max(dlog_next_id, ev.id + 1)
+            if ev.id >= dstats.seq { dlog_note("日志领先累计汇总，历史需离线核验") }
+        }
+    }
+    boot_tick = boot_tick + 1
+    if end < raw.len() { start_timeout(0.01, || dlog_boot_slot_chunk(gen, slot, raw, end, clean)) return }
+    if !dlog_bad_slots[slot] {
+        if slot == dstats.shard % DLOG_SHARDS { dlog_buf = clean dlog_bytes = clean.to_json().len() }
+        if dstats.shard > 0 && slot == (dstats.shard - 1) % DLOG_SHARDS { dlog_prev = clean }
+    }
+    start_timeout(0.01, || dlog_boot_slot(gen, slot + 1))
+}
+fn dlog_boot_state_read(gen, name){
+    if gen != boot_gen { return }
+    let raw = nil
+    let exists = fs.exists(DATA + name)
+    if exists {
+        let text = fs.read(DATA + name)
+        boot_tick = boot_tick + 1
+        start_timeout(0.01, || dlog_json_begin(gen, text, "state", name, 0))
+        return
+    }
+    boot_tick = boot_tick + 1
+    start_timeout(0.01, || dlog_boot_state_clean(gen, name, exists, raw))
+}
+fn dlog_boot_state_clean(gen, name, exists, raw){
+    if gen != boot_gen { return }
+    if exists && !raw.is_object() {
+        dlog_note(name + " 无法解析，保留坏文件")
+        if name == "dstate.json" {
+            dlog_state_file = "dstate-new.json"
+            start_timeout(0.01, || dlog_boot_state_read(gen, dlog_state_file))
+            return
+        }
+        dlog_halt = true
+        dlog_note("dstate-new.json 也损坏，暂停决策写入")
+    } else if exists {
+        if pick(raw, "seq", 0) != dstats.seq { dlog_note("决策缓存与累计汇总不一致，未恢复旧票") }
+        else {
+            dlog_last_act = dlog_clean_event(pick(raw, "act", nil))
+            dlog_last_undone = pick(raw, "undone", false) == true
+            let r = pick(raw, "rec", nil)
+            if r.is_object() {
+                let rows = pick(r, "votes", [])
+                let p = pick(r, "p", [])
+                let votes = []
+                if rows.is_array() && p.is_array() && rows.len() <= REC_N && p.len() <= REC_N {
+                    for row in rows {
+                        if row.is_object() { votes.push({k: pick(row, "k", "") fb: pick(row, "fb", "") pos: pick(row, "pos", 0)
+                            v: pick(row, "v", 0) sim: pick(row, "sim", false) == true}) }
+                    }
+                    dlog_last_rec = {id: pick(r, "id", 0) sim: pick(r, "sim", false) == true p: p votes: votes}
+                } else { dlog_note("决策缓存不是有界歌单，未恢复旧票") }
+            }
+            dlog_state_valid = true
+        }
+    } else if dstats.seq > 1 { dlog_note("缺少决策交互缓存，旧歌单不计分档反馈") }
+    if dstats.shard_n != dlog_buf.len() { dlog_note("分片条数与汇总不一致，需离线核验") }
+    // A damaged current slot is never selected for writing; valid old slots stay eligible.
+    for attempt in DLOG_SHARDS {
+        if !dlog_bad_slots[dstats.shard % DLOG_SHARDS] { break }
+        dstats.shard = dstats.shard + 1
+        dlog_buf = []
+        dlog_bytes = 2
+    }
+    if dlog_bad_slots[dstats.shard % DLOG_SHARDS] { dlog_halt = true dlog_note("全部分片已保护，无法继续记录") }
+    dstats.shard_n = dlog_buf.len()
+    dlog_ready = !dlog_halt
+    boot_next("encounters")
+    start_timeout(0.1, || dlog_restore_playlist())
+}
+fn dlog_restore_playlist(){
+    if !booted { start_timeout(0.1, || dlog_restore_playlist()) return 0 }
+    if playlist_rec != 0 { return 0 }
+    if !dlog_state_valid || dlog_last_rec == nil { return 0 }
+    let p = dlog_last_rec.p
+    let same = playlist.len() == p.len() && p.len() > 0
+    if same {
+        for i in p.len() {
+            let row = p[i]
+            let chosen = playlist[i]
+            let song = songs[chosen.i]
+            if row[0] != key_of(song) || row[2] != i + 1 { same = false }
+        }
+    }
+    if !same {
+        playlist_rec = 0
+        playlist_fit = []
+        dlog_note("缓存歌单与 last.json 不一致，已禁用旧曝光关联")
+        return 0
+    }
+    playlist_rec = dlog_last_rec.id
+    playlist_fit = []
+    for s in songs { playlist_fit.push("") }
+    for i in p.len() {
+        let chosen = playlist[i]
+        let row = p[i]
+        playlist_fit[chosen.i] = row[1]
+    }
+    playlist_rec
+}
+
 // 每一步一个处理函数；读了文件的步骤只读这一个文件。重试时整步重来，所以每步开头先清空自己要填的数据
 fn boot_run(gen, step){
     if gen != boot_gen || booted { return }

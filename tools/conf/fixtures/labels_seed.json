@@ -1,0 +1,902 @@
+[
+  {
+    "at": 1785520800,
+    "day": "weekend",
+    "slot": "深夜",
+    "place_kind": "",
+    "motion": "unknown",
+    "chosen": "sleep",
+    "top": [
+      "sleep",
+      "study",
+      "work"
+    ],
+    "how": "intent",
+    "sim": true
+  },
+  {
+    "at": 1785625200,
+    "day": "weekend",
+    "slot": "早晨",
+    "place_kind": "home",
+    "motion": "walk",
+    "chosen": "commute",
+    "top": [
+      "commute",
+      "study",
+      "work"
+    ],
+    "how": "intent",
+    "sim": true
+  },
+  {
+    "at": 1785722400,
+    "day": "weekday",
+    "slot": "上午",
+    "place_kind": "school",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "relax"
+    ],
+    "how": "tap",
+    "sim": true
+  },
+  {
+    "at": 1785740400,
+    "day": "weekday",
+    "slot": "下午",
+    "place_kind": "work",
+    "motion": "still",
+    "chosen": "work",
+    "top": [
+      "work",
+      "study",
+      "relax"
+    ],
+    "how": "manual",
+    "sim": true
+  },
+  {
+    "at": 1785808800,
+    "day": "weekday",
+    "slot": "上午",
+    "place_kind": "school",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "relax"
+    ],
+    "how": "tap",
+    "sim": true
+  },
+  {
+    "at": 1785826800,
+    "day": "weekday",
+    "slot": "下午",
+    "place_kind": "work",
+    "motion": "still",
+    "chosen": "work",
+    "top": [
+      "work",
+      "study",
+      "relax"
+    ],
+    "how": "manual",
+    "sim": true
+  },
+  {
+    "at": 1785895200,
+    "day": "weekday",
+    "slot": "上午",
+    "place_kind": "school",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "relax"
+    ],
+    "how": "tap",
+    "sim": true
+  },
+  {
+    "at": 1785913200,
+    "day": "weekday",
+    "slot": "下午",
+    "place_kind": "work",
+    "motion": "still",
+    "chosen": "work",
+    "top": [
+      "work",
+      "study",
+      "relax"
+    ],
+    "how": "manual",
+    "sim": true
+  },
+  {
+    "at": 1785981600,
+    "day": "weekday",
+    "slot": "上午",
+    "place_kind": "school",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "relax"
+    ],
+    "how": "tap",
+    "sim": true
+  },
+  {
+    "at": 1785999600,
+    "day": "weekday",
+    "slot": "下午",
+    "place_kind": "work",
+    "motion": "still",
+    "chosen": "work",
+    "top": [
+      "work",
+      "study",
+      "relax"
+    ],
+    "how": "manual",
+    "sim": true
+  },
+  {
+    "at": 1786068000,
+    "day": "weekday",
+    "slot": "上午",
+    "place_kind": "school",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "relax"
+    ],
+    "how": "tap",
+    "sim": true
+  },
+  {
+    "at": 1786086000,
+    "day": "weekday",
+    "slot": "下午",
+    "place_kind": "work",
+    "motion": "still",
+    "chosen": "work",
+    "top": [
+      "work",
+      "study",
+      "relax"
+    ],
+    "how": "manual",
+    "sim": true
+  },
+  {
+    "at": 1786154400,
+    "day": "weekend",
+    "slot": "上午",
+    "place_kind": "school",
+    "motion": "run_bike",
+    "chosen": "work",
+    "top": [
+      "work",
+      "study",
+      "commute"
+    ],
+    "how": "intent",
+    "sim": true
+  },
+  {
+    "at": 1786248000,
+    "day": "weekend",
+    "slot": "中午",
+    "place_kind": "work",
+    "motion": "vehicle",
+    "chosen": "relax",
+    "top": [
+      "relax",
+      "study",
+      "work"
+    ],
+    "how": "intent",
+    "sim": true
+  },
+  {
+    "at": 1786327200,
+    "day": "weekday",
+    "slot": "上午",
+    "place_kind": "school",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "relax"
+    ],
+    "how": "tap",
+    "sim": true
+  },
+  {
+    "at": 1786345200,
+    "day": "weekday",
+    "slot": "下午",
+    "place_kind": "work",
+    "motion": "still",
+    "chosen": "work",
+    "top": [
+      "work",
+      "study",
+      "relax"
+    ],
+    "how": "manual",
+    "sim": true
+  },
+  {
+    "at": 1786413600,
+    "day": "weekday",
+    "slot": "上午",
+    "place_kind": "school",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "relax"
+    ],
+    "how": "tap",
+    "sim": true
+  },
+  {
+    "at": 1786431600,
+    "day": "weekday",
+    "slot": "下午",
+    "place_kind": "work",
+    "motion": "still",
+    "chosen": "work",
+    "top": [
+      "work",
+      "study",
+      "relax"
+    ],
+    "how": "manual",
+    "sim": true
+  },
+  {
+    "at": 1786500000,
+    "day": "weekday",
+    "slot": "上午",
+    "place_kind": "school",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "relax"
+    ],
+    "how": "tap",
+    "sim": true
+  },
+  {
+    "at": 1786518000,
+    "day": "weekday",
+    "slot": "下午",
+    "place_kind": "work",
+    "motion": "still",
+    "chosen": "work",
+    "top": [
+      "work",
+      "study",
+      "relax"
+    ],
+    "how": "manual",
+    "sim": true
+  },
+  {
+    "at": 1786586400,
+    "day": "weekday",
+    "slot": "上午",
+    "place_kind": "school",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "relax"
+    ],
+    "how": "tap",
+    "sim": true
+  },
+  {
+    "at": 1786604400,
+    "day": "weekday",
+    "slot": "下午",
+    "place_kind": "work",
+    "motion": "still",
+    "chosen": "work",
+    "top": [
+      "work",
+      "study",
+      "relax"
+    ],
+    "how": "manual",
+    "sim": true
+  },
+  {
+    "at": 1786672800,
+    "day": "weekday",
+    "slot": "上午",
+    "place_kind": "school",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "relax"
+    ],
+    "how": "tap",
+    "sim": true
+  },
+  {
+    "at": 1786690800,
+    "day": "weekday",
+    "slot": "下午",
+    "place_kind": "work",
+    "motion": "still",
+    "chosen": "work",
+    "top": [
+      "work",
+      "study",
+      "relax"
+    ],
+    "how": "manual",
+    "sim": true
+  },
+  {
+    "at": 1786777200,
+    "day": "weekend",
+    "slot": "下午",
+    "place_kind": "gym",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "commute"
+    ],
+    "how": "intent",
+    "sim": true
+  },
+  {
+    "at": 1786874400,
+    "day": "weekend",
+    "slot": "傍晚",
+    "place_kind": "",
+    "motion": "unknown",
+    "chosen": "workout",
+    "top": [
+      "workout",
+      "study",
+      "work"
+    ],
+    "how": "intent",
+    "sim": true
+  },
+  {
+    "at": 1786932000,
+    "day": "weekday",
+    "slot": "上午",
+    "place_kind": "school",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "relax"
+    ],
+    "how": "tap",
+    "sim": true
+  },
+  {
+    "at": 1786950000,
+    "day": "weekday",
+    "slot": "下午",
+    "place_kind": "work",
+    "motion": "still",
+    "chosen": "work",
+    "top": [
+      "work",
+      "study",
+      "relax"
+    ],
+    "how": "manual",
+    "sim": true
+  },
+  {
+    "at": 1787018400,
+    "day": "weekday",
+    "slot": "上午",
+    "place_kind": "school",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "relax"
+    ],
+    "how": "tap",
+    "sim": true
+  },
+  {
+    "at": 1787036400,
+    "day": "weekday",
+    "slot": "下午",
+    "place_kind": "work",
+    "motion": "still",
+    "chosen": "work",
+    "top": [
+      "work",
+      "study",
+      "relax"
+    ],
+    "how": "manual",
+    "sim": true
+  },
+  {
+    "at": 1787104800,
+    "day": "weekday",
+    "slot": "上午",
+    "place_kind": "school",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "relax"
+    ],
+    "how": "tap",
+    "sim": true
+  },
+  {
+    "at": 1787122800,
+    "day": "weekday",
+    "slot": "下午",
+    "place_kind": "work",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "work",
+      "study",
+      "relax"
+    ],
+    "how": "manual",
+    "sim": true
+  },
+  {
+    "at": 1787191200,
+    "day": "weekday",
+    "slot": "上午",
+    "place_kind": "school",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "relax"
+    ],
+    "how": "tap",
+    "sim": true
+  },
+  {
+    "at": 1787209200,
+    "day": "weekday",
+    "slot": "下午",
+    "place_kind": "work",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "work",
+      "study",
+      "relax"
+    ],
+    "how": "manual",
+    "sim": true
+  },
+  {
+    "at": 1787277600,
+    "day": "weekday",
+    "slot": "上午",
+    "place_kind": "school",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "relax"
+    ],
+    "how": "tap",
+    "sim": true
+  },
+  {
+    "at": 1787295600,
+    "day": "weekday",
+    "slot": "下午",
+    "place_kind": "work",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "work",
+      "study",
+      "relax"
+    ],
+    "how": "manual",
+    "sim": true
+  },
+  {
+    "at": 1787400000,
+    "day": "weekend",
+    "slot": "晚上",
+    "place_kind": "home",
+    "motion": "walk",
+    "chosen": "walk",
+    "top": [
+      "walk",
+      "study",
+      "work"
+    ],
+    "how": "intent",
+    "sim": true
+  },
+  {
+    "at": 1787421600,
+    "day": "weekend",
+    "slot": "深夜",
+    "place_kind": "school",
+    "motion": "run_bike",
+    "chosen": "sleep",
+    "top": [
+      "sleep",
+      "study",
+      "work"
+    ],
+    "how": "intent",
+    "sim": true
+  },
+  {
+    "at": 1787536800,
+    "day": "weekday",
+    "slot": "上午",
+    "place_kind": "school",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "relax"
+    ],
+    "how": "tap",
+    "sim": true
+  },
+  {
+    "at": 1787554800,
+    "day": "weekday",
+    "slot": "下午",
+    "place_kind": "work",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "work",
+      "study",
+      "relax"
+    ],
+    "how": "manual",
+    "sim": true
+  },
+  {
+    "at": 1787623200,
+    "day": "weekday",
+    "slot": "上午",
+    "place_kind": "school",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "relax"
+    ],
+    "how": "tap",
+    "sim": true
+  },
+  {
+    "at": 1787641200,
+    "day": "weekday",
+    "slot": "下午",
+    "place_kind": "work",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "work",
+      "study",
+      "relax"
+    ],
+    "how": "manual",
+    "sim": true
+  },
+  {
+    "at": 1787709600,
+    "day": "weekday",
+    "slot": "上午",
+    "place_kind": "school",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "relax"
+    ],
+    "how": "tap",
+    "sim": true
+  },
+  {
+    "at": 1787727600,
+    "day": "weekday",
+    "slot": "下午",
+    "place_kind": "work",
+    "motion": "still",
+    "chosen": "relax",
+    "top": [
+      "work",
+      "study",
+      "relax"
+    ],
+    "how": "manual",
+    "sim": true
+  },
+  {
+    "at": 1787796000,
+    "day": "weekday",
+    "slot": "上午",
+    "place_kind": "school",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "relax"
+    ],
+    "how": "tap",
+    "sim": true
+  },
+  {
+    "at": 1787814000,
+    "day": "weekday",
+    "slot": "下午",
+    "place_kind": "work",
+    "motion": "still",
+    "chosen": "relax",
+    "top": [
+      "work",
+      "study",
+      "relax"
+    ],
+    "how": "manual",
+    "sim": true
+  },
+  {
+    "at": 1787882400,
+    "day": "weekday",
+    "slot": "上午",
+    "place_kind": "school",
+    "motion": "still",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "relax"
+    ],
+    "how": "tap",
+    "sim": true
+  },
+  {
+    "at": 1787900400,
+    "day": "weekday",
+    "slot": "下午",
+    "place_kind": "work",
+    "motion": "still",
+    "chosen": "relax",
+    "top": [
+      "work",
+      "study",
+      "relax"
+    ],
+    "how": "manual",
+    "sim": true
+  },
+  {
+    "at": 1787958000,
+    "day": "weekend",
+    "slot": "早晨",
+    "place_kind": "work",
+    "motion": "vehicle",
+    "chosen": "commute",
+    "top": [
+      "commute",
+      "study",
+      "work"
+    ],
+    "how": "intent",
+    "sim": true
+  },
+  {
+    "at": 1788055200,
+    "day": "weekend",
+    "slot": "上午",
+    "place_kind": "gym",
+    "motion": "still",
+    "chosen": "work",
+    "top": [
+      "work",
+      "study",
+      "commute"
+    ],
+    "how": "intent",
+    "sim": true
+  },
+  {
+    "at": 1788580800,
+    "day": "weekend",
+    "slot": "中午",
+    "place_kind": "",
+    "motion": "unknown",
+    "chosen": "relax",
+    "top": [
+      "relax",
+      "study",
+      "work"
+    ],
+    "how": "intent",
+    "sim": true
+  },
+  {
+    "at": 1788678000,
+    "day": "weekend",
+    "slot": "下午",
+    "place_kind": "home",
+    "motion": "walk",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "commute"
+    ],
+    "how": "intent",
+    "sim": true
+  },
+  {
+    "at": 1789207200,
+    "day": "weekend",
+    "slot": "傍晚",
+    "place_kind": "school",
+    "motion": "run_bike",
+    "chosen": "workout",
+    "top": [
+      "workout",
+      "study",
+      "work"
+    ],
+    "how": "intent",
+    "sim": true
+  },
+  {
+    "at": 1789300800,
+    "day": "weekend",
+    "slot": "晚上",
+    "place_kind": "work",
+    "motion": "vehicle",
+    "chosen": "walk",
+    "top": [
+      "walk",
+      "study",
+      "work"
+    ],
+    "how": "intent",
+    "sim": true
+  },
+  {
+    "at": 1789754400,
+    "day": "weekend",
+    "slot": "深夜",
+    "place_kind": "gym",
+    "motion": "still",
+    "chosen": "sleep",
+    "top": [
+      "sleep",
+      "study",
+      "work"
+    ],
+    "how": "intent",
+    "sim": true
+  },
+  {
+    "at": 1789858800,
+    "day": "weekend",
+    "slot": "早晨",
+    "place_kind": "",
+    "motion": "unknown",
+    "chosen": "commute",
+    "top": [
+      "commute",
+      "study",
+      "work"
+    ],
+    "how": "intent",
+    "sim": true
+  },
+  {
+    "at": 1790388000,
+    "day": "weekend",
+    "slot": "上午",
+    "place_kind": "home",
+    "motion": "walk",
+    "chosen": "work",
+    "top": [
+      "work",
+      "study",
+      "commute"
+    ],
+    "how": "intent",
+    "sim": true
+  },
+  {
+    "at": 1790481600,
+    "day": "weekend",
+    "slot": "中午",
+    "place_kind": "school",
+    "motion": "run_bike",
+    "chosen": "relax",
+    "top": [
+      "relax",
+      "study",
+      "work"
+    ],
+    "how": "intent",
+    "sim": true
+  },
+  {
+    "at": 1791010800,
+    "day": "weekend",
+    "slot": "下午",
+    "place_kind": "work",
+    "motion": "vehicle",
+    "chosen": "study",
+    "top": [
+      "study",
+      "work",
+      "commute"
+    ],
+    "how": "intent",
+    "sim": true
+  },
+  {
+    "at": 1791108000,
+    "day": "weekend",
+    "slot": "傍晚",
+    "place_kind": "gym",
+    "motion": "still",
+    "chosen": "workout",
+    "top": [
+      "workout",
+      "study",
+      "work"
+    ],
+    "how": "intent",
+    "sim": true
+  }
+]

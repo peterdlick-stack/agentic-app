@@ -1,0 +1,416 @@
+[
+  {
+    "t": "I LOVE U",
+    "a": "洛天依",
+    "en": 4,
+    "vo": true,
+    "md": "欢快",
+    "lg": "zh",
+    "src": "seed"
+  },
+  {
+    "t": "Summer",
+    "a": "久石让",
+    "en": 3,
+    "vo": false,
+    "md": "欢快",
+    "lg": "instr",
+    "src": "seed"
+  },
+  {
+    "t": "One Summer's Day",
+    "a": "久石让",
+    "en": 1,
+    "vo": false,
+    "md": "怀旧",
+    "lg": "instr",
+    "src": "seed"
+  },
+  {
+    "t": "Nuvole Bianche",
+    "a": "Ludovico Einaudi",
+    "en": 2,
+    "vo": false,
+    "md": "平静",
+    "lg": "instr",
+    "src": "seed"
+  },
+  {
+    "t": "Experience",
+    "a": "Ludovico Einaudi",
+    "en": 3,
+    "vo": false,
+    "md": "振奋",
+    "lg": "instr",
+    "src": "seed"
+  },
+  {
+    "t": "River Flows in You",
+    "a": "Yiruma",
+    "en": 1,
+    "vo": false,
+    "md": "平静",
+    "lg": "instr",
+    "src": "seed"
+  },
+  {
+    "t": "Gymnopédie No.1",
+    "a": "Erik Satie",
+    "en": 1,
+    "vo": false,
+    "md": "平静",
+    "lg": "instr",
+    "src": "seed"
+  },
+  {
+    "t": "Clair de Lune",
+    "a": "Debussy",
+    "en": 1,
+    "vo": false,
+    "md": "平静",
+    "lg": "instr",
+    "src": "seed"
+  },
+  {
+    "t": "Cello Suite No.1 Prelude",
+    "a": "J.S. Bach",
+    "en": 2,
+    "vo": false,
+    "md": "专注",
+    "lg": "instr",
+    "src": "seed"
+  },
+  {
+    "t": "On the Nature of Daylight",
+    "a": "Max Richter",
+    "en": 1,
+    "vo": false,
+    "md": "伤感",
+    "lg": "instr",
+    "src": "seed"
+  },
+  {
+    "t": "Aruarian Dance",
+    "a": "Nujabes",
+    "en": 2,
+    "vo": false,
+    "md": "专注",
+    "lg": "instr",
+    "src": "seed"
+  },
+  {
+    "t": "An Ending (Ascent)",
+    "a": "Brian Eno",
+    "en": 1,
+    "vo": false,
+    "md": "平静",
+    "lg": "instr",
+    "src": "seed"
+  },
+  {
+    "t": "Time",
+    "a": "Hans Zimmer",
+    "en": 3,
+    "vo": false,
+    "md": "振奋",
+    "lg": "instr",
+    "src": "seed"
+  },
+  {
+    "t": "Merry Christmas Mr. Lawrence",
+    "a": "坂本龙一",
+    "en": 2,
+    "vo": false,
+    "md": "怀旧",
+    "lg": "instr",
+    "src": "seed"
+  },
+  {
+    "t": "琵琶语",
+    "a": "林海",
+    "en": 1,
+    "vo": false,
+    "md": "平静",
+    "lg": "instr",
+    "src": "seed"
+  },
+  {
+    "t": "Waltz for Debby",
+    "a": "Bill Evans",
+    "en": 2,
+    "vo": false,
+    "md": "温暖",
+    "lg": "instr",
+    "src": "seed"
+  },
+  {
+    "t": "晴天",
+    "a": "周杰伦",
+    "en": 3,
+    "vo": true,
+    "md": "怀旧",
+    "lg": "zh",
+    "src": "seed"
+  },
+  {
+    "t": "稻香",
+    "a": "周杰伦",
+    "en": 3,
+    "vo": true,
+    "md": "温暖",
+    "lg": "zh",
+    "src": "seed"
+  },
+  {
+    "t": "双截棍",
+    "a": "周杰伦",
+    "en": 5,
+    "vo": true,
+    "md": "振奋",
+    "lg": "zh",
+    "src": "seed"
+  },
+  {
+    "t": "十年",
+    "a": "陈奕迅",
+    "en": 2,
+    "vo": true,
+    "md": "伤感",
+    "lg": "zh",
+    "src": "seed"
+  },
+  {
+    "t": "孤勇者",
+    "a": "陈奕迅",
+    "en": 4,
+    "vo": true,
+    "md": "振奋",
+    "lg": "zh",
+    "src": "seed"
+  },
+  {
+    "t": "倔强",
+    "a": "五月天",
+    "en": 4,
+    "vo": true,
+    "md": "振奋",
+    "lg": "zh",
+    "src": "seed"
+  },
+  {
+    "t": "突然好想你",
+    "a": "五月天",
+    "en": 3,
+    "vo": true,
+    "md": "伤感",
+    "lg": "zh",
+    "src": "seed"
+  },
+  {
+    "t": "消愁",
+    "a": "毛不易",
+    "en": 2,
+    "vo": true,
+    "md": "伤感",
+    "lg": "zh",
+    "src": "seed"
+  },
+  {
+    "t": "平凡之路",
+    "a": "朴树",
+    "en": 3,
+    "vo": true,
+    "md": "怀旧",
+    "lg": "zh",
+    "src": "seed"
+  },
+  {
+    "t": "成都",
+    "a": "赵雷",
+    "en": 2,
+    "vo": true,
+    "md": "温暖",
+    "lg": "zh",
+    "src": "seed"
+  },
+  {
+    "t": "贝加尔湖畔",
+    "a": "李健",
+    "en": 1,
+    "vo": true,
+    "md": "平静",
+    "lg": "zh",
+    "src": "seed"
+  },
+  {
+    "t": "光年之外",
+    "a": "邓紫棋",
+    "en": 3,
+    "vo": true,
+    "md": "振奋",
+    "lg": "zh",
+    "src": "seed"
+  },
+  {
+    "t": "江南",
+    "a": "林俊杰",
+    "en": 3,
+    "vo": true,
+    "md": "温暖",
+    "lg": "zh",
+    "src": "seed"
+  },
+  {
+    "t": "红豆",
+    "a": "王菲",
+    "en": 2,
+    "vo": true,
+    "md": "温暖",
+    "lg": "zh",
+    "src": "seed"
+  },
+  {
+    "t": "有何不可",
+    "a": "许嵩",
+    "en": 3,
+    "vo": true,
+    "md": "欢快",
+    "lg": "zh",
+    "src": "seed"
+  },
+  {
+    "t": "云烟成雨",
+    "a": "房东的猫",
+    "en": 2,
+    "vo": true,
+    "md": "平静",
+    "lg": "zh",
+    "src": "seed"
+  },
+  {
+    "t": "演员",
+    "a": "薛之谦",
+    "en": 2,
+    "vo": true,
+    "md": "伤感",
+    "lg": "zh",
+    "src": "seed"
+  },
+  {
+    "t": "爱人错过",
+    "a": "告五人",
+    "en": 4,
+    "vo": true,
+    "md": "欢快",
+    "lg": "zh",
+    "src": "seed"
+  },
+  {
+    "t": "Don't Stop Me Now",
+    "a": "Queen",
+    "en": 5,
+    "vo": true,
+    "md": "欢快",
+    "lg": "en",
+    "src": "seed"
+  },
+  {
+    "t": "Eye of the Tiger",
+    "a": "Survivor",
+    "en": 5,
+    "vo": true,
+    "md": "振奋",
+    "lg": "en",
+    "src": "seed"
+  },
+  {
+    "t": "Believer",
+    "a": "Imagine Dragons",
+    "en": 5,
+    "vo": true,
+    "md": "振奋",
+    "lg": "en",
+    "src": "seed"
+  },
+  {
+    "t": "Get Lucky",
+    "a": "Daft Punk",
+    "en": 4,
+    "vo": true,
+    "md": "欢快",
+    "lg": "en",
+    "src": "seed"
+  },
+  {
+    "t": "Viva la Vida",
+    "a": "Coldplay",
+    "en": 4,
+    "vo": true,
+    "md": "振奋",
+    "lg": "en",
+    "src": "seed"
+  },
+  {
+    "t": "Shake It Off",
+    "a": "Taylor Swift",
+    "en": 4,
+    "vo": true,
+    "md": "欢快",
+    "lg": "en",
+    "src": "seed"
+  },
+  {
+    "t": "Don't Know Why",
+    "a": "Norah Jones",
+    "en": 1,
+    "vo": true,
+    "md": "温暖",
+    "lg": "en",
+    "src": "seed"
+  },
+  {
+    "t": "Paris in the Rain",
+    "a": "Lauv",
+    "en": 2,
+    "vo": true,
+    "md": "温暖",
+    "lg": "en",
+    "src": "seed"
+  },
+  {
+    "t": "Wake Me Up",
+    "a": "Avicii",
+    "en": 4,
+    "vo": true,
+    "md": "振奋",
+    "lg": "en",
+    "src": "seed"
+  },
+  {
+    "t": "Blinding Lights",
+    "a": "The Weeknd",
+    "en": 5,
+    "vo": true,
+    "md": "欢快",
+    "lg": "en",
+    "src": "seed"
+  },
+  {
+    "t": "Happy",
+    "a": "Pharrell Williams",
+    "en": 4,
+    "vo": true,
+    "md": "欢快",
+    "lg": "en",
+    "src": "seed"
+  },
+  {
+    "t": "My Funny Valentine",
+    "a": "Chet Baker",
+    "en": 1,
+    "vo": true,
+    "md": "伤感",
+    "lg": "en",
+    "src": "seed"
+  }
+]

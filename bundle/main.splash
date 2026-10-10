@@ -763,7 +763,12 @@ fn dlog_run(ticket){
     dlog_rotate = job.rotate
     dlog_state_valid = job.valid
     dlog_commit = job.commit
-    if job.step == "idle" { dlog_busy = false return }
+    if job.step == "idle" {
+        // An event can arrive after pump published idle but before this callback.
+        if dlog_waiting() { dlog_schedule("pump", 0.01) }
+        else { dlog_busy = false }
+        return
+    }
     if job.step == "pump" || job.step == "advance" {
         // Only these steps mutate stats/buffers/votes. Keep the checkpoint unmodified.
         dstats = job.stats.to_json().parse_json()

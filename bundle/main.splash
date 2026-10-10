@@ -39,10 +39,6 @@ let playlist_fit = []
 // ==== [A] 选歌契约 ====
 fn dlog_rec(picks, how, ctx){}
 
-// ==== [B] 活动支持度 ====
-fn dlog_act(chosen, how){}
-fn dlog_act_undo(){}
-
 // ==== [C] 调试页 ====
 let debug_expanded = false
 fn sync_debug(){}
@@ -175,7 +171,6 @@ let places = []         // [Place]，存到 places.json
 let labels = []         // 你每次确认的活动（真实标签），存到 labels.json，最多 LABEL_MAX 条
 let LABEL_MAX = 500
 let ALPHA = 3           // 先验的权重（相当于 3 条虚拟记录）
-let ASK_P = 0.7         // 最可能的活动概率低于它时，主动请你确认
 let last_rank = nil     // 最近一次排序结果 {list n level bucket}
 let show_all_acts = false
 // 你在原话里说明的情境、或 AI 从你的话里判断出的情境，在同一情境桶里沿用 30 分钟，
@@ -1738,11 +1733,116 @@ fn rank_acts(r){
     }
     {list: out n: n level: level bucket: b}
 }
+// ==== [B] 活动支持度 ====
+let flow_labels_before = nil
+let flow_activity = ""
+let b_rank_rule = nil
+let b_act_sim = false
+let b_can_undo = false
+// 模拟开关是新流程边界；旧确认保留在原组，不向另一组发撤销。
+fn b_mode_boundary(){
+    cur_act_id = 0
+    b_can_undo = false
+    flow_labels_before = nil
+    flow_activity = ""
+}
+fn b_mode_check(){
+    if cur_act_id > 0 && b_act_sim != (sim.kind != "off") { b_mode_boundary() }
+}
+// 选歌已开始后，确认仍供 rec 引用，但不能再作为未提交确认撤销。
+fn b_commit_act(){ b_can_undo = false }
+fn b_tier(rk, r){
+    let low = ""
+    let q1 = 0.0
+    let q2 = 0.0
+    if rk != nil && rk.list.len() > 0 { q1 = rk.list[0].p }
+    if rk != nil && rk.list.len() > 1 { q2 = rk.list[1].p }
+    if r == nil || r.source == "none" { low = "none" }
+    else if q1 < TIER_LOW_Q { low = "q1" }
+    else if q1 - q2 < TIER_GAP { low = "gap" }
+    let eh = low == "" && q1 >= TIER_HIGH_Q && q1 - q2 >= TIER_GAP
+    let tier = "mid"
+    if low != "" { tier = "low" }
+    else if eh && TIER_HIGH_ON { tier = "high" }
+    {tier: tier eh: eh low: low}
+}
+fn b_duplicate(chosen, b, before){
+    if chosen == "" || before.len() == 0 { return false }
+    let l = before[before.len() - 1]
+    l.chosen == chosen && l.day == b.day && l.slot == b.slot && l.place_kind == b.place && l.motion == b.motion && time_now() - l.at < 1800
+}
+fn b_majority(before){
+    let counts = blank_fb()
+    for l in before { fb_set(counts, l.chosen, fb_get(counts, l.chosen) + 1) }
+    let best = ""
+    let best_n = 0
+    // 按记录出现顺序扫描；并列时不替换，保留最早出现的活动。
+    for l in before {
+        let n = fb_get(counts, l.chosen)
+        if n > best_n { best = l.chosen best_n = n }
+    }
+    best
+}
+fn b_marked(id){
+    let tier = b_tier(last_rank, b_rank_rule)
+    if tier.tier == "low" || last_rank == nil { return false }
+    if tier.tier == "high" { return last_rank.list[0].id == id }
+    for k in 3 { if k < last_rank.list.len() && last_rank.list[k].id == id { return true } }
+    false
+}
+fn dlog_act_undo(){
+    b_mode_check()
+    if cur_act_id > 0 && b_can_undo { dlog_push({e: "act_undo" a: cur_act_id}) }
+    cur_act_id = 0
+    b_can_undo = false
+}
+fn dlog_act(chosen, how){
+    b_mode_check()
+    let before = labels
+    if flow_labels_before != nil { before = flow_labels_before }
+    let rk = last_rank
+    let r = b_rank_rule
+    if rk == nil || r == nil { r = infer_rules() rk = rank_acts(r) }
+    let q = []
+    let pr = []
+    let br = 0.0
+    let bp = 0.0
+    for x in rk.list {
+        let p = round(x.p * 1000) / 1000
+        let pp = round(prior_of(x.id, r) * 1000) / 1000
+        q.push([x.id p])
+        pr.push([x.id pp])
+        let y = if x.id == chosen 1.0 else 0.0
+        br = br + (p - y) * (p - y)
+        bp = bp + (pp - y) * (pp - y)
+    }
+    let tier = b_tier(rk, r)
+    let maj = b_majority(before)
+    let hit = nil
+    let rhit = nil
+    let mhit = nil
+    if chosen != "" {
+        hit = rk.list[0].id == chosen
+        rhit = r.id == chosen
+        mhit = maj == chosen
+    } else { br = nil bp = nil }
+    let ev = {e: "act" pv: POLICY_VER b: bucket_key(rk.bucket) lvl: rk.level n: rk.n
+        q: q pr: pr rule: r.id maj: maj tier: tier.tier eh: tier.eh low: tier.low
+        how: how y: chosen dup: b_duplicate(chosen, rk.bucket, before)
+        hit: hit rhit: rhit mhit: mhit br: br bp: bp}
+    // 先保存快照，再减回旧确认。确认 A→B、A→跳过均只撤销一次。
+    if b_can_undo { dlog_act_undo() }
+    cur_act_id = dlog_push(ev)
+    b_act_sim = sim.kind != "off"
+    b_can_undo = cur_act_id > 0
+}
+
 fn infer_activity(it){
-    // 先算规律排序：候选卡在手动选择期间也要显示最新的概率
+    // 先算规律支持度，候选和确认日志使用同一份快照。
     let r = infer_rules()
     let rk = rank_acts(r)
     last_rank = rk
+    b_rank_rule = r
     if manual_left() > 0 {
         let verb = "手动选了"
         if prefs.act_how == "tap" { verb = "确认了" }
@@ -1751,10 +1851,10 @@ fn infer_activity(it){
     if it != nil && it.act != "" {
         return act_result(it.act, "intent", 0.9, ["你说了「" + it.act_word + "」"])
     }
-    if session_act != nil && time_now() - session_act.at < SESSION_S && session_act.bucket == bucket_key(rk.bucket) {
+    if session_act != nil && session_act.source == "intent" && time_now() - session_act.at < SESSION_S && session_act.bucket == bucket_key(rk.bucket) {
         let w = []
         for x in session_act.why { w.push(x) }
-        w.push("沿用刚才歌单的判断（" + ceil((SESSION_S - (time_now() - session_act.at)) / 60) + " 分钟内有效）")
+        w.push("沿用你刚才说明的活动（" + ceil((SESSION_S - (time_now() - session_act.at)) / 60) + " 分钟内有效）")
         return act_result(session_act.id, session_act.source, session_act.conf, w)
     }
     let top = rk.list[0]
@@ -1765,7 +1865,7 @@ fn infer_activity(it){
         if rk.level == "coarse" { span_word = "同一时段" }
         if top.k == 0 {
             why.push("规律：" + span_word + "下你确认过 " + rk.n + " 次，但还没有一致的选择，暂按规则推测")
-            return act_result(top.id, r.source, top.p, why)
+            return act_result(top.id, r.source, r.conf, why)
         }
         why.push("规律：" + span_word + "下你确认过 " + rk.n + " 次，其中「" + act_name(top.id) + "」" + top.k + " 次")
         return act_result(top.id, "routine", top.p, why)
@@ -1773,9 +1873,8 @@ fn infer_activity(it){
     r
 }
 // 同一次选歌流程中，回到第①步改选会替换本次确认；撤销恢复原列表。
-let flow_labels_before = nil
-let flow_activity = ""
 fn undo_flow_label(){
+    b_mode_check()
     if flow_labels_before != nil {
         labels = flow_labels_before
         flow_labels_before = nil
@@ -1785,6 +1884,7 @@ fn undo_flow_label(){
 fn confirm_act(id, how){
     if !booted { boot_hint() return }
     if busy { return }
+    b_mode_check()
     if flow_labels_before != nil && prefs.act == id && manual_left() > 0 {
         dlog_act_undo() // [W0 hook / B]
         undo_flow_label()
@@ -1803,13 +1903,7 @@ fn confirm_act(id, how){
     // 和 add_label 一样：同一情境桶 30 分钟内重复确认同一个活动只算一次
     //（例如「从头再选一次」后又点了同一个活动），用新记录顶替旧的那条，避免放大统计
     let n_before = flow_labels_before.len()
-    let dup = false
-    if n_before > 0 {
-        let l = flow_labels_before[n_before - 1]
-        if l.chosen == id && l.day == b.day && l.slot == b.slot && l.place_kind == b.place && l.motion == b.motion {
-            if time_now() - l.at < 1800 { dup = true }
-        }
-    }
+    let dup = b_duplicate(id, b, flow_labels_before)
     let next = []
     let start = max(0, n_before - LABEL_MAX + 1)
     let stop = n_before
@@ -1835,6 +1929,7 @@ fn defer_save_prefs_and_refresh(){
 fn flow_uncertain(){
     if !booted { boot_hint() return }
     if busy { return }
+    b_mode_check()
     undo_flow_label()
     dlog_act("", "skip") // [W0 hook / B]
     prefs.act = ""
@@ -1882,12 +1977,14 @@ fn cand_title(){
         if flow_labels_before != nil { return verb + "：" + act_name(prefs.act) + "（再点同一活动可撤销本次确认）" }
         return verb + "：" + act_name(prefs.act) + "（可重新选择）"
     }
-    if last_rank == nil { return "① 你现在在做什么？" }
-    let top = last_rank.list[0]
-    if top.p < ASK_P || last_rank.n == 0 {
+    let tier = b_tier(last_rank, b_rank_rule)
+    if tier.tier == "low" {
         return "① 你现在在做什么？点一下确认，我会越来越懂你"
     }
-    "① 按你的规律，你多半在" + act_name(top.id) + "（" + pct(top.p) + "）；不对就点下面改"
+    if tier.tier == "high" { return "① 按你的规律，多半在 " + act_name(last_rank.list[0].id) + "；不对就点下面改" }
+    let names = []
+    for x in cand_top3() { names.push(act_name(x.id)) }
+    "① 可能在：" + join(names, "、") + "（按你的规律排序）· 点一下确认"
 }
 fn build_ctx(it){
     let p = local_parts()
@@ -1901,7 +1998,7 @@ fn source_word(src){
         return "手动"
     }
     if src == "intent" { return "你说的" }
-    if src == "ai" { return "AI 推断" }
+    if src == "ai" { return "AI 判断（未校准）" }
     if src == "place" { return "地点推断" }
     if src == "motion" { return "移动推断" }
     if src == "time" { return "时段推测" }
@@ -1910,7 +2007,10 @@ fn source_word(src){
 }
 fn act_line(a){
     if a.id == "" { return "未知 · 不参与" }
-    act_name(a.id) + " · " + source_word(a.source) + " · 可信度 " + round(a.conf * 100) / 100
+    let text = act_name(a.id) + " · " + source_word(a.source)
+    if a.source == "motion" || a.source == "place" { return text + " · 可信度 " + round(a.conf * 100) / 100 }
+    if a.source == "routine" && screen == "sense" { return text + " · 支持度 " + round(a.conf * 100) / 100 + "（未校准）" }
+    text
 }
 fn here_text(){
     if here.place == nil {
@@ -3092,9 +3192,7 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
                             let j = r * 2 + col
                             if j < ACTS.len() {
                                 let a = ACTS[j]
-                                if prefs.act == a.id && manual_left() > 0 {
-                                    Activity{ text: a.n draw_bg.color: SC_ACCENT draw_bg.color_hover: SC_ACCENT draw_bg.color_down: SC_ACCENT draw_text.color: SC_GROUND draw_text.color_hover: SC_GROUND draw_text.color_down: SC_GROUND on_click: || confirm_act(a.id, "tap") }
-                                } else if last_rank != nil && last_rank.list[0].id == a.id {
+                                if b_marked(a.id) {
                                     ActivityTop{text: a.n on_click: || confirm_act(a.id, "tap")}
                                 } else { Activity{text: a.n on_click: || confirm_act(a.id, "tap")} }
                             } else { View{width: Fill height: 52} }

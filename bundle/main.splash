@@ -53,14 +53,6 @@ fn toggle_debug(){
     if debug_expanded { sync_debug() }
 }
 
-// ==== [D] 决策日志 ====
-fn dlog_push(ev){}
-fn dlog_new_id(){ 0 }
-fn dlog_recent(n){ [] }
-fn dlog_stats(want_sim){ nil }
-fn boot_dstats(gen){ boot_next("dshard") }
-fn boot_dshard(gen){ boot_next("encounters") }
-
 // ==== [E] 契合档 ====
 fn fit_snapshot(ctx, it, elig){ [] }
 fn dlog_rate(i, v){}
@@ -385,6 +377,14 @@ fn load_label(x){
             motion: pick(x, "motion", "unknown") chosen: chosen top: pick(x, "top", []) how: pick(x, "how", "tap")})
     }
 }
+// ==== [D] 决策日志 ====
+fn dlog_push(ev){}
+fn dlog_new_id(){ 0 }
+fn dlog_recent(n){ [] }
+fn dlog_stats(want_sim){ nil }
+// 启动挂钩须在 boot_next 所在作用域之后定义。
+fn boot_dstats(gen){ boot_next("dshard") }
+fn boot_dshard(gen){ boot_next("encounters") }
 // 每一步一个处理函数；读了文件的步骤只读这一个文件。重试时整步重来，所以每步开头先清空自己要填的数据
 fn boot_run(gen, step){
     if gen != boot_gen || booted { return }

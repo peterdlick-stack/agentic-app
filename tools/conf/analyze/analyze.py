@@ -450,7 +450,7 @@ def plot_reliability(bins, destination):
             empty = "无数据" if chosen else "No data / n=0"
             ax.text(.02, .95 - i * .055, f"{bucket['bin']}: {empty}", transform=ax.transAxes, fontsize=9)
     ax.set(xlim=(-.02, 1.02), ylim=(-.02, 1.08), xlabel="Mean top-1 support (uncalibrated)", ylabel="Observed hit rate (95% Wilson)", title="Descriptive reliability by support bin")
-    ax.legend(loc="lower right", fontsize=8)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.18), fontsize=8)
     fig.savefig(destination, dpi=160)
     plt.close(fig)
 

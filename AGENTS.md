@@ -36,7 +36,7 @@ Add this app's own requirements, data sources and tests below.
 - 设计、接口、阈值：`docs/PLAN.md` 第 2 节（v0.2）。数据存放在 `accounts/device/`（prefs、library、feedback、history、last、labels、encounters）；`encounters.json` 的规格见 `docs/DEMO-ILOVEU.md` §4.2（每个时刻只记第一次，模拟记录可被真实记录替换）；地点 `places.json` 放在存储根目录，应用助手读不到。
 - 反馈分按活动读写时，必须用 `fb_get` / `fb_set` 访问固定字段。不要写 `f[id] = v`：运行时会追加一个重复键，而不是覆盖原来的值（已实测）。
 - 判断意图时，"不要人声"包含"要人声"：先匹配"要人声"，再用"不要人声"覆盖。
-- `card-host` 中没有 `model` 服务，也没有 Linux 上的内置网页，这两条路径必须在 Shell 或真机上验证。
+- 不把 `card-host` 视为没有 `model` 服务：当前宿主可能报告模型可用。零真实调用的选歌测试必须使用 `DEV_FAKE_MODEL` 测试副本，或在副本中显式禁用模型路径；该开关不拦截曲库的 AI 补标签，测试时不得触发该入口。真实模型与 Linux 内置网页仍在 Shell 或真机验证。
 - 读取已保存的数据时一律用 `pick(o, key, 默认值)`：直接访问不存在的字段会报错，并中断整个处理函数（已实测）。
 - **`pick()` 只对 `parse_json` 得到的对象有效**：脚本里直接写出来的对象（`{sim: true}`），`for k v in o` 拿到的键和字符串比较永远不相等，`pick` 会静默返回默认值（已实测，D4 因此出过错）。脚本里建的对象直接读字段（`m.sim`）；从文件读进来的数据先用 `pick` 整理成字段齐全的对象（见 `enc_clean`），之后也直接读字段。
 - `ok` 是保留字，不能用作对象的键（`{ok: true}` 会解析失败），本应用改用 `valid`。

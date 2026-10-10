@@ -38,15 +38,7 @@ let playlist_fit = []
 
 
 
-// ==== [C] 调试页 ====
-let debug_expanded = false
-fn sync_debug(){}
-fn toggle_debug(){
-    debug_expanded = !debug_expanded
-    ui.debug.set_visible(debug_expanded)
-    ui.debug_toggle.set_text(if debug_expanded "调试信息（开发用）▾" else "调试信息（开发用）▸")
-    if debug_expanded { sync_debug() }
-}
+
 
 // ==== [F] 读回 ====
 fn readback_check(name, expect_n){}
@@ -2929,6 +2921,125 @@ fn shown_places(){
     if sim.kind != "off" { return sim_places }
     places
 }
+// ==== [C] 调试页 ====
+let debug_expanded = false
+let debug_include_sim = false
+let debug_page = 0
+fn c_sum(a, b){ if debug_include_sim { return a + b } a }
+fn c_ratio(a, b){ if b == 0 { return "N/A" } "" + a + "/" + b }
+fn c_mean(a, b){ if b == 0 { return "N/A" } "" + round(a * 1000) / 1000 + "/" + b + " = " + round(a / b * 1000) / 1000 }
+fn c_wilson(h, n){
+    if n == 0 { return "N/A" }
+    let p = h / n
+    let z = 1.96
+    let den = 1 + z * z / n
+    let center = (p + z * z / (2 * n)) / den
+    let half = z * sqrt((p * (1 - p) + z * z / (4 * n)) / n) / den
+    "[" + round((center - half) * 1000) / 1000 + ", " + round((center + half) * 1000) / 1000 + "]"
+}
+fn c_err(o, key){
+    if key == "E_JSON" { return o.E_JSON }
+    if key == "E_STATUS" { return o.E_STATUS }
+    if key == "E_COUNT" { return o.E_COUNT }
+    if key == "E_DUP" { return o.E_DUP }
+    if key == "E_RANGE" { return o.E_RANGE }
+    if key == "E_NOT_ELIG" { return o.E_NOT_ELIG }
+    if key == "E_CAT" { return o.E_CAT }
+    if key == "E_HARD_VOCAL" { return o.E_HARD_VOCAL }
+    if key == "E_HARD_LANG" { return o.E_HARD_LANG }
+    if key == "E_REF_ENUM" { return o.E_REF_ENUM }
+    if key == "E_REF_ABSENT" { return o.E_REF_ABSENT }
+    if key == "E_REF_MISMATCH" { return o.E_REF_MISMATCH }
+    if key == "E_REF_KIND" { return o.E_REF_KIND }
+    if key == "E_WHY" { return o.E_WHY }
+    if key == "E_INSUFF" { return o.E_INSUFF }
+    0
+}
+fn c_song(name, a, b){
+    let likes = c_sum(a.like, b.like)
+    let dislikes = c_sum(a.dis, b.dis)
+    name + "：曝光 " + c_sum(a.exp, b.exp) + " · ♥ " + likes + " · ✕ " + dislikes + " · 去听 " + c_sum(a.click, b.click) + " · 正评价 " + c_ratio(likes, likes + dislikes)
+}
+fn c_recent_line(ev){
+    let t = floor((ev.at + 28800) % 86400)
+    let line = "" + floor(t / 3600) + ":" + floor(t % 3600 / 60) + " #" + ev.id + " " + ev.e
+    if ev.e == "act" { line = line + " " + ev.tier + " → " + (if ev.y == "" "跳过" else act_name(ev.y)) }
+    else if ev.e == "rec" { line = line + " " + ev.res + " · " + ev.p.len() + "首" }
+    else if ev.e == "act_undo" { line = line + " 撤销 #" + ev.a }
+    else { line = line + " " + ev.k }
+    line
+}
+fn c_recent(){
+    let rows = []
+    for ev in dlog_recent(20) { if debug_include_sim || !ev.sim { rows.push(ev) } }
+    let pages = max(1, floor((rows.len() + 4) / 5))
+    debug_page = min(debug_page, pages - 1)
+    let lines = []
+    for i in min(5, max(0, rows.len() - debug_page * 5)) { lines.push(c_recent_line(rows[debug_page * 5 + i])) }
+    ui.debug_recent.set_text(if lines.len() == 0 "最近事件：无记录" else join(lines, "\n"))
+    ui.debug_pages.set_text("最近20条 · " + (debug_page + 1) + "/" + pages + "页 · UTC+8")
+}
+fn sync_debug(){
+    if !debug_expanded { return }
+    ui.debug_mode.set_text(if debug_include_sim "含模拟数据（点此只看真实）" else "只显示真实数据（点此含模拟）")
+    ui.debug_note.set_text(dlog_warn + "\n超过600字节：" + dlog_big + "条，最大 " + dlog_big_max + " 字节；完整保留")
+    let r = dlog_stats(false)
+    let s = dlog_stats(true)
+    if r == nil || s == nil {
+        ui.debug_act.set_text("活动命中：N/A")
+        ui.debug_tier.set_text("问询分档：N/A")
+        ui.debug_quality.set_text("支持度质量：N/A（未校准）")
+        ui.debug_rec.set_text("输出检查：N/A")
+        ui.debug_song.set_text("歌曲反馈：N/A")
+        c_recent()
+        return
+    }
+    let lab = c_sum(r.act.lab, s.act.lab)
+    let hit = c_sum(r.act.hit, s.act.hit)
+    let rhit = c_sum(r.act.rhit, s.act.rhit)
+    let mhit = c_sum(r.act.mhit, s.act.mhit)
+    let small = if lab < 30 " · 样本不足" else ""
+    ui.debug_act.set_text("活动命中" + small + "\n支持度第一名 " + c_ratio(hit, lab) + " · 95% Wilson " + c_wilson(hit, lab) + "\n规则 " + c_ratio(rhit, lab) + " · 多数类 " + c_ratio(mhit, lab))
+    ui.debug_tier.set_text("问询分档：低 " + c_sum(r.act.low, s.act.low) + " · 中 " + c_sum(r.act.mid, s.act.mid) + " · 高 " + c_sum(r.act.high, s.act.high) + "\n跳过 " + c_sum(r.act.skip, s.act.skip) + " · 撤销 " + c_sum(r.act.undo, s.act.undo) + " · 重复 " + c_sum(r.act.dup, s.act.dup) + "\neh 子集 " + c_ratio(c_sum(r.act.eh_hit,s.act.eh_hit),c_sum(r.act.eh_lab,s.act.eh_lab)) + " · 高档预选关闭中")
+    ui.debug_quality.set_text("支持度质量：Brier " + c_mean(c_sum(r.act.br,s.act.br),lab) + " · 先验 " + c_mean(c_sum(r.act.bp,s.act.bp),lab) + "\n未校准，越小越好，仅描述\n当前活动：" + act_line(infer_activity(nil)))
+    let n = c_sum(r.rec.n,s.rec.n)
+    let fallback = c_sum(r.rec.fail+r.rec.net+r.rec.timeout+r.rec.insuff,s.rec.fail+s.rec.net+s.rec.timeout+s.rec.insuff)
+    let errors = []
+    errors.push({code: "E_JSON" name: "对象或字段缺失" n: c_sum(c_err(r.err,"E_JSON"),c_err(s.err,"E_JSON"))})
+    errors.push({code: "E_STATUS" name: "状态不合法" n: c_sum(c_err(r.err,"E_STATUS"),c_err(s.err,"E_STATUS"))})
+    errors.push({code: "E_COUNT" name: "曲目数量不符" n: c_sum(c_err(r.err,"E_COUNT"),c_err(s.err,"E_COUNT"))})
+    errors.push({code: "E_DUP" name: "重复曲目" n: c_sum(c_err(r.err,"E_DUP"),c_err(s.err,"E_DUP"))})
+    errors.push({code: "E_RANGE" name: "索引越界" n: c_sum(c_err(r.err,"E_RANGE"),c_err(s.err,"E_RANGE"))})
+    errors.push({code: "E_NOT_ELIG" name: "曲目不可选" n: c_sum(c_err(r.err,"E_NOT_ELIG"),c_err(s.err,"E_NOT_ELIG"))})
+    errors.push({code: "E_CAT" name: "曲库已变化" n: c_sum(c_err(r.err,"E_CAT"),c_err(s.err,"E_CAT"))})
+    errors.push({code: "E_HARD_VOCAL" name: "违反人声条件" n: c_sum(c_err(r.err,"E_HARD_VOCAL"),c_err(s.err,"E_HARD_VOCAL"))})
+    errors.push({code: "E_HARD_LANG" name: "违反语种条件" n: c_sum(c_err(r.err,"E_HARD_LANG"),c_err(s.err,"E_HARD_LANG"))})
+    errors.push({code: "E_REF_ENUM" name: "未知证据" n: c_sum(c_err(r.err,"E_REF_ENUM"),c_err(s.err,"E_REF_ENUM"))})
+    errors.push({code: "E_REF_ABSENT" name: "证据不可用" n: c_sum(c_err(r.err,"E_REF_ABSENT"),c_err(s.err,"E_REF_ABSENT"))})
+    errors.push({code: "E_REF_MISMATCH" name: "证据不一致" n: c_sum(c_err(r.err,"E_REF_MISMATCH"),c_err(s.err,"E_REF_MISMATCH"))})
+    errors.push({code: "E_REF_KIND" name: "证据种类不足" n: c_sum(c_err(r.err,"E_REF_KIND"),c_err(s.err,"E_REF_KIND"))})
+    errors.push({code: "E_WHY" name: "理由长度不符" n: c_sum(c_err(r.err,"E_WHY"),c_err(s.err,"E_WHY"))})
+    errors.push({code: "E_INSUFF" name: "错误声称曲库不足" n: c_sum(c_err(r.err,"E_INSUFF"),c_err(s.err,"E_INSUFF"))})
+    let top = []
+    for k in 3 {
+        let best = -1
+        let count = 0
+        for i e in errors { if e.n > count { best = i count = e.n } }
+        if best >= 0 { top.push(errors[best].code + " " + errors[best].name + " ×" + count) errors[best].n = 0 }
+    }
+    ui.debug_rec.set_text("输出检查：首轮不合格 " + c_ratio(c_sum(r.rec.first_bad,s.rec.first_bad),c_sum(r.rec.first_ret,s.rec.first_ret)) + "\n首轮网络失败 " + c_ratio(c_sum(r.rec.net,s.rec.net),n) + " · 重试修复 " + c_ratio(c_sum(r.rec.retry_ok,s.rec.retry_ok),c_sum(r.rec.retry,s.rec.retry)) + "\n最终回退 " + c_ratio(fallback,n) + " · 无模型 " + c_sum(r.rec.nomodel,s.rec.nomodel) + "\n" + (if top.len() == 0 "错误码：无" else join(top,"\n")))
+    ui.debug_song.set_text("歌曲反馈\n" + c_song("H",r.song.H,s.song.H) + "\n" + c_song("M",r.song.M,s.song.M) + "\n" + c_song("L",r.song.L,s.song.L))
+    c_recent()
+}
+fn toggle_debug(){
+    debug_expanded = !debug_expanded
+    ui.debug.set_visible(debug_expanded)
+    ui.debug_toggle.set_text(if debug_expanded "调试信息（开发用）▾" else "调试信息（开发用）▸")
+    if debug_expanded { sync_debug() start_timeout(0.4, || sync_debug()) }
+}
+fn c_toggle_sim(){ debug_include_sim = !debug_include_sim debug_page = 0 sync_debug() }
+fn c_page(delta){ debug_page = max(0, debug_page + delta) c_recent() }
+
 fn sync_sense(){
     ui.sense_motion.set_text(motion_line())
     ui.sense_note.set_text(motion.note)
@@ -3597,8 +3708,20 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
         }
         sense_status := Label{width: Fill text: "" draw_text.color: secondary draw_text.text_style.font_size: 12}
         debug_toggle := Bar{width: Fill text: "调试信息（开发用）▸" on_click: || toggle_debug()}
-        debug := View{visible: false width: Fill height: Fit flow: Down spacing: 6
-            // ==== [C] 调试容器 ====
+        debug := View{visible: false width: Fill height: Fit flow: Down spacing: 12
+            debug_mode := Bar{width: Fill text: "只显示真实数据" on_click: || c_toggle_sim()}
+            debug_note := ScMuted{width: Fill text: ""}
+            debug_act := ScText{width: Fill text: ""}
+            debug_tier := ScText{width: Fill text: ""}
+            debug_quality := ScText{width: Fill text: ""}
+            debug_rec := ScText{width: Fill text: ""}
+            debug_song := ScText{width: Fill text: ""}
+            debug_pages := ScMuted{width: Fill text: ""}
+            debug_recent := ScMuted{width: Fill text: ""}
+            View{width: Fill height: Fit flow: Right spacing: 8
+                Chip{text: "上一页" on_click: || c_page(-1)}
+                Chip{text: "下一页" on_click: || c_page(1)}
+            }
         }
     }
     library := SolidView{visible: false width: Fill height: Fill flow: Down spacing: 10 padding: Inset{left: 14 right: 14 top: 12 bottom: 8} draw_bg.color: ground

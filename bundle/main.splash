@@ -379,6 +379,11 @@ let dlog_last_undone = false
 let dlog_last_rec = nil
 let dlog_state_valid = false
 let dlog_commit = nil
+// A published job owns an immutable checkpoint; retries discard partial work.
+let dlog_job = nil
+let dlog_ticket = 0
+let dlog_progress_at = 0
+let dlog_retries = 0
 let dstats = nil
 
 fn dlog_note(text){
@@ -691,7 +696,7 @@ fn dlog_push(ev){
     dlog_pending.push(ev)
     if !dlog_busy {
         dlog_busy = true
-        start_timeout(0.3, || dlog_pump())
+        dlog_schedule("pump", 0.3)
     }
     ev.id
 }
@@ -714,12 +719,83 @@ fn dlog_rec_sim(){
     if dlog_last_rec != nil { return dlog_last_rec.sim }
     nil
 }
+fn dlog_waiting(){
+    dlog_pending.len() > 0 && dlog_pending[dlog_pending.len() - 1].id >= dstats.seq
+}
+fn dlog_stop(text){
+    dlog_note(text)
+    dlog_halt = true
+    dlog_busy = false
+    ui.boot_note_text.set_text(dlog_warn)
+    ui.boot_note.set_visible(true)
+    ui.plan.set_text(dlog_warn)
+    ui.debug_note.set_text(dlog_warn)
+}
+fn dlog_dispatch(delay){
+    dlog_ticket = dlog_ticket + 1
+    let ticket = dlog_ticket
+    dlog_progress_at = time_now()
+    start_timeout(delay, || dlog_run(ticket))
+}
+fn dlog_schedule(step, delay){
+    // This single assignment publishes progress. Until then the old job is replayable.
+    dlog_job = {step: step stats: dstats buf: dlog_buf prev: dlog_prev
+        bytes: dlog_bytes big: dlog_big big_max: dlog_big_max
+        act: dlog_last_act undone: dlog_last_undone rec: dlog_last_rec
+        dirty: dlog_dirty rotate: dlog_rotate valid: dlog_state_valid commit: dlog_commit}
+    dlog_retries = 0
+    dlog_dispatch(delay)
+}
+fn dlog_run(ticket){
+    if ticket != dlog_ticket || dlog_halt || dlog_job == nil { return }
+    let job = dlog_job
+    // Restore the last published checkpoint, never a half-applied event or rotation.
+    dstats = job.stats
+    dlog_buf = job.buf
+    dlog_prev = job.prev
+    dlog_bytes = job.bytes
+    dlog_big = job.big
+    dlog_big_max = job.big_max
+    dlog_last_act = job.act
+    dlog_last_undone = job.undone
+    dlog_last_rec = job.rec
+    dlog_dirty = job.dirty
+    dlog_rotate = job.rotate
+    dlog_state_valid = job.valid
+    dlog_commit = job.commit
+    if job.step == "idle" { dlog_busy = false return }
+    if job.step == "pump" || job.step == "advance" {
+        // Only these steps mutate stats/buffers/votes. Keep the checkpoint unmodified.
+        dstats = job.stats.to_json().parse_json()
+        dlog_buf = []
+        for ev in job.buf { dlog_buf.push(ev) }
+        if job.rec != nil { dlog_last_rec = job.rec.to_json().parse_json() }
+    }
+    if job.step == "pump" { dlog_pump() }
+    else if job.step == "piece" { dlog_write_piece() }
+    else if job.step == "state" { dlog_write_state() }
+    else if job.step == "stats" { dlog_write_stats() }
+    else if job.step == "advance" { dlog_advance() }
+}
+fn dlog_watch(){
+    if dlog_halt { dlog_stop(dlog_warn) return }
+    if !dlog_busy || dlog_job == nil || time_now() - dlog_progress_at < 1.5 { return }
+    if dlog_retries >= 3 {
+        dlog_stop("决策日志步骤 " + dlog_job.step + " 连续中断，重试3次后暂停；内存队列已保留")
+        return
+    }
+    dlog_retries = dlog_retries + 1
+    dlog_dispatch(0.01)
+}
 fn dlog_pump(){
-    if dlog_halt { dlog_busy = false return }
-    if !booted { start_timeout(0.1, || dlog_pump()) return }
-    for batch in 4 {
-        if dlog_pending.len() == 0 { break }
-        let ev = dlog_pending[0]
+    if !booted { dlog_dispatch(0.1) return }
+    // Only discard events covered by the published checkpoint, not this tentative batch.
+    for old in dlog_pending.len() {
+        if dlog_pending.len() == 0 || dlog_pending[0].id >= dlog_job.stats.seq { break }
+        dlog_pending.remove(0)
+    }
+    for batch in min(4, dlog_pending.len()) {
+        let ev = dlog_pending[batch]
         let bytes = ev.to_json().len()
         let extra = bytes + (if dlog_buf.len() > 0 1 else 0)
         if dlog_buf.len() > 0 && (dlog_buf.len() >= DLOG_SHARD_N || dlog_bytes + extra > DLOG_SHARD_BYTES) {
@@ -727,7 +803,6 @@ fn dlog_pump(){
             dlog_prepare_write()
             return
         }
-        dlog_pending.remove(0)
         if bytes > 600 { dlog_big = dlog_big + 1 dlog_big_max = max(dlog_big_max, bytes) }
         if bytes + 2 > DLOG_SHARD_BYTES { dlog_note("单条完整事件超出分片字节目标，单独保存且未截断") }
         dlog_buf.push(ev)
@@ -742,51 +817,53 @@ fn dlog_pump(){
             return
         }
     }
-    if dlog_pending.len() > 0 { start_timeout(0.01, || dlog_pump()) }
+    if dlog_waiting() { dlog_schedule("pump", 0.01) }
     else if dlog_dirty { dlog_rotate = false dlog_prepare_write() }
-    else { dlog_busy = false }
+    else { dlog_schedule("idle", 0.01) }
 }
 fn dlog_file(shard){ "decisions-" + (shard % DLOG_SHARDS) + ".json" }
 fn dlog_prepare_write(){
-    // The buffer stays intact through all three writes; no empty/full-piece overwrite.
     dlog_commit = {log: dlog_buf.to_json() stats: dstats.to_json()
         state: {v: 1 seq: dstats.seq act: dlog_last_act undone: dlog_last_undone rec: dlog_last_rec}.to_json()}
-    start_timeout(0.01, || dlog_write_piece())
+    dlog_schedule("piece", 0.01)
 }
 fn dlog_write_piece(){
     if !booted || dlog_halt { return }
     let result = fs.write(DATA + dlog_file(dstats.shard), dlog_commit.log)
-    if result != nil { dlog_note("决策分片写入失败，已保留内存队列") dlog_halt = true dlog_busy = false return }
-    start_timeout(0.01, || dlog_write_state())
+    if result != nil { dlog_stop("决策分片写入失败，已保留内存队列") return }
+    dlog_schedule("state", 0.01)
 }
 fn dlog_write_state(){
     if !booted || dlog_halt { return }
     let result = fs.write(DATA + dlog_state_file, dlog_commit.state)
-    if result != nil { dlog_note("决策缓存写入失败，汇总未提交") dlog_halt = true dlog_busy = false return }
-    start_timeout(0.01, || dlog_write_stats())
+    if result != nil { dlog_stop("决策缓存写入失败，汇总未提交") return }
+    dlog_schedule("stats", 0.01)
 }
 fn dlog_write_stats(){
     if !booted || dlog_halt { return }
     let result = fs.write(DATA + dlog_stats_file, dlog_commit.stats)
-    if result != nil { dlog_note("决策汇总写入失败，需离线核验") dlog_halt = true dlog_busy = false return }
+    if result != nil { dlog_stop("决策汇总写入失败，需离线核验") return }
     dlog_dirty = false
     dlog_state_valid = true
-    if dlog_rotate && dlog_pending.len() > 0 { start_timeout(0.01, || dlog_advance(0)) }
-    else { start_timeout(0.01, || dlog_pump()) }
+    if dlog_rotate && dlog_waiting() { dlog_schedule("advance", 0.01) }
+    else { dlog_schedule("pump", 0.01) }
 }
-fn dlog_advance(skipped){
-    if skipped >= DLOG_SHARDS { dlog_note("全部决策分片损坏，未覆盖任何文件") dlog_halt = true dlog_busy = false return }
+fn dlog_advance(){
     let next = dstats.shard + 1
+    for skipped in DLOG_SHARDS {
+        if !dlog_bad_slots[next % DLOG_SHARDS] { break }
+        next = next + 1
+    }
+    if dlog_bad_slots[next % DLOG_SHARDS] { dlog_stop("全部决策分片损坏，未覆盖任何文件") return }
     dstats.shard = next
-    if dlog_bad_slots[next % DLOG_SHARDS] { start_timeout(0.01, || dlog_advance(skipped + 1)) return }
-    // Only now, after the full piece and its cumulative stats are on disk, clear it.
     dlog_prev = dlog_buf
     dlog_buf = []
     dlog_bytes = 2
     dstats.shard_n = 0
     dlog_rotate = false
-    start_timeout(0.01, || dlog_pump())
+    dlog_schedule("pump", 0.01)
 }
+start_interval(0.5, || dlog_watch())
 
 // Parsed objects are normalized with pick exactly once, then use fixed-field reads.
 fn dlog_clean_event(raw){

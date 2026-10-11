@@ -5,3 +5,6 @@ bundle/*.json text eol=lf
 bundle/*.md text eol=lf
 bundle/assets/*.svg text eol=lf
 bundle/screenshots/*.png binary
+
+# PREF 依据文件：逐字节验收（V1），检出必须保持 LF
+tools/pref/* text eol=lf

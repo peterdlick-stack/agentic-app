@@ -2390,12 +2390,14 @@ fn pref_x(s){
     let x = [0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0]
     if s.en != nil { x[0] = (s.en - 3) / 2 }
     if s.vo != nil { if s.vo { x[1] = 1.0 } else { x[1] = -1.0 } }
-    // BPM：SEED_BPM 是 [{k b}] 数组（对象动态键会追加重复键、缺失键直接读报错），线性扫描
+    // BPM：SEED_BPM 是 [{k b}] 数组，线性扫描。
+    // 注意运行时限制：for k v in 对脚本构造的对象迭代为空（pick 靠它，会静默读不到），
+    // 但 SEED_BPM 每行是源码字面量、字段必存在，直接静态读 e.k / e.b（与 score_song 读 s.en 同款）。
     let k = key_of(s)
     let has_bpm = false
     let bpm = 0.0
     for e in SEED_BPM {
-        if pick(e, "k", "") == k { has_bpm = true bpm = pick(e, "b", 0.0) }
+        if e.k == k { has_bpm = true bpm = e.b }
     }
     if has_bpm { x[2] = max(-1.0, min(1.0, (bpm - 110) / 40)) }
     // 情绪 7 维：md 与 PREF_FEAT[3..9] 精确相等才置 1，其余（含 nil）全 0
@@ -2421,9 +2423,12 @@ fn pref_hash(seed, key){
 fn pref_rank(ctx, it, elig, seed){
     let v = nil
     let act = ctx.activity.id
-    if act != "" && act_by_id(act) != nil {
-        let m = pick(pref_model, act, nil)
-        if m != nil { v = pick(m, "v", nil) }
+    // 运行时限制：for k v in 对脚本构造的对象迭代为空，pick 靠迭代实现、读不到构造对象；
+    // 动态键读取一律用索引 o[key]（构造/解析对象都支持，缺键返回 nil 不报错，已离线实测）。
+    // pref_model 不论由 P2 整体重建为字面量还是 JSON 往返而来，本读法都成立。
+    if act != "" && act_by_id(act) != nil && pref_model != nil {
+        let m = pref_model[act]
+        if m != nil { v = m.v }
     }
     let rows = []
     jitter_on = false

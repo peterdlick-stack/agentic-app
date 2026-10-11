@@ -5,3 +5,5 @@ bundle/*.json text eol=lf
 bundle/*.md text eol=lf
 bundle/assets/*.svg text eol=lf
 bundle/screenshots/*.png binary
+# tools/win 的 shell 脚本在 WSL 里运行，Windows 检出时也必须保持 LF，否则 bash 会报 $'\r' 错误。
+tools/win/*.sh text eol=lf

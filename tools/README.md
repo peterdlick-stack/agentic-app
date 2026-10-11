@@ -1,5 +1,7 @@
 # Context DJ validation tools
 
+> 要在 Windows 原生 OctoSense（0.1.0-rc.5）上安装和继续开发情境 DJ，看 [`win/README.md`](win/README.md)。下面的 G0–G5 脚本是更早的一次性验证工具，路径写死在作者本机。
+
 Task-specific helpers for PLAN G0–G5 on 泛舟's Windows + WSL machine. They reuse existing binaries and are pinned to the inspected local paths; they do not bootstrap a new machine or build OctoSense. Reports, captures, downloaded APKs and private credentials are not part of this branch.
 
 All output is under `F:\context-dj-work` (`/mnt/f/context-dj-work` in WSL). Do not edit `bundle/`, push `main`, compile inside WSL, install SDK/NDK, or read credential file contents. Scripts reference existing credential locations only where the native application needs them. Test signing keys are handled only by the existing hub CLI; never inspect them.

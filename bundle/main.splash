@@ -2399,7 +2399,14 @@ fn pref_x(s){
     for e in SEED_BPM {
         if e.k == k { has_bpm = true bpm = e.b }
     }
-    if has_bpm { x[2] = max(-1.0, min(1.0, (bpm - 110) / 40)) }
+    // 裁剪用 if 分支不用 min/max：运行时的 min/max/abs 走 f32，未触发裁剪也会截断（P2 实测），
+    // 补 BPM 后 V3 的 1e-9 容差必然被打破
+    if has_bpm {
+        let b = (bpm - 110) / 40
+        if b < -1.0 { b = -1.0 }
+        if b > 1.0 { b = 1.0 }
+        x[2] = b
+    }
     // 情绪 7 维：md 与 PREF_FEAT[3..9] 精确相等才置 1，其余（含 nil）全 0
     for j in 7 { if s.md != nil && s.md == PREF_FEAT[j + 3] { x[j + 3] = 1.0 } }
     if s.lg == "zh" { x[10] = 1.0 }

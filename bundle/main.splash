@@ -2386,15 +2386,99 @@ let rec_pref_rows = []  // 本轮 pref_rank 结果 [{i k b learn s h rank why}]�
 //
 // ---- 函数空壳（签名冻结；返回 [] / "" / 0 = 本路不走 PREF，调用方回退旧逻辑）----
 // [P1] 12 维特征，缺失填 0；对应 ref_pref.py features()，BPM 查 SEED_BPM
-fn pref_x(s){ [0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0] }
+fn pref_x(s){
+    let x = [0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0]
+    if s.en != nil { x[0] = (s.en - 3) / 2 }
+    if s.vo != nil { if s.vo { x[1] = 1.0 } else { x[1] = -1.0 } }
+    // BPM：SEED_BPM 是 [{k b}] 数组（对象动态键会追加重复键、缺失键直接读报错），线性扫描
+    let k = key_of(s)
+    let has_bpm = false
+    let bpm = 0.0
+    for e in SEED_BPM {
+        if pick(e, "k", "") == k { has_bpm = true bpm = pick(e, "b", 0.0) }
+    }
+    if has_bpm { x[2] = max(-1.0, min(1.0, (bpm - 110) / 40)) }
+    // 情绪 7 维：md 与 PREF_FEAT[3..9] 精确相等才置 1，其余（含 nil）全 0
+    for j in 7 { if s.md != nil && s.md == PREF_FEAT[j + 3] { x[j + 3] = 1.0 } }
+    if s.lg == "zh" { x[10] = 1.0 }
+    if s.lg == "en" { x[11] = 1.0 }
+    x
+}
 // [P1] 并列定序哈希（§2.3），对应 tie_hash()；seed 转字符串必须与 Python str(int) 一致（"1"，不是 "1.0"）
-fn pref_hash(seed, key){ 0 }
+fn pref_hash(seed, key){
+    // to_chars() 给出 Unicode 标量值（= Python ord），本曲库全部字符在 BMP 内；
+    // 中间值 h*h + 12345 < 1000003^2 + 12345 < 2^53，双精度下精确
+    let h = 0
+    for c in ("" + seed + "|" + key).to_chars() { h = (h * 31 + c) % PREF_P }
+    for t in 2 { h = (h * h + 12345) % PREF_P }
+    h
+}
 // [P1] 排名（§2.5）：对 elig 允许的歌算 b（调用 score_song 前置 jitter_on = false、算完恢复）与学习项，
 // 按 (s 降序, 哈希升序, 曲库序号升序) 排，返回 [{i k b learn s h rank why}]，rank 从 1 开始；
 // why = score_song(...).why（界面理由，应用侧扩展字段，ref 行形状里没有）
-fn pref_rank(ctx, it, elig, seed){ [] }
+// TOPK > 0 时只返回前 TOPK 名（ask_model 候选恰为前 12 首靠此保证）；TOPK = 0 不截断（V7 回归副本）。
+// 回退路径的 local_pick 拿到的是收窄后的 elig，本函数对同一 elig + 同一种子的名次与全量一致（确定性）。
+fn pref_rank(ctx, it, elig, seed){
+    let v = nil
+    let act = ctx.activity.id
+    if act != "" && act_by_id(act) != nil {
+        let m = pick(pref_model, act, nil)
+        if m != nil { v = pick(m, "v", nil) }
+    }
+    let rows = []
+    jitter_on = false
+    for i s in songs {
+        if elig == nil || (i < elig.len() && elig[i]) {
+            let r = score_song(s, ctx, it)
+            let lt = 0.0
+            if v != nil {
+                let x = pref_x(s)
+                for d in 12 { lt = lt + v[d] * x[d] }
+            }
+            let k = key_of(s)
+            rows.push({i: i k: k b: r.sc learn: lt s: r.sc + lt h: pref_hash(seed, k) rank: 0 why: r.why})
+        }
+    }
+    jitter_on = true
+    // 手写名次（照 fit_snapshot 的选择式写法），比较键 (s 降序, h 升序, i 升序)
+    let limit = rows.len()
+    if TOPK > 0 && TOPK < limit { limit = TOPK }
+    let out = []
+    for t in limit {
+        let best = -1
+        for j r in rows {
+            if r.rank == 0 {
+                if best < 0 { best = j }
+                else {
+                    let q = rows[best]
+                    if r.s > q.s || (r.s == q.s && (r.h < q.h || (r.h == q.h && r.i < q.i))) { best = j }
+                }
+            }
+        }
+        if best < 0 { break }
+        rows[best].rank = t + 1
+        out.push(rows[best])
+    }
+    out
+}
 // [P1] 回退选歌（§1 回退）：按 rows 名次取 6 首、同一歌手最多 2 首，返回 [{i why}]，对应 local_six()
-fn pref_local_six(rows){ [] }
+fn pref_local_six(rows){
+    let out = []
+    let arts = []   // [{a n}] 数组+下标计数（对象动态键赋值会追加重复键，不用来做按歌手计数）
+    for r in rows {
+        let a = songs[r.i].a
+        let at = -1
+        for j e in arts { if e.a == a { at = j } }
+        let n = 0
+        if at >= 0 { n = arts[at].n }
+        if n < 2 {
+            out.push({i: r.i why: r.why})
+            if at >= 0 { arts[at].n = n + 1 } else { arts.push({a: a n: 1}) }
+        }
+        if out.len() >= REC_N { break }
+    }
+    out
+}
 // [P2] 评价表挂点（§2.6），feedback() 末尾与 dlog_rate 并列调用。
 // 只收：feedback_act != ""、sim.kind == "off"、e_link(i) 能定位推荐、能拿到该推荐 6 首的票；
 // 同一 (r, k) 删旧行追加新行（拿新 n）；超过 PREF_CAP 删 n 最小的行；每个处理函数只写一次文件

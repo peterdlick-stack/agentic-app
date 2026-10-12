@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Hackathon](https://img.shields.io/badge/GOSIM_Agentic_App_黑客松-2026-orange)](https://github.com/gosimfoundation/hackathon-agenticapp26)
 [![Track](https://img.shields.io/badge/场景-音乐-66CCFF)](#对照官方评审口径)
-[![Version](https://img.shields.io/badge/版本-0.3.4-0B1526)](https://github.com/peterdlick-stack/agentic-app/tree/d56da0b/bundle)
+[![Version](https://img.shields.io/badge/版本-0.4.0-0B1526)](https://github.com/peterdlick-stack/agentic-app/tree/v0.4.0/bundle)
 [![Built with](https://img.shields.io/badge/OctoSense-脚本应用-lightgrey)](https://github.com/OctoSense-org/OctoScript-App-Design-Flow)
 
 一个 OctoSense 脚本应用（`bundle/main.splash` 一个文件），GOSIM 智能体应用黑客松 2026 音乐场景参赛作品，队伍 KYBER（成员见[文末](#作者支持与许可)）。
@@ -20,7 +20,7 @@
 | **Agent 做了哪几步** | 读状态（定位、时段、天气、你的历史确认）→ 推断活动并请你确认 → 理解你的话、选歌、写理由 → 核验 AI 的返回 → 按你的喜欢 / 不喜欢更新偏好 → 记录相遇。六个环节见 [Agent 任务流水线](#agent-任务流水线pipeline)，实例见[一次完整的任务](#一次完整的任务) |
 | **用户权限** | 永远以用户表述为准，AI 不能覆盖；每一项情境都写明来源和依据；模拟定位、预制内容、AI 解读在界面上都有标注 |
 | **出了问题会怎样** | AI 不可用或报错 → 改用本地规则并写明原因；每次 AI 尝试 90 秒未完成（含一次重试时约 150 秒，另加处理和调度延迟）→ 解锁界面、提示再试，迟到的结果作废；没有定位、天气失败 → 该项不参与推荐；启动读文件超时 → 看门狗整步重试并显示原因，不会卡死 |
-| **已发布版本（历史）** | **0.3.3**，提交 [`3345814`](https://github.com/peterdlick-stack/agentic-app/commit/3345814)，门禁检查 `context-dj 0.3.3 — PASSED`。2026-10-06 的 **0.3.4** App Hub 提交只更新商店信息和截图，程序与当时 0.3.3 相同，`hub check` 通过。本分支另增支持度、输出守卫、决策日志、调试页和读回检查，保留版本号，**尚未发布，待审查**；本轮验证见第 16 节，不能沿用旧版通过结论。 |
+| **版本** | **0.4.0**（本版，经 GitHub 发布流程生成带证明的 Release，标签 `v0.4.0`）：定位改走宿主 location 服务，新增选歌输出守卫、偏好学习与探索位、支持度、决策日志、调试页和读回检查，验证见第 16 节。此前：**0.3.3** 提交 [`3345814`](https://github.com/peterdlick-stack/agentic-app/commit/3345814) 为初赛版本；2026-10-06 的 **0.3.4** App Hub 提交（#101）只更新商店信息和截图，程序与 0.3.3 相同。 |
 | **在哪里跑过** | **Windows 原生 OctoSense 桌面版 0.1.0-rc.5**（2026-10-11，经本地商店安装，接 MiniMax-M3）：安装、真实 AI 选歌、更新后数据保留；OctoSense 桌面版 0.1.0（WSL2 + Ubuntu 24.04，接 MiniMax-M3）：完整流程含真实 AI 选歌；`card-host`：全部界面和失败路径。手机尚未验证。具体版本见[运行环境](#运行环境)，结果见[验证情况](#验证情况) |
 | **怎么跑** | [运行与复现](#运行与复现)：读源码 → 门禁检查 → `card-host` 运行 → 桌面版完整体验 |
 
@@ -379,6 +379,8 @@ curl -s 127.0.0.1:8141/quit           # 退出
 
 <details>
 <summary><b>逐轮验证记录（按时间倒序）</b></summary>
+
+**0.4.0（2026-10-12，复赛版）**：在 `pref/learn` 基础上只改版本号、商店更新说明、平台（加 `windows`）和本 README，并加入 `.github/workflows/publish-app.yml`（App Flow `tools/octo publish-github` 生成，App Hub 工具链 `3863591`）。定位改走宿主服务的验证：Windows 原生 OctoSense rc.5 上探测 `runtime.list` 无 `location.*`、`location.get` 返回 `unsupported_platform`，界面显示“此平台的 OctoSense 不提供定位”，真实 MiniMax 选歌 6 首 + 探索 1 首正常（2026-10-12）。
 
 **0.3.4（2026-10-06，App Hub 提交版）**：只改 `listing.json` 和商店截图，`main.splash` 与 0.3.3 逐字节相同。6 张商店截图在 `card-host` 里按当前界面重拍（三步卡片、歌单、歌曲卡、相遇页、感知页、曲库）；App Hub `main`（`78dfda5`）的 `hub check` 为 `context-dj 0.3.4 — PASSED`，唯一警告是发布者未签名。
 

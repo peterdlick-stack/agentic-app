@@ -1335,6 +1335,7 @@ fn boot_done(){
     ui.cities.render()
     start_timeout(0.01, || fetch_weather())
     start_timeout(0.02, || gps_poll())
+    start_timeout(0.03, || hostloc_init()) // [HOSTLOC]
 }
 
 fn save_prefs(){ write_json("prefs.json", prefs) }
@@ -1604,14 +1605,117 @@ fn sim_next(){
 }
 // 取一个定位点；拿不到时返回 nil，原因写在 gps_note
 let gps_note = "还没有定位"
+
+// ---- [HOSTLOC] 宿主 location 服务（host-api-v1，App Hub docs/HOST-API.zh-CN.md）----
+// 打开时用 runtime.describe 查询 location.sample / location.get。宿主不支持本平台时不读定位（也不读 sys.gps）。
+// 支持时：location.permission.status 载入授权；未授权时感知页显示「允许定位」，点后 location.permission.request（只在前台）。
+// Android/macOS 路径按文档实现，未在真机验证。
+let HOSTLOC_NONE = "此平台的 OctoSense 不提供定位（宿主声明 location.* 仅支持 macOS/Android）"
+let hostloc = {ready: false avail: false via: "" why: "正在查询宿主定位服务"}
+let hostloc_auth = "unknown"   // unknown | granted | denied | asking
+let hostloc_fix = nil          // 最近一次宿主取位结果，由下一次 gps_poll 取走
+let hostloc_busy = false
+let hostloc_err = ""
+fn hostloc_has_text(s, part){
+    if s == nil || !s.is_string() { return false }
+    s.split(part).len() > 1
+}
+fn hostloc_supported(r){ r.is_ok && pick(r.data, "supported", false) == true && pick(r.data, "implemented", false) == true }
+fn hostloc_init(){
+    host.request("runtime.describe", {method: "location.sample"}, fn(r){
+        if hostloc_supported(r) { hostloc_set(true, "location.sample", "宿主支持新鲜位置采样") return }
+        host.request("runtime.describe", {method: "location.get"}, fn(r2){
+            if hostloc_supported(r2) { hostloc_set(true, "location.get", "宿主只提供上次已知位置") return }
+            let why = "runtime.describe：location.sample、location.get 都不支持本平台"
+            if !r2.is_ok { why = "runtime.describe 失败：" + r2.error }
+            hostloc_set(false, "", why)
+        })
+    })
+}
+fn hostloc_set(avail, via, why){
+    hostloc = {ready: true avail: avail via: via why: why}
+    if avail { hostloc_status() }
+    gps_poll()
+}
+fn hostloc_status(){
+    host.request("location.permission.status", {}, fn(r){
+        if r.is_ok && pick(r.data, "app_consent", false) == true { hostloc_auth = "granted" }
+        else {
+            hostloc_auth = "denied"
+            if !r.is_ok { hostloc_err = r.error }
+        }
+        refresh_views()
+    })
+}
+fn hostloc_request(){
+    if !hostloc.avail || hostloc_auth == "asking" { return }
+    hostloc_auth = "asking"
+    refresh_views()
+    host.request("location.permission.request", {}, fn(r){
+        if !r.is_ok { hostloc_err = r.error }
+        hostloc_status()
+    })
+}
+fn hostloc_num(o, keys){
+    for k in keys {
+        let v = pick(o, k, nil)
+        if v != nil && v.is_number() { return v }
+    }
+    nil
+}
+fn hostloc_parse(d){
+    let src = d
+    let inner = pick(d, "location", nil)
+    if inner != nil { src = inner }
+    let lat = hostloc_num(src, ["lat" "latitude"])
+    let lon = hostloc_num(src, ["lon" "lng" "longitude"])
+    let acc = hostloc_num(src, ["acc" "accuracy" "accuracy_m" "horizontal_accuracy" "horizontal_accuracy_m"])
+    if lat == nil || lon == nil { return nil }
+    if acc == nil { acc = -1.0 }
+    {t: time_now() lat: lat lon: lon acc: acc}
+}
+fn hostloc_fetch(){
+    if hostloc_busy { return }
+    hostloc_busy = true
+    host.request(hostloc.via, {}, fn(r){
+        hostloc_busy = false
+        if r.is_ok {
+            hostloc_fix = hostloc_parse(r.data)
+            if hostloc_fix == nil { hostloc_err = "宿主返回的位置里没有经纬度" } else { hostloc_err = "" }
+        } else {
+            hostloc_err = r.error
+            if hostloc_has_text(r.error, "authorization_required") { hostloc_auth = "denied" }
+        }
+    })
+}
+fn hostloc_no_place(){ hostloc.ready && !hostloc.avail && sim.kind == "off" }
+fn hostloc_debug(){
+    let t = (if hostloc.avail hostloc.via else "不支持") + " · " + hostloc.why
+    if hostloc.avail { t = t + " · 授权 " + hostloc_auth }
+    if hostloc_err != "" { t = t + " · " + hostloc_err }
+    t
+}
+
 fn read_fix(){
     if sim.kind != "off" { return sim_next() }
     if !prefs.use_gps { gps_note = "定位已关闭" return nil }
-    if sys.gps("ok") < 1 { gps_note = "没有定位（未授权或还没有信号）" return nil }
-    let acc = sys.gps("acc")
-    if acc < 0 || acc > ACC_MAX_M { gps_note = "定位精度太差（±" + round(acc) + " m）" return nil }
+    if !hostloc.ready { gps_note = hostloc.why return nil }
+    if !hostloc.avail { gps_note = HOSTLOC_NONE return nil }
+    if hostloc_auth != "granted" {
+        gps_note = (if hostloc_auth == "asking" "正在请求定位授权" else "定位未授权（在感知页点「允许定位」）")
+        return nil
+    }
+    hostloc_fetch()
+    let f = hostloc_fix
+    hostloc_fix = nil
+    if f == nil {
+        gps_note = (if hostloc_err == "" "还没有定位点（等待宿主返回）" else "宿主定位出错：" + hostloc_err)
+        return nil
+    }
+    if f.acc < 0 { gps_note = "宿主没有返回定位精度，这个点丢掉" return nil }
+    if f.acc > ACC_MAX_M { gps_note = "定位精度太差（±" + round(f.acc) + " m）" return nil }
     gps_note = ""
-    {t: time_now() lat: sys.gps("lat") lon: sys.gps("lon") acc: acc}
+    f
 }
 fn median_acc(list){
     let n = list.len()
@@ -1762,9 +1866,9 @@ fn sim_set(kind){
         if was == "off" {
             let lat = 39.9042
             let lon = 116.4074
-            if sys.gps("ok") >= 1 {
-                lat = sys.gps("lat")
-                lon = sys.gps("lon")
+            if fixes.len() > 0 {
+                lat = fixes[fixes.len() - 1].lat
+                lon = fixes[fixes.len() - 1].lon
             }
             sim = {kind: kind lat: lat lon: lon t: time_now()}
         } else {
@@ -3755,6 +3859,7 @@ fn weather_line(){
 }
 fn motion_line(){
     if motion.state == "unknown" {
+        if motion.note == HOSTLOC_NONE { return HOSTLOC_NONE + " · 不参与" }
         if motion.note != "" { return motion.note }
         return "未知"
     }
@@ -3855,7 +3960,7 @@ fn c_recent(){
 fn sync_debug(){
     if !debug_expanded { return }
     ui.debug_mode.set_text(if debug_include_sim "含模拟数据（点此只看真实）" else "只显示真实数据（点此含模拟）")
-    ui.debug_note.set_text(dlog_warn + "\n超过600字节：" + dlog_big + "条，最大 " + dlog_big_max + " 字节；完整保留")
+    ui.debug_note.set_text(dlog_warn + "\n超过600字节：" + dlog_big + "条，最大 " + dlog_big_max + " 字节；完整保留" + "\n宿主定位：" + hostloc_debug())
     let r = dlog_stats(false)
     let s = dlog_stats(true)
     if r == nil || s == nil {
@@ -3924,6 +4029,7 @@ fn sync_sense(){
     if t == "" { t = "还没有定位点。" + gps_note }
     ui.sense_fixes.set_text(t)
     ui.sense_banner.set_visible(sim.kind != "off")
+    ui.hostloc_ask.set_visible(hostloc.avail && hostloc_auth != "granted" && sim.kind == "off")
     ui.sims.render()
     ui.kinds.render()
     ui.place_list.render()
@@ -4555,9 +4661,12 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
         }
         sense_banner := Notice{visible: false ScMuted{width: Fill text: "模拟定位中：下面的数据是模拟的，不是真实感知" draw_text.color: SC_WARNING}}
         RoundedView{width: Fill height: Fit flow: Down spacing: 6 padding: 12 draw_bg.color: card draw_bg.border_radius: 24.0
-            Label{text: "移动状态（GPS 每 10 秒采样一次）" draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 13}}
+            Label{text: "移动状态（有定位的设备上每 10 秒采样一次）" draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 13}}
             sense_motion := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 14}}
             sense_note := Label{width: Fill text: "" draw_text.color: secondary draw_text.text_style.font_size: 11}
+            hostloc_ask := View{visible: false width: Fill height: Fit flow: Right spacing: 6
+                Chip{text: "允许定位" on_click: || hostloc_request()}
+            }
             sense_here := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style.font_size: 13}
             Label{text: "最近的定位点（只在内存里，不保存）" draw_text.color: secondary draw_text.text_style.font_size: 11}
             sense_fixes := Label{width: Fill text: "" draw_text.color: ink draw_text.text_style.font_size: 11}
@@ -4566,7 +4675,8 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
             Label{text: "把当前位置标记为" draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 13}}
             kinds := View{width: Fill height: Fit flow: Right spacing: 6
                 on_render: || {
-                    for x in PLACE_KINDS { Chip{text: x.n on_click: || mark_place(x.k)} }
+                    if hostloc_no_place() { ScMuted{width: Fill text: "需定位：此平台不提供定位。打开下面的模拟定位后可以标记（只在模拟模式里有效）"} }
+                    else { for x in PLACE_KINDS { Chip{text: x.n on_click: || mark_place(x.k)} } }
                 }
             }
             place_list := View{width: Fill height: Fit flow: Down spacing: 4

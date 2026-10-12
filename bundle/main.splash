@@ -2552,17 +2552,167 @@ fn pref_local_six(rows){
 // [P2] 评价表挂点（§2.6），feedback() 末尾与 dlog_rate 并列调用。
 // 只收：feedback_act != ""、sim.kind == "off"、e_link(i) 能定位推荐、能拿到该推荐 6 首的票；
 // 同一 (r, k) 删旧行追加新行（拿新 n）；超过 PREF_CAP 删 n 最小的行；每个处理函数只写一次文件
-fn pref_vote(i, v){ 0 }
-// [P2] 写 pref_votes.json：写法与 save_feedback 一致，booted 之前不写
-fn pref_save(){ 0 }
+fn pref_vote(i, v){
+    if !PREF_ON { return 0 }
+    if !booted { return 0 }
+    // 活动归属与 feedback() 同口径：曲库页打开的歌曲卡不算任何活动
+    let feedback_act = playlist_act
+    if screen == "songcard" && sc_origin == "library" { feedback_act = "" }
+    if feedback_act == "" { return 0 }
+    if sim.kind != "off" { return 0 }
+    if act_by_id(feedback_act) == nil { return 0 }
+    // e_link 已保证：i 在当前歌单里、歌单属于某个推荐、该推荐与当前模拟状态一致
+    let link = e_link(i)
+    if link.r <= 0 { return 0 }
+    if playlist.len() == 0 { return 0 }
+    // L = 这张歌单当时的歌曲键（当前歌单就是 link.r 的歌单）
+    let L = []
+    for p in playlist { L.push(song_keys[p.i]) }
+    let k = song_keys[i]
+    let y = 0
+    if v > 0 { y = 1 }
+    // 同一 (r, k) 只留最后一票：删旧行，追加新行（拿新 n），对应 ref apply_vote()
+    let dup = false
+    let kept = []
+    for row in pref_votes {
+        if row.r == link.r && row.k == k { dup = true }
+        else { kept.push(row) }
+    }
+    pref_votes = kept
+    pref_seq = pref_seq + 1
+    let row = {n: pref_seq r: link.r k: k a: feedback_act y: y L: L}
+    pref_votes.push(row)
+    // 行按 n 升序，超过 PREF_CAP 时最小的 n 在最前
+    if pref_votes.len() > PREF_CAP { pref_votes.remove(0) }
+    // §2.7：新增一票只做单步更新（与全表重放等价，已离线核对）；改票走全表重放
+    if dup { pref_replay() }
+    else { pref_update(row) }
+    // 写文件各占一个处理函数，写法与 save_feedback 一致
+    start_timeout(0.01, || pref_save())
+    0
+}
+// [P2] 写 pref_votes.json：写法与 save_feedback 一致，booted 之前不写。
+// 文件格式（广播归 P2）：{seq: 持久序号 rows: [{n r k a y L}]}；加载时 seq = max(文件 seq, 行内最大 n)
+fn pref_save(){
+    if !booted { return 0 }
+    write_json("pref_votes.json", {seq: pref_seq rows: pref_votes})
+    0
+}
 // [P2] 启动步骤（§2.7）：读 pref_votes.json 按 n 升序分批重放（单次处理不完用 start_timeout 分批接续），
 // 重建 pref_model 并恢复 pref_seq；开头先清空 pref_votes / pref_model（看门狗会整步重试，重试不得叠加），
-// 完成后必须调用 boot_next("dstats") 继续启动链（空壳直接续链）
-fn pref_boot(gen){ boot_next("dstats") }
-// [P2] 新增一票的单步更新（§2.7）：结果必须与全表重放相同；对应 replay() 的单票路径
-fn pref_update(row){ 0 }
-// [P2] 全表重放 pref_votes → pref_model（改票或撤销后调用）
-fn pref_replay(){ 0 }
+// 完成后必须调用 boot_next("dstats") 继续启动链
+fn pref_boot(gen){
+    pref_votes = []
+    pref_model = nil
+    pref_seq = 0
+    // 本处理函数只读这一个文件；文件不存在或解析失败都按空表续链
+    let pv = read_json("pref_votes.json")
+    if pv == nil { boot_next("dstats") return 0 }
+    let fseq = pick(pv, "seq", 0)
+    if fseq > pref_seq { pref_seq = fseq }
+    // 一次性把 JSON 行整理成字段齐全的脚本对象（pick 只对 parse_json 的对象有效）；
+    // 600 行 × 6 字段在单次 20 万指令预算内。pref_save 写出的行本就按 n 升序
+    for x in as_list(pick(pv, "rows", [])) {
+        let n = pick(x, "n", 0)
+        let k = pick(x, "k", "")
+        let a = pick(x, "a", "")
+        let y = pick(x, "y", -1)
+        if n > 0 && k != "" && a != "" && (y == 0 || y == 1) {
+            pref_votes.push({n: n r: pick(x, "r", 0) k: k a: a y: y L: pick(x, "L", [])})
+            if n > pref_seq { pref_seq = n }
+        }
+    }
+    // 重放分批接续：复用 boot_chunks，空表/最后一批都会 boot_next("dstats")；gen 失效时整步由看门狗重试
+    boot_tick = boot_tick + 1
+    start_timeout(0.01, || boot_chunks(gen, pref_votes, 0, 30, |row| pref_update(row), "dstats"))
+    0
+}
+// [P2] 新增一票的单步更新（§2.7）：结果必须与全表重放相同；对应 replay() 的单票路径。
+// 跳过未知活动 / 未知歌曲键 / L 全未知（对应 ref replay 的 skip，不计入票数）
+fn pref_update(row){
+    if act_by_id(row.a) == nil { return 0 }
+    let si = -1
+    for j key in song_keys { if key == row.k { si = j break } }
+    if si < 0 { return 0 }
+    // L 里已知歌的特征（未知键跳过，与 ref 一致）
+    let xs = []
+    for k in row.L {
+        for j key in song_keys {
+            if key == k { xs.push(pref_x(songs[j])) break }
+        }
+    }
+    if xs.len() == 0 { return 0 }
+    // 歌单中心化：先按列求和再除（与 ref 同顺序，避免舍入分歧）
+    let mu = [0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0]
+    for x in xs { for j in 12 { mu[j] = mu[j] + x[j] } }
+    let nx = xs.len() + 0.0
+    for j in 12 { mu[j] = mu[j] / nx }
+    let xf = pref_x(songs[si])
+    let xt = []
+    for j in 12 { xt.push(xf[j] - mu[j]) }
+    // 当前活动的 {v beta n}：固定 7 个活动字段、整体重建，不用动态键（运行时会追加重复键）
+    let cv = [0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0]
+    let cb = 0.0
+    let cn = 0
+    if pref_model != nil {
+        let cur = nil
+        if row.a == "study" { cur = pref_model.study }
+        else if row.a == "work" { cur = pref_model.work }
+        else if row.a == "commute" { cur = pref_model.commute }
+        else if row.a == "walk" { cur = pref_model.walk }
+        else if row.a == "workout" { cur = pref_model.workout }
+        else if row.a == "relax" { cur = pref_model.relax }
+        else if row.a == "sleep" { cur = pref_model.sleep }
+        if cur != nil { cv = cur.v cb = cur.beta cn = cur.n }
+    }
+    // 按歌单中心化的投影逻辑回归单步（§1：η=0.5，‖v‖≤2，β∈[-3,3]）
+    let z = cb
+    for j in 12 { z = z + cv[j] * xt[j] }
+    let p = 1.0 / (1.0 + exp(0.0 - z))
+    let g = PREF_ETA * (row.y - p)
+    let v2 = []
+    for j in 12 { v2.push(cv[j] + g * xt[j]) }
+    let b2 = clamp(cb + g, 0.0 - PREF_BETA_MAX, PREF_BETA_MAX)
+    let nsq = 0.0
+    for j in 12 { nsq = nsq + v2[j] * v2[j] }
+    let nv = sqrt(nsq)
+    if nv > PREF_R {
+        let sc = PREF_R / nv
+        for j in 12 { v2[j] = v2[j] * sc }
+    }
+    let e = {v: v2 beta: b2 n: cn + 1}
+    let m_study = nil
+    let m_work = nil
+    let m_commute = nil
+    let m_walk = nil
+    let m_workout = nil
+    let m_relax = nil
+    let m_sleep = nil
+    if pref_model != nil {
+        m_study = pref_model.study
+        m_work = pref_model.work
+        m_commute = pref_model.commute
+        m_walk = pref_model.walk
+        m_workout = pref_model.workout
+        m_relax = pref_model.relax
+        m_sleep = pref_model.sleep
+    }
+    if row.a == "study" { m_study = e }
+    else if row.a == "work" { m_work = e }
+    else if row.a == "commute" { m_commute = e }
+    else if row.a == "walk" { m_walk = e }
+    else if row.a == "workout" { m_workout = e }
+    else if row.a == "relax" { m_relax = e }
+    else if row.a == "sleep" { m_sleep = e }
+    pref_model = {study: m_study work: m_work commute: m_commute walk: m_walk workout: m_workout relax: m_relax sleep: m_sleep}
+    0
+}
+// [P2] 全表重放 pref_votes → pref_model（改票或撤销后调用）；行按 n 升序
+fn pref_replay(){
+    pref_model = nil
+    for row in pref_votes { pref_update(row) }
+    0
+}
 // [P3] 偏好说明（§2.8）：当前活动权重绝对值最大项 ≥ 0.25 时返回 "偏好：…" 一句，否则 ""；不进模型输入
 fn pref_note(act_id){ "" }
 // [P3] 调试页 PREF 组（§2.9）：当前活动票数、β、绝对值最大三项权重、本轮前 12 首的名次/规则分/学习项/学习前名次

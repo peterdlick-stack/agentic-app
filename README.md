@@ -21,7 +21,7 @@
 | **用户权限** | 永远以用户表述为准，AI 不能覆盖；每一项情境都写明来源和依据；模拟定位、预制内容、AI 解读在界面上都有标注 |
 | **出了问题会怎样** | AI 不可用或报错 → 改用本地规则并写明原因；每次 AI 尝试 90 秒未完成（含一次重试时约 150 秒，另加处理和调度延迟）→ 解锁界面、提示再试，迟到的结果作废；没有定位、天气失败 → 该项不参与推荐；启动读文件超时 → 看门狗整步重试并显示原因，不会卡死 |
 | **已发布版本（历史）** | **0.3.3**，提交 [`3345814`](https://github.com/peterdlick-stack/agentic-app/commit/3345814)，门禁检查 `context-dj 0.3.3 — PASSED`。2026-10-06 的 **0.3.4** App Hub 提交只更新商店信息和截图，程序与当时 0.3.3 相同，`hub check` 通过。本分支另增支持度、输出守卫、决策日志、调试页和读回检查，保留版本号，**尚未发布，待审查**；本轮验证见第 16 节，不能沿用旧版通过结论。 |
-| **在哪里跑过** | OctoSense 桌面版 0.1.0（WSL2 + Ubuntu 24.04，接 MiniMax-M3）：完整流程含真实 AI 选歌；`card-host`：全部界面和失败路径。手机尚未验证。具体版本见[运行环境](#运行环境)，结果见[验证情况](#验证情况) |
+| **在哪里跑过** | **Windows 原生 OctoSense 桌面版 0.1.0-rc.5**（2026-10-11，经本地商店安装，接 MiniMax-M3）：安装、真实 AI 选歌、更新后数据保留；OctoSense 桌面版 0.1.0（WSL2 + Ubuntu 24.04，接 MiniMax-M3）：完整流程含真实 AI 选歌；`card-host`：全部界面和失败路径。手机尚未验证。具体版本见[运行环境](#运行环境)，结果见[验证情况](#验证情况) |
 | **怎么跑** | [运行与复现](#运行与复现)：读源码 → 门禁检查 → `card-host` 运行 → 桌面版完整体验 |
 
 ## 目录
@@ -297,12 +297,13 @@ flowchart LR
 
 | 组件 | 版本 |
 |---|---|
-| OctoSense 桌面版 | `0.1.0`，[OctoSense](https://github.com/OctoSense-org/OctoSense) 提交 `7534fc703e27da6446d6cd3d95720d94cdcd2c2f` |
+| OctoSense 桌面版（Windows 原生，2026-10-11 起） | `0.1.0-rc.5`，Release tag `desktop-v0.1.0-rc.5`（提交 `83d356c2`），装在 `%LOCALAPPDATA%\OctoSense`；它锁定的 App Hub 为 `8347a489141c0e24cab564883db7c4592935a8b2`，本地商店用的 `hub` 从这个提交编译（[`tools/win/build-hub.sh`](tools/win/build-hub.sh)） |
+| OctoSense 桌面版（WSL，此前各轮） | `0.1.0`，[OctoSense](https://github.com/OctoSense-org/OctoSense) 提交 `7534fc703e27da6446d6cd3d95720d94cdcd2c2f` |
 | `tools/octo`（门禁检查、打包） | [OctoScript-App-Design-Flow](https://github.com/OctoSense-org/OctoScript-App-Design-Flow) 提交 `e08517254d9b2c316352eec4f959810d9ad22d40` |
 | `card-host` | [OctoSense-App-Hub](https://github.com/OctoSense-org/OctoSense-App-Hub) 提交 `58c3c8aed8fc811a16d67c5f784a8a44214ff876`（本机 `Cargo.lock` 有一处本地改动：增加了 `serde` 依赖条目） |
 | 系统 | Windows + WSL `2.4.13.0`，Ubuntu 24.04.3 LTS，内核 `5.15.167.4-microsoft-standard-WSL2`；图形用 WSLg 1.0.65 |
 | AI | MiniMax-M3（提供方 `minimax-cn`，赛方提供），在桌面版 AI 设置里配置 |
-| 应用支持平台 | `listing.json` 声明 `linux`；Android、macOS 未验证 |
+| 应用支持平台 | `listing.json` 声明 `linux`；Windows 原生 rc.5 上经本地商店安装运行通过（声明未改）；Android、macOS 未验证 |
 
 另有一部分 `card-host` 回归测试（故障注入、指令上限）由 Claude 在云端 Linux 容器里用 Xvfb 隐藏窗口跑，那台机器的 App-Hub 提交号没有记录。
 
@@ -331,7 +332,7 @@ curl -s 127.0.0.1:8141/quit           # 退出
 
 `model` 服务是否可用取决于宿主版本和配置，不能假定 `card-host` 一定走本地规则。本轮非真实彩排须在隔离测试副本中明确强制本地回退，或用 `DEV_FAKE_MODEL=true` 的选歌夹具；生产代码保持 false。该开关只覆盖选歌，AI 补标签等其他模型入口须另行禁用或不触发，不能据此保证零真实调用。定位测试在“感知”页打开模拟定位；本轮 Linux 环境的内置网页仍未验证。
 
-**④ 在 OctoSense 桌面版里完整体验**（真实 AI 选歌）：按 [PUBLISHING](https://github.com/OctoSense-org/OctoScript-App-Design-Flow/blob/main/docs/PUBLISHING.md) 把 `bundle/` 签名后发布到本地 App Hub 目录，在桌面版的 App Hub 里安装并打开；AI 提供方在桌面版的 AI 设置里配置。
+**④ 在 OctoSense 桌面版里完整体验**（真实 AI 选歌）：按 [PUBLISHING](https://github.com/OctoSense-org/OctoScript-App-Design-Flow/blob/main/docs/PUBLISHING.md) 把 `bundle/` 签名后发布到本地 App Hub 目录，在桌面版的 App Hub 里安装并打开；AI 提供方在桌面版的 AI 设置里配置。**Windows 原生桌面版（rc.5）照 [`tools/win/README.md`](tools/win/README.md) 做**：编译 `hub`、发布、启动各一条命令，之后改了代码重新发布再点 Update 即可，数据保留。
 
 **可选：放入歌曲卡内容**。clone 下来的应用里，《I LOVE U》的歌词页和故事页是空状态。要看完整卡片，把下面三个文件放进应用存储目录（格式见 [docs/DEMO-ILOVEU.md](docs/DEMO-ILOVEU.md) 第 4 节）：`accounts/device/cards.json`、`lyrics/iloveu.txt`、`covers/iloveu-front.jpg`。
 
@@ -339,7 +340,8 @@ curl -s 127.0.0.1:8141/quit           # 退出
 
 - **一直停在“正在加载…”或反复显示“读取××超时”**：应用数据目录放在了很慢的盘上（例如 WSL 里的 `/mnt/c`、`/mnt/f`）。0.3.0 起看门狗会重试并显示原因；仍然进不去时，把 `OCTOSENSE_APP_DATA` 改到 WSL 自己的 ext4 目录。
 - **歌单上方写着“AI 不可用”**：当前宿主没有开放 `model` 服务、AI 配置不可用，或请求失败。本地规则照常工作，不能仅凭宿主名判断服务能力。
-- **点“去听”没反应**：Linux 桌面上 makepad 还没实现内置网页，属于平台限制。
+- **点“去听”没反应**：Linux 桌面上 makepad 还没实现内置网页，属于平台限制。Windows rc.5 上内嵌浏览器存在，但拒绝打开外部网页（`Navigation is not permitted in this embedded browser`），应用只显示搜索链接。
+- **AI 配置测试返回 401**：2026-10-11 在 Windows rc.5 上，MiniMax 的两个官方路由都对同一个有效 key 返回 401；改用 Custom endpoint `https://api.minimaxi.com/v1`（OpenAI 协议）+ MiniMax M3 后通过。
 
 ## 验证情况
 
@@ -358,14 +360,19 @@ curl -s 127.0.0.1:8141/quit           # 退出
 | 启动看门狗、慢盘启动、故障注入 | ✅ | `card-host` 故障注入 + 桌面版放在 `/mnt/f` |
 | 重启后数据全部保留 | ✅ | `card-host` + 桌面版 |
 | 仓库里没有歌词、封面原图、照片 | ✅ | `git ls-files` |
+| Windows 原生桌面版 rc.5：本地商店安装、打开、本地规则歌单、♥ 与相遇记录重启后保留 | ✅ | 2026-10-11，提交 `0ceab2e`（`0.3.4`，摘要 `ef69aaac…`） |
+| Windows 原生桌面版 rc.5：真实 MiniMax 选歌和理由 | ✅ | 同上，1 次真实调用，`res=ai_retry`（输出守卫拦截一次后重试成功） |
+| Windows 原生桌面版 rc.5：发布新版本后在 App Hub 更新，数据全部保留 | ✅ | 同上，`0.3.4-local.1` → `local.2` |
 | 桌面上用鼠标横拖翻页 | ❌ 未通过 | 桌面版（远程桥拖动未触发翻页，页码圆点可用） |
 | 真实 MiniMax 下迟到结果被作废 | ⏳ 未验证 | 当时所用 `card-host` 未配置 model；不代表所有宿主版本的能力 |
 | 真机 GPS、触屏滑动、手机上的 AI | ⏳ 未验证 | 还没有把商店应用装到手机上的途径 |
-| “去听”在应用内打开网页 | ⏳ 未验证 | Linux 桌面不支持，要在 Android 或 macOS 上验证 |
+| “去听”在应用内打开网页 | ⏳ 未验证 | Linux 桌面不支持；Windows rc.5 的内嵌浏览器拒绝导航（宿主策略），只显示链接；要在 Android 或 macOS 上验证 |
 | 应用助手面板 | ⏳ 未验证 | — |
 | 用真实照片翻面、封面连续旋转 | ⏳ 未验证 | 照片翻面只用合成测试图验证过 |
 
 **已知问题**：推荐理由偏直白，演示里那次基本复述了用户的话（“用户指定的洛天依甜歌，直接安排”），下一步要改提示词。内置 46 首歌的标签是人工粗标的。
+
+**Windows 原生桌面版 rc.5（2026-10-11）**：按 [`tools/win/README.md`](tools/win/README.md) 的流程，在作者的 Windows 笔记本上由 Kimi 执行、逐步截图记录。App Hub 里只出现本地商店的情境 DJ，安装时列出 storage、net、web、model、location 五项权限；冷启动约 5 秒进入第一步，重启约 6 秒（目测）。数据目录直接放在 F 盘 NTFS 上，没有观察到 WSL 访问 `/mnt/f` 时的 64 ms 超时问题，但这只是非正式观察，不替代上文的性能验收。同时记下的已知问题：“去听”的内嵌网页被宿主拒绝；天气显示“不可用”，原因未查；AI 设置向导的模型列表要鼠标移入才显示、密钥框会保留旧输入；更新后点 Open，应用开在一个 412×892 的独立窗口里（功能和数据正常，原因未查）。OctoSense `desktop-v0.1.0-rc.6` 已于 2026-10-11 作为预发布推出，尚未在 rc.6 上验证。
 
 <details>
 <summary><b>逐轮验证记录（按时间倒序）</b></summary>
@@ -453,6 +460,7 @@ agentic-app/
 │  ├─ DEMO-ILOVEU.md       歌曲卡的设计规格、数据格式和验收用例
 │  └─ media/               演示视频和 README 截图
 ├─ tools/                  GPT 在作者电脑上做 G0–G5 验证用的脚本（路径写死在作者本机，见 tools/README.md）
+│  └─ win/                 Windows 原生桌面版 rc.5 的开发环境：编译 hub、发布到本地商店、启动（见 tools/win/README.md）
 ├─ AGENTS.md               开发约定和实测踩过的坑（CLAUDE.md、GEMINI.md 只是引用它）
 ├─ BRIEF.md                v0.1 的原始需求
 ├─ PRIVACY.md              隐私说明
@@ -466,6 +474,7 @@ agentic-app/
 - **泛舟（作者）**：选题、需求和设计取舍、每一步的验收，以及所有需要人工完成的步骤（密钥、发布、提交）。
 - **Claude（Anthropic）**：应用代码 `bundle/main.splash`、界面设计、歌曲卡文案、技术文档，审查和合并 GPT 的改动，在 `card-host` 里做回归测试。
 - **GPT（OpenAI Codex）**：在作者电脑上部署 OctoSense 桌面版、跑真实 MiniMax 的测试、核实歌曲资料、实现歌曲卡初版、按分镜录制演示视频并逐帧核对。
+- **Kimi（月之暗面）**：按 Claude 写的任务书，在 Windows 原生 OctoSense rc.5 上搭建本地商店、安装并实测情境 DJ（`tools/win/` 由此整理而来）。
 - **其他队员**：按本 README 的步骤复现安装和运行。
 
 `docs/` 里 G6、G12、T1–T14 这类编号是内部任务和测试用例的编号，定义在 `docs/PLAN.md` 和 `docs/DEMO-ILOVEU.md` 里。

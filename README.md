@@ -170,6 +170,8 @@ flowchart LR
 - 给 `bundle/` 签名、发布到 App Hub 目录、在桌面版里安装
 - 在桌面版的 AI 设置里配置 AI 提供方；应用自己不保存密钥
 - 桌面没有 GPS，测试和演示要在“感知”页手动打开模拟定位
+- 定位经宿主 location 服务（`host-api-v1`）：应用打开时用 `runtime.describe` 查询 `location.sample` 和 `location.get`，不再读 `sys.gps`。App Hub 文档写明“设备权限方法支持 Android 和 macOS；`location.get` 只支持 Android”；2026-10-12 在 Windows 原生 OctoSense rc.5 上实测，`location.get` 返回 `unsupported_platform`，感知页如实显示“此平台的 OctoSense 不提供定位”，移动状态不参与，地点标记只在模拟定位下可用。Android/macOS 路径按文档实现，**未在真机验证**（官方手机版不能侧载应用）
+- 声明 `host-api-v1` 后，`card-host` 会拒绝运行本应用（`needs a host implementing …`），界面回归和商店截图改在桌面版里做
 
 ## 设计依据
 
@@ -282,7 +284,8 @@ flowchart LR
 | 权限 | 用来做什么 | 没有这项权限时 |
 |---|---|---|
 | `storage` | 偏好、反馈、曲库、推荐历史、确认记录、相遇记录、决策事件和汇总（上限 16 MiB） | — |
-| `location` | 估计移动速度、判断是否在你标记的地点附近；查当地天气 | 移动状态显示“没有定位”，不参与推荐 |
+| `location` | 估计移动速度、判断是否在你标记的地点附近；查当地天气（经宿主 location 服务） | 未授权时显示“定位未授权”；宿主不提供定位的平台显示“此平台的 OctoSense 不提供定位”；都不参与推荐 |
+| `runtime` | 打开时查询宿主是否在本平台提供 `location.*` | — |
 | `net`（只有 `api.open-meteo.com`） | 当前天气 | 天气显示“不可用”，不参与推荐 |
 | `model` | AI 理解情境、选歌、写理由、补标签 | 改用本地规则选歌，界面写明原因；补标签提示没有 AI 权限 |
 | `web` | “去听”在应用内打开音乐网站搜索页 | — |

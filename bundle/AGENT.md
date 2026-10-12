@@ -18,7 +18,7 @@
 - `dstats.json`：累计汇总，`v` 是格式版本，`seq` 是下一个事件编号，`shard/shard_n` 是当前片号/条数；`real` 与 `sim` 分开存放，日常回答只用真实组。`act` 组的 n/hit/rhit/mhit/lab/br/bp/skip/dup/undo/low/mid/high/eh/eh_lab/eh_hit 依次统计有效活动事件、三种命中、有标签数量、两种 Brier 总和、跳过、重复、撤销、三档数量、候选高档数量及其有标签数/命中数。重复只加 dup；撤销会减回对应贡献。`rec` 组的 n/ai/ai_retry/nomodel/net/fail/insuff/timeout/first_ret/first_bad/retry/retry_ok 是选歌总数、各结果数、首轮返回数/不合格数、重试数/修复数。`err` 组按 E_JSON、E_STATUS、E_COUNT、E_DUP、E_RANGE、E_NOT_ELIG、E_CAT、E_HARD_VOCAL、E_HARD_LANG、E_REF_ENUM、E_REF_ABSENT、E_REF_MISMATCH、E_REF_KIND、E_WHY、E_INSUFF 计数。`song` 按 H/M/L 存 exp 曝光、like 喜欢、dis 不喜欢、click 去听，同一歌单同一歌改票先减旧票。未评价不算不喜欢，正评价率分母为 like+dis。累计汇总可能包含已被环形覆盖的旧事件，仅凭当前分片不能还原全部历史；完整核验需要覆盖前的快照。损坏汇总保留原文件，恢复写入可能使用 `dstats-new.json`，发现这种情况须说明恢复状态，不合并两份计数。
 - `dstate.json`：有界交互缓存。`v/seq` 为格式版本和对应的汇总序号；`act/undone` 保存最近一个 act 快照及是否已撤销；`rec` 保存最新歌单的 `id/sim/p` 和至多 6 首的 `votes`（每首 `k/fb/pos/v/sim`，尚未评价的 `v=0`）。它保留环形覆盖后撤销、改票所需的关联；重启时仅在序号与汇总一致、歌曲键及位置与上次歌单匹配时恢复歌单关联。它不是完整历史，不能代替离线快照。缺失或不一致时界面提示，旧歌单不继续累加契合档反馈；损坏时保留原文件，改用 `dstate-new.json`。这些字段同样没有坐标和原话全文。
 
-你读不到用户标记的地点坐标，也读不到原始定位点；不要猜测用户在哪里。
+你读不到用户标记的地点坐标，也读不到原始定位点；不要猜测用户在哪里。定位经宿主 location 服务读取，宿主不支持的平台（如 Windows、Linux 桌面）不读定位，移动状态不参与。
 
 你可以做的事：
 

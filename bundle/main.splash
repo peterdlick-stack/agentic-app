@@ -2713,14 +2713,113 @@ fn pref_replay(){
     for row in pref_votes { pref_update(row) }
     0
 }
+// [P3] 四位小数格式化："" + x 是最短往返表示、不补零（0.12 显示为 "0.12"），这里补零到 4 位。
+// 负号单独处理；-0.0 显示为 "0.0000"（x < 0 对 -0.0 为假）。仅用于显示，不进任何计算。
+fn pref_fmt4(x){
+    let neg = x < 0
+    let scaled = floor(abs(x) * 10000 + 0.5)
+    let ip = floor(scaled / 10000)
+    let frac = scaled - ip * 10000
+    let d1 = floor(frac / 1000)
+    frac = frac - d1 * 1000
+    let d2 = floor(frac / 100)
+    frac = frac - d2 * 100
+    let d3 = floor(frac / 10)
+    let d4 = frac - d3 * 10
+    (if neg "-" else "") + ip + "." + d1 + d2 + d3 + d4
+}
 // [P3] 偏好说明（§2.8）：当前活动权重绝对值最大项 ≥ 0.25 时返回 "偏好：…" 一句，否则 ""；不进模型输入
-fn pref_note(act_id){ "" }
-// [P3] 调试页 PREF 组（§2.9）：当前活动票数、β、绝对值最大三项权重、本轮前 12 首的名次/规则分/学习项/学习前名次
-fn pref_debug_text(){ "" }
+fn pref_note(act_id){
+    let m = pick(pref_model, act_id, nil)
+    if m == nil { return "" }
+    let v = pick(m, "v", nil)
+    if v == nil || v.len() != 12 { return "" }
+    let bi = -1
+    let bv = 0.0
+    for i in 12 {
+        let av = abs(v[i])
+        if av > bv { bv = av bi = i }
+    }
+    if bi < 0 || bv < 0.25 { return "" }
+    let pos = v[bi] > 0
+    let phrase = ""
+    if bi == 0 { phrase = if pos "较常选节奏强的歌" else "较常选安静的歌" }
+    else if bi == 1 { phrase = if pos "较常选带人声的歌" else "较常选纯音乐" }
+    else if bi == 2 { phrase = if pos "较常选快歌" else "较常选慢歌" }
+    else if bi == 10 { phrase = if pos "较常选中文歌" else "较少选中文歌" }
+    else if bi == 11 { phrase = if pos "较常选英文歌" else "较少选英文歌" }
+    else { phrase = (if pos "较常选" else "较少选") + PREF_FEAT[bi] + "的歌" }
+    "偏好：你在「" + act_name(act_id) + "」时" + phrase
+}
+// [P3] 调试页 PREF 组（§2.9）：当前活动票数、β、绝对值最大三项权重、本轮前 12 首的名次/规则分/学习项/学习前名次；
+// 另加本轮种子与每首哈希 h、当前活动 v 的全部 12 个分量（4 位小数），便于直接对照 tools/pref/PREF-EXPECTED.json 抽查。
+// 活动归属与评价表一致用 playlist_act（票按歌单生成时的活动记），不另调 infer_activity（有 last_rank 副作用）。
+fn pref_debug_text(){
+    let lines = []
+    let shown = []
+    let m = pick(pref_model, playlist_act, nil)
+    if playlist_act == "" {
+        lines.push("偏好学习：还没有歌单（暂无当前活动）")
+    } else if m == nil {
+        lines.push("偏好学习 · 当前活动「" + act_name(playlist_act) + "」：暂无已学习的权重")
+    } else {
+        let v = pick(m, "v", [])
+        lines.push("偏好学习 · 当前活动「" + act_name(playlist_act) + "」：票数 " + pick(m, "n", 0) + " · β " + pref_fmt4(pick(m, "beta", 0.0)))
+        let top = []
+        let used = []
+        for t in 3 {
+            let bi = -1
+            let bv = 0.0
+            for i in v.len() {
+                if rec_member(used, i) { continue }
+                let av = abs(v[i])
+                if bi < 0 || av > bv { bv = av bi = i }
+            }
+            if bi >= 0 { top.push(PREF_FEAT[bi] + " " + pref_fmt4(v[bi])) used.push(bi) }
+        }
+        lines.push("权重前三：" + join(top, " · "))
+        let parts = []
+        for i in v.len() { parts.push(PREF_FEAT[i] + " " + pref_fmt4(v[i])) }
+        lines.push("v 十二分量：" + join(parts, " · "))
+        shown.push(playlist_act)
+    }
+    // 其他已有权重的活动各一行（对照 fixture_B 这类多活动模型）
+    if pref_model != nil {
+        for k mm in pref_model {
+            if rec_member(shown, k) { continue }
+            lines.push("另有「" + act_name(k) + "」：票数 " + pick(mm, "n", 0) + " · β " + pref_fmt4(pick(mm, "beta", 0.0)))
+        }
+    }
+    if rec_seed == 0 { lines.push("本轮种子：无（还没有推荐）") }
+    else { lines.push("本轮种子：" + rec_seed) }
+    if rec_pref_rows.len() == 0 {
+        lines.push("本轮前 12 首：无")
+    } else {
+        lines.push("本轮前 12 首（名次 · 规则分 b · 学习项 · 学习前名次 · 哈希 h）：")
+        for r in rec_pref_rows {
+            // 只显示前 TOPK 行；学习前名次仍在全部候选（rec_pref_rows 全集）上算：
+            // 同一种子、学习项置 0 时的名次，即按 (b 降序, h 升序, i 升序) 重排的位置
+            if TOPK != 0 && r.rank > TOPK { continue }
+            let pre = 1
+            for q in rec_pref_rows {
+                if q.b > r.b || (q.b == r.b && (q.h < r.h || (q.h == r.h && q.i < r.i))) { pre = pre + 1 }
+            }
+            lines.push("" + r.rank + ". " + r.k + " · b " + pref_fmt4(r.b) + " · 学习项 " + pref_fmt4(r.learn) + " · 学习前 " + pre + " · h " + r.h)
+        }
+    }
+    join(lines, "\n")
+}
 // [P3] rec 事件 ts 字段（§2.4/§2.10）：本轮实际用到的种子（rec_seed）
-fn pref_rec_ts(){ 0 }
+fn pref_rec_ts(){ rec_seed }
 // [P3] rec 事件 topk 字段（§2.10）：前 12 首歌曲键，按名次（取自 rec_pref_rows）
-fn pref_rec_topk(){ [] }
+fn pref_rec_topk(){
+    let out = []
+    let m = 0
+    for r in rec_pref_rows {
+        if TOPK == 0 || m < TOPK { out.push(r.k) m = m + 1 }
+    }
+    out
+}
 
 
 // ==== [A] 选歌契约 ====

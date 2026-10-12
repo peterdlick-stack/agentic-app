@@ -3,6 +3,7 @@
 import argparse
 from collections import Counter
 from datetime import datetime, timedelta, timezone
+import importlib.util
 import json
 import math
 from pathlib import Path
@@ -95,6 +96,15 @@ def validate_event(ev, origin):
             require(isinstance(pick, list) and len(pick) == 3 and isinstance(pick[0], str)
                     and pick[1] in (*TIERS, "") and type(pick[2]) is int and pick[2] >= 1, f"{prefix}: invalid pick")
         require(len({p[0] for p in ev["p"]}) == len(ev["p"]), f"{prefix}: duplicate exposure key")
+        # PREF (GPT-PREF-BUILD §2.10): rec events gain ts (tie-break seed) and topk
+        # (top-12 candidate keys in rank order) when PREF_ON; old events lack both.
+        ts, topk = ev.get("ts"), ev.get("topk")
+        require((ts is None) == (topk is None), f"{prefix}: ts/topk must appear together")
+        if ts is not None:
+            require(type(ts) is int and ts >= 0, f"{prefix}: invalid ts (tie-break seed)")
+            require(isinstance(topk, list) and len(topk) <= 12 and all(type(key) is str for key in topk),
+                    f"{prefix}: invalid topk (top-12 candidate keys)")
+            require(len(set(topk)) == len(topk), f"{prefix}: duplicate key in topk")
     else:
         require(type(ev.get("r")) is int and ev["r"] >= 0 and isinstance(ev.get("k"), str), f"{prefix}: invalid r/k")
         require(ev.get("fb") in (*TIERS, "") and type(ev.get("pos")) is int and ev["pos"] >= 0, f"{prefix}: invalid fb/pos")
@@ -221,6 +231,10 @@ def replay(events):
                 warnings.append(f"{ev['e']} {ev['id']}: missing earlier exposure {ev['r']} / {ev['k']}")
             elif pick[1] != ev["fb"] or pick[2] != ev["pos"] or rec["sim"] != ev["sim"]:
                 warnings.append(f"{ev['e']} {ev['id']}: exposure tier/position/sim differs")
+        if ev["e"] == "rec" and ev.get("topk") is not None:
+            for key, _, _ in ev["p"]:
+                if key not in ev["topk"]:
+                    warnings.append(f"rec {ev['id']}: pick {key} not in topk candidate list")
     return groups, list(active.values()), votes, warnings
 
 
@@ -365,6 +379,93 @@ def check_dstats(events, groups, dstats, replay_warnings):
             "metadata_scope": "seq continuity checked; v/shard/shard_n types checked. Physical shard cursor is not independently reconstructed."}
 
 
+PREF_FEAT = "能量 人声 BPM 欢快 怀旧 平静 振奋 伤感 专注 温暖 中文 英文".split()
+# Debug page shows v/beta rounded to 4 decimals (pref_fmt4); accept half a step plus float noise.
+PREF_DISPLAY_TOL = 5e-5 + 1e-12
+
+
+def load_ref_pref(ref_path):
+    """Import tools/pref/ref_pref.py by path; it is the single source of numeric behavior."""
+    require(Path(ref_path).is_file(), f"ref_pref.py not found: {ref_path}")
+    spec = importlib.util.spec_from_file_location("ref_pref", ref_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def validate_pref_votes(votes, origin):
+    require(isinstance(votes, list), f"{origin}: pref_votes.json must be an array")
+    seen_n = set()
+    for row in votes:
+        require(isinstance(row, dict), f"{origin}: vote row must be an object")
+        n = row.get("n")
+        require(type(n) is int and n >= 1 and n not in seen_n, f"{origin}: invalid or duplicate n {n!r}")
+        seen_n.add(n)
+        require(type(row.get("r")) is int and row["r"] >= 0, f"{origin}: vote {n}: invalid r")
+        require(type(row.get("k")) is str and row["k"], f"{origin}: vote {n}: invalid k")
+        require(row.get("a") in ACTIVITIES, f"{origin}: vote {n}: invalid activity {row.get('a')!r}")
+        require(row.get("y") in (0, 1), f"{origin}: vote {n}: y must be 0 or 1")
+        require(isinstance(row.get("L"), list) and len(row["L"]) == 6 and all(type(k) is str for k in row["L"]),
+                f"{origin}: vote {n}: L must be the 6 playlist keys")
+
+
+def display_number(value, field):
+    """Debug-page values may be transcribed as numbers or 4-decimal strings."""
+    try:
+        result = float(value)
+    except (TypeError, ValueError):
+        raise InputError(f"pref display: {field} is not a number: {value!r}")
+    require(math.isfinite(result), f"pref display: {field} is not finite: {value!r}")
+    return result
+
+
+def check_pref(votes_path, display_path, bundle, bpm_path=None, ref_path=None):
+    """Replay pref_votes.json with ref_pref.py and compare per-activity {v, beta, n} against
+    the values shown on the debug page (GPT-PREF-BUILD §2.10). Displayed values are 4-decimal
+    rounded, so the comparison tolerance is PREF_DISPLAY_TOL."""
+    root = Path(__file__).resolve().parents[3]  # <root>/tools/conf/analyze/analyze.py → repo root
+    ref = load_ref_pref(ref_path or root / "tools" / "pref" / "ref_pref.py")
+    bundle = Path(bundle or root / "bundle" / "main.splash")
+    require(bundle.is_file(), f"bundle/main.splash not found: {bundle}")
+    songs = ref.load_seed(str(bundle))
+    by_key = {ref.key_of(s): s for s in songs}
+    bpm = read_json(bpm_path) if bpm_path else {}
+    require(isinstance(bpm, dict), f"{bpm_path}: bpm.json must be an object")
+    votes = read_json(votes_path)
+    validate_pref_votes(votes, votes_path)
+    model, skipped = ref.replay(votes, by_key, bpm)
+    display = read_json(display_path)
+    require(isinstance(display, dict), f"{display_path}: debug display JSON must be an object keyed by activity id")
+    differences, compared, only_in_model = [], [], []
+    for act, shown in display.items():
+        require(act in ACTIVITIES, f"{display_path}: unknown activity {act!r}")
+        require(isinstance(shown, dict), f"{display_path}: {act} must be an object with v/beta/n")
+        actual = model.get(act)
+        if actual is None:
+            differences.append(f"{act}: shown on debug page but no votes replay to this activity")
+            continue
+        compared.append(act)
+        shown_v = shown.get("v")
+        require(isinstance(shown_v, list) and len(shown_v) == len(PREF_FEAT),
+                f"{display_path}: {act}.v must have {len(PREF_FEAT)} components")
+        for name, want, got in zip(PREF_FEAT, actual["v"], shown_v):
+            got = display_number(got, f"{act}.v[{name}]")
+            if abs(want - got) > PREF_DISPLAY_TOL:
+                differences.append(f"{act}.v[{name}]: replayed {want!r} vs displayed {got!r}")
+        beta = display_number(shown.get("beta"), f"{act}.beta")
+        if abs(actual["beta"] - beta) > PREF_DISPLAY_TOL:
+            differences.append(f"{act}.beta: replayed {actual['beta']!r} vs displayed {beta!r}")
+        if shown.get("n") is not None and shown["n"] != actual["n"]:
+            differences.append(f"{act}.n: replayed {actual['n']} vs displayed {shown['n']!r}")
+    for act in sorted(model.keys() - set(display)):
+        only_in_model.append(act)
+    status = "FAIL" if differences else "PASS"
+    return {"status": status, "differences": differences, "compared_activities": compared,
+            "only_in_model": only_in_model, "skipped_votes": skipped,
+            "replayed_model": model, "tolerance": PREF_DISPLAY_TOL,
+            "scope": "weights replayed from pref_votes.json via ref_pref.py; compared with 4-decimal debug-page values"}
+
+
 def pretty_rate(value):
     text = f"{value['numerator']}/{value['denominator']}"
     text += f" = {100 * value['value']:.1f}%" if value["value"] is not None else " = N/A"
@@ -374,7 +475,7 @@ def pretty_rate(value):
     return text
 
 
-def render_report(metrics, provenance, check, warnings):
+def render_report(metrics, provenance, check, warnings, pref_check=None):
     lines = [f"样本量 n={metrics['label_n']}；这些数字描述的是这台设备上这段时间的记录，不是校准过的概率，也不能推广到其他用户。", "",
              "# 决策日志离线分析", "", f"包含模拟数据：{'是' if metrics['include_sim'] else '否'}。n 为排除重复和撤销后的已标注活动数。",
              f"读取 {len(provenance['files'])} 个文件；合并相同 id 的相同事件 {provenance['identical_duplicates']} 次。核验始终分别复算 real 和 sim，不受展示开关影响。", "",
@@ -423,6 +524,16 @@ def render_report(metrics, provenance, check, warnings):
         lines.append(check["metadata_scope"])
     else:
         lines.append("未指定 --check-dstats，未核验累计汇总。即使图表可生成，也不代表历史完整。")
+    if pref_check:
+        lines.extend(["", "## 偏好学习核验", ""])
+        lines.append(f"状态：**{pref_check['status']}**。用 `ref_pref.py` 从 `pref_votes.json` 按 n 升序重放各活动权重，"
+                     f"与调试页显示值（4 位小数）比对，容差 {pref_check['tolerance']:.3g}。")
+        lines.append(f"比对活动：`{json.dumps(pref_check['compared_activities'], ensure_ascii=False)}`；"
+                     f"跳过未知歌曲键的票 {pref_check['skipped_votes']} 张。")
+        if pref_check["only_in_model"]:
+            lines.append(f"仅在重放里、显示值未覆盖的活动：`{json.dumps(pref_check['only_in_model'], ensure_ascii=False)}`（未比对）。")
+        lines.extend(f"- {row}" for row in pref_check["differences"])
+        lines.append(pref_check["scope"])
     if warnings:
         lines.extend(["", "## 证据限制", ""])
         lines.extend(f"- {warning}" for warning in warnings)
@@ -461,6 +572,11 @@ def main(argv=None):
     parser.add_argument("--archive", action="append", default=[], type=Path, help="earlier snapshot directory or shard JSON; repeatable")
     parser.add_argument("--include-sim", action="store_true", help="include synthetic/simulation events in displayed metrics")
     parser.add_argument("--check-dstats", action="store_true", help="check full cumulative history against device/dstats.json")
+    parser.add_argument("--check-pref", type=Path, help="pref_votes.json; replay weights with ref_pref.py and compare to --pref-display")
+    parser.add_argument("--pref-display", type=Path, help="JSON of debug-page values {act: {v: [12], beta, n}} (numbers or 4-decimal strings)")
+    parser.add_argument("--bundle", type=Path, help="bundle/main.splash for the SEED table (default: repo checkout)")
+    parser.add_argument("--bpm", type=Path, help="bpm.json for the BPM feature (optional)")
+    parser.add_argument("--pref-ref", type=Path, help="tools/pref/ref_pref.py (default: repo checkout)")
     default = Path("F:/context-dj-work/research/confidence/analysis") / datetime.now(TAIPEI).date().isoformat()
     parser.add_argument("--output", type=Path, default=default, help="new output directory (default: Asia/Taipei date)")
     args = parser.parse_args(argv)
@@ -470,22 +586,31 @@ def main(argv=None):
         groups, active, _, warnings = replay(events)
         metrics = describe(events, active, groups, args.include_sim)
         check = check_dstats(events, groups, read_json(args.device / "dstats.json"), warnings) if args.check_dstats else None
+        pref_check = None
+        if args.check_pref:
+            require(args.pref_display is not None, "--check-pref needs --pref-display (debug-page values JSON)")
+            pref_check = check_pref(args.check_pref, args.pref_display, args.bundle, args.bpm, args.pref_ref)
         for name in ("REPORT.md", "metrics.json", "reliability.png"):
             require(not (args.output / name).exists(), f"refusing to overwrite {args.output / name}; choose a fresh --output")
         args.output.mkdir(parents=True, exist_ok=True)
-        output = {"metrics": metrics, "provenance": provenance, "cumulative_replay": groups, "warnings": warnings, "dstats_check": check}
+        output = {"metrics": metrics, "provenance": provenance, "cumulative_replay": groups, "warnings": warnings, "dstats_check": check,
+                  "pref_check": pref_check}
         (args.output / "metrics.json").write_text(json.dumps(output, ensure_ascii=False, indent=2, allow_nan=False) + "\n", encoding="utf-8")
-        (args.output / "REPORT.md").write_text(render_report(metrics, provenance, check, warnings), encoding="utf-8")
+        (args.output / "REPORT.md").write_text(render_report(metrics, provenance, check, warnings, pref_check), encoding="utf-8")
         try:
             plot_reliability(metrics["reliability"], args.output / "reliability.png")
         except ImportError as exc:
             print(f"Report and metrics written; reliability chart unavailable: {exc}", file=sys.stderr)
             return 2
         print(f"Report: {args.output / 'REPORT.md'}")
+        failed = False
         if check:
             print(f"dstats: {check['status']}; differences={len(check['differences'])}; missing ranges={check['missing_id_ranges']}")
-            return 0 if check["status"] == "PASS" else 3
-        return 0
+            failed = failed or check["status"] != "PASS"
+        if pref_check:
+            print(f"pref: {pref_check['status']}; differences={len(pref_check['differences'])}; compared={pref_check['compared_activities']}")
+            failed = failed or pref_check["status"] != "PASS"
+        return 3 if failed else 0
     except InputError as exc:
         print(f"INPUT_ERROR: {exc}", file=sys.stderr)
         return 2

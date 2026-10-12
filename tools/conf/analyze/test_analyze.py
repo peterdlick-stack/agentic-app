@@ -360,5 +360,81 @@ class LoadingAndReconciliationTests(unittest.TestCase):
         self.assertIn("样本量 n=0；", analyze.render_report(metrics, {"files": [], "identical_duplicates": 0}, None, []).splitlines()[0])
 
 
+class PrefTests(unittest.TestCase):
+    """PREF (GPT-PREF-BUILD §2.10): rec ts/topk fields and the pref_votes weight replay check."""
+
+    ROOT = Path(__file__).resolve().parents[3]
+
+    def test_rec_ts_topk_accepted_and_silent(self):
+        row = rec(1, picks=[["a|x", "H", 1]])
+        row["ts"] = 1001
+        row["topk"] = ["a|x", "b|y"]
+        analyze.validate_event(row, "test")
+        _, _, _, warnings = analyze.replay([row])
+        self.assertEqual(warnings, [])
+
+    def test_ts_without_topk_rejected(self):
+        row = rec(1)
+        row["ts"] = 7
+        with self.assertRaisesRegex(analyze.InputError, "ts/topk"):
+            analyze.validate_event(row, "test")
+
+    def test_topk_shape_rejected(self):
+        row = rec(1)
+        row["ts"] = 7
+        row["topk"] = ["a|x"] * 2
+        with self.assertRaisesRegex(analyze.InputError, "duplicate key in topk"):
+            analyze.validate_event(row, "test")
+        row["topk"] = [f"s{i}|a" for i in range(13)]
+        with self.assertRaisesRegex(analyze.InputError, "invalid topk"):
+            analyze.validate_event(row, "test")
+        row["topk"] = []
+        row["ts"] = 1.5
+        with self.assertRaisesRegex(analyze.InputError, "invalid ts"):
+            analyze.validate_event(row, "test")
+
+    def test_pick_outside_topk_warns(self):
+        row = rec(1, picks=[["outside|x", "H", 1]])
+        row["ts"] = 1
+        row["topk"] = ["a|x", "b|y"]
+        _, _, _, warnings = analyze.replay([row])
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("not in topk", warnings[0])
+
+    def test_check_pref_matches_expected_fixture(self):
+        expected = json.loads((self.ROOT / "tools" / "pref" / "PREF-EXPECTED.json").read_text(encoding="utf-8"))
+        votes = expected["fixture_B"]["final_table"]
+        model = expected["fixture_B"]["model"]
+        with tempfile.TemporaryDirectory() as tmp:
+            votes_path = Path(tmp) / "pref_votes.json"
+            display_path = Path(tmp) / "display.json"
+            write(votes_path, votes)
+            # Transcribed from the debug page: 4-decimal strings.
+            display = {act: {"beta": f"{m['beta']:.4f}", "n": m["n"],
+                             "v": [f"{x:.4f}" for x in m["v"]]} for act, m in model.items()}
+            write(display_path, display)
+            result = analyze.check_pref(votes_path, display_path, self.ROOT / "bundle" / "main.splash",
+                                        None, self.ROOT / "tools" / "pref" / "ref_pref.py")
+            self.assertEqual(result["status"], "PASS")
+            self.assertEqual(sorted(result["compared_activities"]), sorted(model))
+            self.assertEqual(result["skipped_votes"], 0)
+            # One perturbed component beyond the 4-decimal rounding tolerance must fail.
+            display["commute"]["v"][11] = f"{model['commute']['v'][11] + 0.001:.4f}"
+            write(display_path, display)
+            result = analyze.check_pref(votes_path, display_path, self.ROOT / "bundle" / "main.splash",
+                                        None, self.ROOT / "tools" / "pref" / "ref_pref.py")
+            self.assertEqual(result["status"], "FAIL")
+            self.assertEqual(len(result["differences"]), 1)
+            self.assertIn("英文", result["differences"][0])
+
+    def test_check_pref_rejects_bad_vote_rows(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            votes_path = Path(tmp) / "pref_votes.json"
+            write(votes_path, [{"n": 1, "r": 1, "k": "a|x", "a": "commute", "y": 2, "L": ["a|x"] * 6}])
+            with self.assertRaisesRegex(analyze.InputError, "y must be 0 or 1"):
+                analyze.check_pref(votes_path, Path(tmp) / "display.json", self.ROOT / "bundle" / "main.splash",
+                                   None, self.ROOT / "tools" / "pref" / "ref_pref.py")
+
+
 if __name__ == "__main__":
     unittest.main()

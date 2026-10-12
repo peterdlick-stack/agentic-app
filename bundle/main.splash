@@ -2668,14 +2668,17 @@ fn pref_update(row){
     // 按歌单中心化的投影逻辑回归单步（§1：η=0.5，‖v‖≤2，β∈[-3,3]）
     let z = cb
     for j in 12 { z = z + cv[j] * xt[j] }
-    let p = 1.0 / (1.0 + exp(0.0 - z))
+    let p = 1.0 / (1.0 + pref_exp64(0.0 - z))
     let g = PREF_ETA * (row.y - p)
     let v2 = []
     for j in 12 { v2.push(cv[j] + g * xt[j]) }
-    let b2 = clamp(cb + g, 0.0 - PREF_BETA_MAX, PREF_BETA_MAX)
+    // 裁剪用 if 分支：内建 clamp/min/max 会把 f64 截成 f32（P1 5326a01 同一问题）
+    let b2 = cb + g
+    if b2 > PREF_BETA_MAX { b2 = PREF_BETA_MAX }
+    if b2 < 0.0 - PREF_BETA_MAX { b2 = 0.0 - PREF_BETA_MAX }
     let nsq = 0.0
     for j in 12 { nsq = nsq + v2[j] * v2[j] }
-    let nv = sqrt(nsq)
+    let nv = pref_sqrt64(nsq)
     if nv > PREF_R {
         let sc = PREF_R / nv
         for j in 12 { v2[j] = v2[j] * sc }
@@ -2730,9 +2733,12 @@ fn pref_fmt4(x){
 }
 // [P3] 偏好说明（§2.8）：当前活动权重绝对值最大项 ≥ 0.25 时返回 "偏好：…" 一句，否则 ""；不进模型输入
 fn pref_note(act_id){
-    let m = pick(pref_model, act_id, nil)
+    // 动态键读法：pref_model 是脚本构造对象，pick 在它上面恒返回默认值（迭代出的键是 id，与字符串 == 恒假；
+    // 合并时在 makepad-script @1f3b1de 裸 VM 实测），所以一律用索引 o[key]，缺键返回 nil
+    if pref_model == nil || act_id == "" { return "" }
+    let m = pref_model[act_id]
     if m == nil { return "" }
-    let v = pick(m, "v", nil)
+    let v = m.v
     if v == nil || v.len() != 12 { return "" }
     let bi = -1
     let bv = 0.0
@@ -2757,14 +2763,16 @@ fn pref_note(act_id){
 fn pref_debug_text(){
     let lines = []
     let shown = []
-    let m = pick(pref_model, playlist_act, nil)
+    // 读法同 pref_note：索引而非 pick
+    let m = nil
+    if pref_model != nil && playlist_act != "" { m = pref_model[playlist_act] }
     if playlist_act == "" {
         lines.push("偏好学习：还没有歌单（暂无当前活动）")
     } else if m == nil {
         lines.push("偏好学习 · 当前活动「" + act_name(playlist_act) + "」：暂无已学习的权重")
     } else {
-        let v = pick(m, "v", [])
-        lines.push("偏好学习 · 当前活动「" + act_name(playlist_act) + "」：票数 " + pick(m, "n", 0) + " · β " + pref_fmt4(pick(m, "beta", 0.0)))
+        let v = m.v
+        lines.push("偏好学习 · 当前活动「" + act_name(playlist_act) + "」：票数 " + m.n + " · β " + pref_fmt4(m.beta))
         let top = []
         let used = []
         for t in 3 {
@@ -2786,8 +2794,11 @@ fn pref_debug_text(){
     // 其他已有权重的活动各一行（对照 fixture_B 这类多活动模型）
     if pref_model != nil {
         for k mm in pref_model {
-            if rec_member(shown, k) { continue }
-            lines.push("另有「" + act_name(k) + "」：票数 " + pick(mm, "n", 0) + " · β " + pref_fmt4(pick(mm, "beta", 0.0)))
+            // 迭代出的 k 是 id，转成字符串再比较；未投过票的活动字段值为 nil，跳过
+            if mm == nil { continue }
+            let ks = "" + k
+            if rec_member(shown, ks) { continue }
+            lines.push("另有「" + act_name(ks) + "」：票数 " + mm.n + " · β " + pref_fmt4(mm.beta))
         }
     }
     if rec_seed == 0 { lines.push("本轮种子：无（还没有推荐）") }

@@ -1822,6 +1822,7 @@ fn gps_poll(){
     refresh_views()
 }
 fn mark_place(kind){
+    if hostloc_no_place() { ui.sense_status.set_text("需定位：此平台的 OctoSense 不提供定位，只能在模拟定位下标记地点") return }
     if fixes.len() == 0 { ui.sense_status.set_text("还没有定位，标记不了地点") return }
     let f = fixes[fixes.len() - 1]
     let item = {id: kind kind: kind name: kind_name(kind) lat: f.lat lon: f.lon}
@@ -4675,8 +4676,10 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
             Label{text: "把当前位置标记为" draw_text.color: ink draw_text.text_style: theme.font_bold{font_size: 13}}
             kinds := View{width: Fill height: Fit flow: Right spacing: 6
                 on_render: || {
-                    if hostloc_no_place() { ScMuted{width: Fill text: "需定位：此平台不提供定位。打开下面的模拟定位后可以标记（只在模拟模式里有效）"} }
-                    else { for x in PLACE_KINDS { Chip{text: x.n on_click: || mark_place(x.k)} } }
+                    for x in PLACE_KINDS {
+                        if hostloc_no_place() { Chip{text: x.n + "·需定位" on_click: || mark_place(x.k)} }
+                        else { Chip{text: x.n on_click: || mark_place(x.k)} }
+                    }
                 }
             }
             place_list := View{width: Fill height: Fit flow: Down spacing: 4

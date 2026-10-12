@@ -1291,6 +1291,7 @@ fn boot_places(){
 // 恢复上次歌单
 fn boot_last(){
     playlist = []
+    playlist_x = nil
     boot_restored = false
     let last = read_json("last.json")
     if last != nil {
@@ -1300,6 +1301,14 @@ fn boot_last(){
         for i k in keys {
             for j key in song_keys {
                 if key == k && i < whys.len() { playlist.push({i: j why: whys[i]}) }
+            }
+        }
+        // [EXPLORE] §2.7：恢复探索位（只恢复歌和理由；明细不保存）
+        let lx = pick(last, "x", nil)
+        if lx != nil && playlist.len() > 0 {
+            let xk = pick(lx, "k", "")
+            for j key in song_keys {
+                if xk != "" && key == xk { playlist_x = {i: j why: pick(lx, "why", "") rank: 0 c1: 0 c0: 0 a: 0 b: 0 xt: 0} }
             }
         }
         playlist_act = pick(last, "act", "")
@@ -1434,7 +1443,9 @@ fn save_last(){
         keys.push(key_of(songs[p.i]))
         whys.push(p.why)
     }
-    write_json("last.json", {keys: keys whys: whys act: playlist_act slot: playlist_slot intent: playlist_intent at: time_now()})
+    let o = {keys: keys whys: whys act: playlist_act slot: playlist_slot intent: playlist_intent at: time_now()}
+    if playlist_x != nil { o.x = {k: key_of(songs[playlist_x.i]) why: playlist_x.why} }
+    write_json("last.json", o)
 }
 fn save_encounters(){ f_save("encounters.json", encounters) }
 
@@ -2546,7 +2557,15 @@ fn pref_vote(i, v){
     if act_by_id(feedback_act) == nil { return 0 }
     // e_link 已保证：i 在当前歌单里、歌单属于某个推荐、该推荐与当前模拟状态一致
     let link = e_link(i)
-    if link.r <= 0 { return 0 }
+    let r = link.r
+    // [EXPLORE] §2.6：探索歌不在 playlist 里，e_link 给 r = 0（决策日志照旧是未关联票）；
+    // 这里按本歌单的推荐 id 收进评价表，带 x: 1。e_link 本身一字未改
+    let is_x = 0
+    if r <= 0 && playlist_x != nil && playlist_x.i == i && playlist_rec > 0 && !dlog_rec_sim() {
+        r = playlist_rec
+        is_x = 1
+    }
+    if r <= 0 { return 0 }
     if playlist.len() == 0 { return 0 }
     // L = 这张歌单当时的歌曲键（当前歌单就是 link.r 的歌单）
     let L = []
@@ -2558,12 +2577,13 @@ fn pref_vote(i, v){
     let dup = false
     let kept = []
     for row in pref_votes {
-        if row.r == link.r && row.k == k { dup = true }
+        if row.r == r && row.k == k { dup = true }
         else { kept.push(row) }
     }
     pref_votes = kept
     pref_seq = pref_seq + 1
-    let row = {n: pref_seq r: link.r k: k a: feedback_act y: y L: L}
+    // x：1 = 探索歌的票（L 仍是这张歌单的 6 首）；PREF 重放不看 x
+    let row = {n: pref_seq r: r k: k a: feedback_act y: y L: L x: is_x}
     pref_votes.push(row)
     // 行按 n 升序，超过 PREF_CAP 时最小的 n 在最前
     if pref_votes.len() > PREF_CAP { pref_votes.remove(0) }
@@ -2601,7 +2621,7 @@ fn pref_boot(gen){
         let a = pick(x, "a", "")
         let y = pick(x, "y", -1)
         if n > 0 && k != "" && a != "" && (y == 0 || y == 1) {
-            pref_votes.push({n: n r: pick(x, "r", 0) k: k a: a y: y L: pick(x, "L", [])})
+            pref_votes.push({n: n r: pick(x, "r", 0) k: k a: a y: y L: pick(x, "L", []) x: pick(x, "x", 0)})
             if n > pref_seq { pref_seq = n }
         }
     }
@@ -2801,6 +2821,7 @@ fn pref_debug_text(){
             lines.push("" + r.rank + ". " + r.k + " · b " + pref_fmt4(r.b) + " · 学习项 " + pref_fmt4(r.learn) + " · 学习前 " + pre + " · h " + r.h)
         }
     }
+    for l in x_debug_lines() { lines.push(l) }   // [EXPLORE] §2.9
     join(lines, "\n")
 }
 // [P3] rec 事件 ts 字段（§2.4/§2.10）：本轮实际用到的种子（rec_seed）
@@ -2813,6 +2834,145 @@ fn pref_rec_topk(){
         if TOPK == 0 || m < TOPK { out.push(r.k) m = m + 1 }
     }
     out
+}
+
+// ===================== [EXPLORE] 探索位：歌单 6+1 的第 7 首（GPT-EXPLORE-BUILD.md）=====================
+// 从 PREF 前 12 名里、不在 6 首中、且该歌手在 6 首里不足 2 首的歌中，用 Beta-Thompson 抽一首。
+// 数值行为与 tools/explore/ref_explore.py 逐位一致（EXPLORE-EXPECTED.json）。MiniMax 照旧只挑 6 首，不知道探索歌。
+let EXPLORE_ON = true
+let X_CAP = 40          // 每首歌参与抽样的票数上限
+let X_LCG_A = 48271     // 均匀数递推 h = (h*A + C) mod PREF_P；中间值 < 5e10，双精度精确
+let X_LCG_C = 11
+let X_TOPK = 12         // 候选范围固定为前 12 名（与 ref 的 RP.TOPK 一致，不随 TOPK=0 的回归副本变）
+let playlist_x = nil    // 有探索位时 {i why rank c1 c0 a b xt}；清空或替换 playlist 的地方一律同时置 nil
+let x_rows = []         // 本轮候选明细 [{i c1 c0 th}]，只给调试页
+let x_none = ""         // 本轮没出探索位的原因，只给调试页
+
+// f64 floor：内建 floor 走 f32（裸 VM 实测 floor(878922.99) = 878923），先取近似再按 f64 比较校正。
+// 只用于 0 ≤ v < 1e7（xt 与封顶舍入），f32 近似误差 ≤ 1，两步校正足够。
+fn x_floor64(v){
+    let f = floor(v)
+    if f > v { f = f - 1 }
+    if f > v { f = f - 1 }
+    if f + 1 <= v { f = f + 1 }
+    if f + 1 <= v { f = f + 1 }
+    f
+}
+// n 个 (0,1) 内的确定性均匀数：h0 = PREF 哈希("x" + 种子, 歌曲键)，之后每步先递推再取值。
+// pref_hash 内部是 "" + seed + "|" + key 的字符串拼接，"x1001" 可以直接传入，不必另写 x_hash
+fn x_uniforms(seed, key, n){
+    let h = pref_hash("x" + seed, key)
+    let out = []
+    for t in n {
+        h = (h * X_LCG_A + X_LCG_C) % PREF_P
+        out.push((h + 0.5) / PREF_P)
+    }
+    out
+}
+// 整数参数 Beta(a, b) 的一次抽样：a+b-1 个均匀数升序后的第 a 个（n ≤ 41，冒泡排序足够）
+fn x_beta(seed, key, a, b){
+    let us = x_uniforms(seed, key, a + b - 1)
+    let m = us.len()
+    for p in m {
+        for q in m - 1 - p {
+            if us[q] > us[q + 1] { let tmp = us[q] us[q] = us[q + 1] us[q + 1] = tmp }
+        }
+    }
+    us[a - 1]
+}
+// 总票数超过 X_CAP 时按比例缩放，舍入 floor(x + 0.5)；返回 {u1 u0}
+// （不写成 [k1 X_CAP - k1] 这类数组字面量：空格分隔的元素里带减号有解析歧义，先算成变量）
+fn x_cap(c1, c0){
+    let t = c1 + c0
+    if t <= X_CAP { return {u1: c1 u0: c0} }
+    let k1 = x_floor64(X_CAP * c1 / t + 0.5)
+    let k0 = X_CAP - k1
+    {u1: k1 u0: k0}
+}
+// 一次扫描评价表，数出各候选在本活动下的 ♥ 行数 c1、✕ 行数 c0（与 keys 对齐）
+fn x_counts(act, keys){
+    let c1 = []
+    let c0 = []
+    for k in keys { c1.push(0) c0.push(0) }
+    for row in pref_votes {
+        if row.a == act {
+            for j k in keys {
+                if row.k == k {
+                    if row.y == 1 { c1[j] = c1[j] + 1 } else { c0[j] = c0[j] + 1 }
+                }
+            }
+        }
+    }
+    {c1: c1 c0: c0}
+}
+fn x_why(c1, c0){
+    if c1 + c0 == 0 { return "试一首：这个场景下你还没评过它" }
+    "试一首：这个场景下 ♥" + c1 + " ✕" + c0 + "，再给它一次机会"
+}
+// picks = 这次的 6 首 [{i why}]；名次表用 rec_pref_rows（按名次排好）。返回 nil 或 {i why rank c1 c0 a b xt}
+fn explore_pick(picks, act, seed){
+    x_rows = []
+    x_none = ""
+    if !EXPLORE_ON || !PREF_ON { x_none = "开关关闭" return nil }
+    if act == "" || act_by_id(act) == nil { x_none = "没有当前活动" return nil }
+    if rec_pref_rows.len() == 0 { x_none = "本轮没有名次表" return nil }
+    let picked = []
+    let arts = []
+    for p in picks { picked.push(p.i) arts.push(songs[p.i].a) }
+    let cand = []
+    for r in rec_pref_rows {
+        if r.rank <= X_TOPK && !rec_member(picked, r.i) {
+            let same = 0
+            for a in arts { if a == songs[r.i].a { same = same + 1 } }
+            if same < 2 { cand.push(r) }
+        }
+    }
+    if cand.len() == 0 { x_none = "候选为空" return nil }
+    let keys = []
+    for r in cand { keys.push(song_keys[r.i]) }
+    let cnt = x_counts(act, keys)
+    let best = nil
+    let best_th = 0.0
+    for j r in cand {
+        let c1 = cnt.c1[j]
+        let c0 = cnt.c0[j]
+        let u = x_cap(c1, c0)
+        let a = 1 + u.u1
+        let b = 1 + u.u0
+        let th = x_beta(seed, keys[j], a, b)
+        x_rows.push({i: r.i c1: c1 c0: c0 th: th})
+        // 严格大于才替换：并列时保留名次更靠前的
+        if best == nil || th > best_th {
+            best_th = th
+            best = {i: r.i why: x_why(c1, c0) rank: r.rank c1: c1 c0: c0 a: a b: b xt: x_floor64(th * 1000000)}
+        }
+    }
+    best
+}
+// 调试页用：θ 保留 3 位（只显示，不进计算）
+fn x_fmt3(v){
+    let sc = x_floor64(v * 1000 + 0.5)
+    let ip = x_floor64(sc / 1000)
+    let fr = sc - ip * 1000
+    let pad = ""
+    if fr < 100 { pad = "0" }
+    if fr < 10 { pad = "00" }
+    "" + ip + "." + pad + fr
+}
+fn x_debug_lines(){
+    let lines = ["探索位（🎲 试一首）："]
+    if x_rows.len() == 0 {
+        if playlist_x != nil { lines.push("🎲 " + song_keys[playlist_x.i] + "（重启后恢复，本轮明细不在内存里）") }
+        else if x_none != "" { lines.push("本轮没有探索位：" + x_none) }
+        else { lines.push("本轮没有探索位：还没有歌单") }
+        return lines
+    }
+    for r in x_rows {
+        let mark = "   "
+        if playlist_x != nil && playlist_x.i == r.i { mark = "🎲 " }
+        lines.push(mark + song_keys[r.i] + " · ♥" + r.c1 + " ✕" + r.c0 + " · θ " + x_fmt3(r.th))
+    }
+    lines
 }
 
 
@@ -3039,6 +3199,10 @@ fn rec_event(picks, how, ctx){
     // [PREF] §2.10：rec 事件新增 ts（并列定序种子）与 topk（前 12 首歌曲键，按名次）。
     // 新键动态追加，与 dlog_push 补 id/at 的写法相同；PREF_ON = false 时不加，保持旧格式。
     if PREF_ON { ev.ts = pref_rec_ts() ev.topk = pref_rec_topk() }
+    // [EXPLORE] §2.8：探索歌不进 p，另记 x = [歌曲键 名次 c1 c0 xt]；没有探索位时不加这个键
+    if playlist_x != nil {
+        ev.x = [key_of(songs[playlist_x.i]) playlist_x.rank playlist_x.c1 playlist_x.c0 playlist_x.xt]
+    }
     ev
 }
 fn dlog_rec(picks, how, ctx){
@@ -3284,6 +3448,9 @@ let ai_raw = nil          // 最近一次 AI 返回的原始情境判断，写�
 fn finish(picks, how, raw, it, ctx, note){
     busy = false
     ui.list.set_visible(true)
+    // [EXPLORE hook] §2.4：先置 nil 再算；只计算，不读写文件
+    playlist_x = nil
+    playlist_x = explore_pick(picks, ctx.activity.id, rec_seed)
     playlist = picks
     playlist_rec = 0
     playlist_fit = rec_snap.fit
@@ -3322,12 +3489,20 @@ fn finish(picks, how, raw, it, ctx, note){
     // 歌单照样显示出来（③-补2）。要用的值先取好，不依赖之后可能变化的全局变量
     let keys = []
     for p in picks { keys.push(key_of(songs[p.i])) }
+    // [EXPLORE] 探索歌也算"被看到"；历史里另记探索歌键，picks 仍是 6 首
+    let seen = []
+    for p in picks { seen.push(p) }
+    let xk = ""
+    if playlist_x != nil {
+        seen.push({i: playlist_x.i why: playlist_x.why})
+        xk = key_of(songs[playlist_x.i])
+    }
     let air = ai_raw
     ai_raw = nil
     let logctx = {event: rec_event(picks, how, ctx) gen: rec_gen}
     start_timeout(0.01, || save_last())
-    start_timeout(0.02, || log_history(label, raw, ctx, keys, air))
-    start_timeout(0.03, || enc_seen(ctx, picks))
+    start_timeout(0.02, || log_history(label, raw, ctx, keys, air, xk))
+    start_timeout(0.03, || enc_seen(ctx, seen))
     start_timeout(0.04, || dlog_rec(picks, how, logctx)) // [W0 hook / A]
 }
 
@@ -3386,13 +3561,13 @@ fn enc_event_for(i, which, event_act){
 }
 
 // 历史不存坐标（PLAN 2.7）。读和写分在两个处理函数里
-fn log_history(how, raw, ctx, keys, air){
+fn log_history(how, raw, ctx, keys, air, xk){
     let h = read_json("history.json")
     if h == nil { h = [] }
     let pk = ""
     if ctx.here.place != nil { pk = ctx.here.place.kind }
     let next = [{at: time_now() how: how intent: raw ctx_text: ctx_text(ctx) act: ctx.activity.id act_source: ctx.activity.source
-        motion: ctx.motion.state place_kind: pk sim: sim.kind != "off" picks: keys ai_raw: air}]
+        motion: ctx.motion.state place_kind: pk sim: sim.kind != "off" picks: keys x: xk ai_raw: air}]
     for x in h { if next.len() < 30 { next.push(x) } }
     start_timeout(0.01, || write_json("history.json", next))
 }
@@ -3443,6 +3618,7 @@ fn remove_song(i){
     songs = kept
     index_songs()
     playlist = []
+    playlist_x = nil
     save_library()
     save_feedback()
     ui.lib_status.set_text("已删除《" + s.t + "》")
@@ -3890,6 +4066,7 @@ fn sc_from_playlist(pos){
     sc_origin = "home"
     sc_queue = []
     for p in playlist { sc_queue.push(p.i) }
+    if playlist_x != nil { sc_queue.push(playlist_x.i) }   // [EXPLORE] 歌曲卡"共 7 首"，可滑到探索歌
     sc_open(pos)
 }
 fn library_order(){
@@ -4353,6 +4530,18 @@ SolidView{width: Fill height: Fill flow: Overlay draw_bg.color: ground
                             ScMuted{width: Fill text: fb_text(songs[p.i])}
                         }
                         Small{text: "去听" on_click: || play(p.i)}
+                    }
+                }
+                // [EXPLORE] §2.5：第 7 张卡，结构与前 6 张相同，不显示序号
+                if playlist_x != nil {
+                    RoundedView{width: Fill height: Fit flow: Right padding: 16 spacing: 8 draw_bg.color: SC_CARD draw_bg.border_radius: 24.0
+                        GestureView{width: Fill height: Fit flow: Down spacing: 6 on_tap: |x, y| sc_from_playlist(playlist.len())
+                            ScText{width: Fill height: 44 text: "🎲 " + song_title(playlist_x.i) + " ›"}
+                            ScMuted{width: Fill text: songs[playlist_x.i].a}
+                            ScMuted{width: Fill text: playlist_x.why}
+                            ScMuted{width: Fill text: fb_text(songs[playlist_x.i])}
+                        }
+                        Small{text: "去听" on_click: || play(playlist_x.i)}
                     }
                 }
             }}

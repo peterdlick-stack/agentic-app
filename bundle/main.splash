@@ -42,52 +42,52 @@ let playlist_fit = []
 
 // ---- 内置曲库：人工粗标注。en 能量 1-5，vo 是否人声，md 情绪，lg 语种 ----
 let SEED = [
-    {t: "I LOVE U" a: "洛天依" en: 4 vo: true md: "欢快" lg: "zh"}
-    {t: "Summer" a: "久石让" en: 3 vo: false md: "欢快" lg: "instr"}
-    {t: "One Summer's Day" a: "久石让" en: 1 vo: false md: "怀旧" lg: "instr"}
-    {t: "Nuvole Bianche" a: "Ludovico Einaudi" en: 2 vo: false md: "平静" lg: "instr"}
-    {t: "Experience" a: "Ludovico Einaudi" en: 3 vo: false md: "振奋" lg: "instr"}
-    {t: "River Flows in You" a: "Yiruma" en: 1 vo: false md: "平静" lg: "instr"}
-    {t: "Gymnopédie No.1" a: "Erik Satie" en: 1 vo: false md: "平静" lg: "instr"}
-    {t: "Clair de Lune" a: "Debussy" en: 1 vo: false md: "平静" lg: "instr"}
-    {t: "Cello Suite No.1 Prelude" a: "J.S. Bach" en: 2 vo: false md: "专注" lg: "instr"}
-    {t: "On the Nature of Daylight" a: "Max Richter" en: 1 vo: false md: "伤感" lg: "instr"}
-    {t: "Aruarian Dance" a: "Nujabes" en: 2 vo: false md: "专注" lg: "instr"}
-    {t: "An Ending (Ascent)" a: "Brian Eno" en: 1 vo: false md: "平静" lg: "instr"}
-    {t: "Time" a: "Hans Zimmer" en: 3 vo: false md: "振奋" lg: "instr"}
-    {t: "Merry Christmas Mr. Lawrence" a: "坂本龙一" en: 2 vo: false md: "怀旧" lg: "instr"}
-    {t: "琵琶语" a: "林海" en: 1 vo: false md: "平静" lg: "instr"}
-    {t: "Waltz for Debby" a: "Bill Evans" en: 2 vo: false md: "温暖" lg: "instr"}
-    {t: "晴天" a: "周杰伦" en: 3 vo: true md: "怀旧" lg: "zh"}
-    {t: "稻香" a: "周杰伦" en: 3 vo: true md: "温暖" lg: "zh"}
-    {t: "双截棍" a: "周杰伦" en: 5 vo: true md: "振奋" lg: "zh"}
-    {t: "十年" a: "陈奕迅" en: 2 vo: true md: "伤感" lg: "zh"}
-    {t: "孤勇者" a: "陈奕迅" en: 4 vo: true md: "振奋" lg: "zh"}
-    {t: "倔强" a: "五月天" en: 4 vo: true md: "振奋" lg: "zh"}
-    {t: "突然好想你" a: "五月天" en: 3 vo: true md: "伤感" lg: "zh"}
-    {t: "消愁" a: "毛不易" en: 2 vo: true md: "伤感" lg: "zh"}
-    {t: "平凡之路" a: "朴树" en: 3 vo: true md: "怀旧" lg: "zh"}
-    {t: "成都" a: "赵雷" en: 2 vo: true md: "温暖" lg: "zh"}
-    {t: "贝加尔湖畔" a: "李健" en: 1 vo: true md: "平静" lg: "zh"}
-    {t: "光年之外" a: "邓紫棋" en: 3 vo: true md: "振奋" lg: "zh"}
-    {t: "江南" a: "林俊杰" en: 3 vo: true md: "温暖" lg: "zh"}
-    {t: "红豆" a: "王菲" en: 2 vo: true md: "温暖" lg: "zh"}
-    {t: "有何不可" a: "许嵩" en: 3 vo: true md: "欢快" lg: "zh"}
-    {t: "云烟成雨" a: "房东的猫" en: 2 vo: true md: "平静" lg: "zh"}
-    {t: "演员" a: "薛之谦" en: 2 vo: true md: "伤感" lg: "zh"}
-    {t: "爱人错过" a: "告五人" en: 4 vo: true md: "欢快" lg: "zh"}
-    {t: "Don't Stop Me Now" a: "Queen" en: 5 vo: true md: "欢快" lg: "en"}
-    {t: "Eye of the Tiger" a: "Survivor" en: 5 vo: true md: "振奋" lg: "en"}
-    {t: "Believer" a: "Imagine Dragons" en: 5 vo: true md: "振奋" lg: "en"}
-    {t: "Get Lucky" a: "Daft Punk" en: 4 vo: true md: "欢快" lg: "en"}
-    {t: "Viva la Vida" a: "Coldplay" en: 4 vo: true md: "振奋" lg: "en"}
-    {t: "Shake It Off" a: "Taylor Swift" en: 4 vo: true md: "欢快" lg: "en"}
-    {t: "Don't Know Why" a: "Norah Jones" en: 1 vo: true md: "温暖" lg: "en"}
-    {t: "Paris in the Rain" a: "Lauv" en: 2 vo: true md: "温暖" lg: "en"}
-    {t: "Wake Me Up" a: "Avicii" en: 4 vo: true md: "振奋" lg: "en"}
-    {t: "Blinding Lights" a: "The Weeknd" en: 5 vo: true md: "欢快" lg: "en"}
-    {t: "Happy" a: "Pharrell Williams" en: 4 vo: true md: "欢快" lg: "en"}
-    {t: "My Funny Valentine" a: "Chet Baker" en: 1 vo: true md: "伤感" lg: "en"}
+    {t: "I LOVE U" a: "洛天依" en: 4 vo: true md: "欢快" lg: "zh" pc: 1}
+    {t: "Summer" a: "久石让" en: 3 vo: false md: "欢快" lg: "instr" pc: 1}
+    {t: "One Summer's Day" a: "久石让" en: 1 vo: false md: "怀旧" lg: "instr" pc: -1}
+    {t: "Nuvole Bianche" a: "Ludovico Einaudi" en: 2 vo: false md: "平静" lg: "instr" pc: 0}
+    {t: "Experience" a: "Ludovico Einaudi" en: 3 vo: false md: "振奋" lg: "instr" pc: 1}
+    {t: "River Flows in You" a: "Yiruma" en: 1 vo: false md: "平静" lg: "instr" pc: 0}
+    {t: "Gymnopédie No.1" a: "Erik Satie" en: 1 vo: false md: "平静" lg: "instr" pc: -1}
+    {t: "Clair de Lune" a: "Debussy" en: 1 vo: false md: "平静" lg: "instr" pc: -1}
+    {t: "Cello Suite No.1 Prelude" a: "J.S. Bach" en: 2 vo: false md: "专注" lg: "instr" pc: 1}
+    {t: "On the Nature of Daylight" a: "Max Richter" en: 1 vo: false md: "伤感" lg: "instr" pc: -1}
+    {t: "Aruarian Dance" a: "Nujabes" en: 2 vo: false md: "专注" lg: "instr" pc: 0}
+    {t: "An Ending (Ascent)" a: "Brian Eno" en: 1 vo: false md: "平静" lg: "instr" pc: -1}
+    {t: "Time" a: "Hans Zimmer" en: 3 vo: false md: "振奋" lg: "instr" pc: -1}
+    {t: "Merry Christmas Mr. Lawrence" a: "坂本龙一" en: 2 vo: false md: "怀旧" lg: "instr" pc: 0}
+    {t: "琵琶语" a: "林海" en: 1 vo: false md: "平静" lg: "instr" pc: -1}
+    {t: "Waltz for Debby" a: "Bill Evans" en: 2 vo: false md: "温暖" lg: "instr" pc: 0}
+    {t: "晴天" a: "周杰伦" en: 3 vo: true md: "怀旧" lg: "zh" pc: 0}
+    {t: "稻香" a: "周杰伦" en: 3 vo: true md: "温暖" lg: "zh" pc: 0}
+    {t: "双截棍" a: "周杰伦" en: 5 vo: true md: "振奋" lg: "zh" pc: 1}
+    {t: "十年" a: "陈奕迅" en: 2 vo: true md: "伤感" lg: "zh" pc: -1}
+    {t: "孤勇者" a: "陈奕迅" en: 4 vo: true md: "振奋" lg: "zh" pc: 0}
+    {t: "倔强" a: "五月天" en: 4 vo: true md: "振奋" lg: "zh" pc: 0}
+    {t: "突然好想你" a: "五月天" en: 3 vo: true md: "伤感" lg: "zh" pc: 0}
+    {t: "消愁" a: "毛不易" en: 2 vo: true md: "伤感" lg: "zh" pc: -1}
+    {t: "平凡之路" a: "朴树" en: 3 vo: true md: "怀旧" lg: "zh" pc: 0}
+    {t: "成都" a: "赵雷" en: 2 vo: true md: "温暖" lg: "zh" pc: -1}
+    {t: "贝加尔湖畔" a: "李健" en: 1 vo: true md: "平静" lg: "zh" pc: -1}
+    {t: "光年之外" a: "邓紫棋" en: 3 vo: true md: "振奋" lg: "zh" pc: 0}
+    {t: "江南" a: "林俊杰" en: 3 vo: true md: "温暖" lg: "zh" pc: 0}
+    {t: "红豆" a: "王菲" en: 2 vo: true md: "温暖" lg: "zh" pc: -1}
+    {t: "有何不可" a: "许嵩" en: 3 vo: true md: "欢快" lg: "zh" pc: 0}
+    {t: "云烟成雨" a: "房东的猫" en: 2 vo: true md: "平静" lg: "zh" pc: -1}
+    {t: "演员" a: "薛之谦" en: 2 vo: true md: "伤感" lg: "zh" pc: -1}
+    {t: "爱人错过" a: "告五人" en: 4 vo: true md: "欢快" lg: "zh" pc: 1}
+    {t: "Don't Stop Me Now" a: "Queen" en: 5 vo: true md: "欢快" lg: "en" pc: 1}
+    {t: "Eye of the Tiger" a: "Survivor" en: 5 vo: true md: "振奋" lg: "en" pc: 1}
+    {t: "Believer" a: "Imagine Dragons" en: 5 vo: true md: "振奋" lg: "en" pc: 0}
+    {t: "Get Lucky" a: "Daft Punk" en: 4 vo: true md: "欢快" lg: "en" pc: 0}
+    {t: "Viva la Vida" a: "Coldplay" en: 4 vo: true md: "振奋" lg: "en" pc: 0}
+    {t: "Shake It Off" a: "Taylor Swift" en: 4 vo: true md: "欢快" lg: "en" pc: 1}
+    {t: "Don't Know Why" a: "Norah Jones" en: 1 vo: true md: "温暖" lg: "en" pc: -1}
+    {t: "Paris in the Rain" a: "Lauv" en: 2 vo: true md: "温暖" lg: "en" pc: 0}
+    {t: "Wake Me Up" a: "Avicii" en: 4 vo: true md: "振奋" lg: "en" pc: 0}
+    {t: "Blinding Lights" a: "The Weeknd" en: 5 vo: true md: "欢快" lg: "en" pc: 1}
+    {t: "Happy" a: "Pharrell Williams" en: 4 vo: true md: "欢快" lg: "en" pc: 1}
+    {t: "My Funny Valentine" a: "Chet Baker" en: 1 vo: true md: "伤感" lg: "en" pc: -1}
 ]
 let MOODS = ["平静" "专注" "温暖" "怀旧" "伤感" "振奋" "欢快"]
 
@@ -321,7 +321,7 @@ fn load_lib_song(s){
     let t = pick(s, "t", "")
     if t != "" {
         songs.push({t: t a: pick(s, "a", "未知歌手") en: pick(s, "en", nil) vo: pick(s, "vo", nil)
-            md: pick(s, "md", nil) lg: pick(s, "lg", nil) src: pick(s, "src", "user") fb: blank_fb()})
+            md: pick(s, "md", nil) lg: pick(s, "lg", nil) pc: pick(s, "pc", nil) src: pick(s, "src", "user") fb: blank_fb()})
     }
 }
 let song_keys = []      // 与 songs 一一对应的 "歌名|歌手"，加载反馈时避免反复拼字符串
@@ -1225,7 +1225,7 @@ fn boot_run(gen, step){
     } else if step == "library" {
         songs = []
         for s in SEED {
-            songs.push({t: s.t a: s.a en: s.en vo: s.vo md: s.md lg: s.lg src: "seed" fb: blank_fb()})
+            songs.push({t: s.t a: s.a en: s.en vo: s.vo md: s.md lg: s.lg pc: s.pc src: "seed" fb: blank_fb()})
         }
         boot_read(gen, "library.json", 30, |s| load_lib_song(s), "feedback")
     } else if step == "feedback" {
@@ -1416,7 +1416,7 @@ fn save_labels(){ f_save("labels.json", labels) }
 fn save_library(){
     if !booted { return }
     let out = []
-    for s in songs { if s.src != "seed" { out.push({t: s.t a: s.a en: s.en vo: s.vo md: s.md lg: s.lg src: s.src}) } }
+    for s in songs { if s.src != "seed" { out.push({t: s.t a: s.a en: s.en vo: s.vo md: s.md lg: s.lg pc: s.pc src: s.src}) } }
     write_json("library.json", out)
 }
 fn save_feedback(){
@@ -2367,13 +2367,10 @@ let PREF_R = 2.0
 let PREF_BETA_MAX = 3.0
 let PREF_P = 1000003
 let PREF_CAP = 600
-// 12 维特征，顺序冻结（§1）：能量、人声、BPM、欢快、怀旧、平静、振奋、伤感、专注、温暖、中文、英文
-let PREF_FEAT = ["能量" "人声" "BPM" "欢快" "怀旧" "平静" "振奋" "伤感" "专注" "温暖" "中文" "英文"]
-// BPM 常量表（§2.2）：每行 {k: key_of(s) b: BPM}，不改 SEED 的行；先按空表写，
-// 10-11 22:00 后泛舟给 bpm.json，由 P1 单独提交 data: add BPM。
-// 用数组而不用 {键: 值} 字面量：本运行时对缺失键直接读会报错、动态键赋值会追加重复键
-// （见 pick / fb_set 的注释）；查找用线性扫描，曲库只有几十首，够快。
-let SEED_BPM = []
+// 12 维特征，顺序冻结（§1）：能量、人声、节奏、欢快、怀旧、平静、振奋、伤感、专注、温暖、中文、英文
+let PREF_FEAT = ["能量" "人声" "节奏" "欢快" "怀旧" "平静" "振奋" "伤感" "专注" "温暖" "中文" "英文"]
+// 第 3 维原计划用 BPM（SEED_BPM 表），10-12 改为节奏密度三档，直接写在 SEED 每行的 pc 字段：
+// BPM 有半速/倍速歧义，古典和氛围曲没有稳定值，曲库又没有音频可算。
 // ---- f64 原语（裁决 A，2026-10-11）：运行时数学内建是 f32 精度，V4/V5 的 ≤1e-9 判据不可达，
 // 故基座冻结这两个纯脚本 f64 原语；学习数值一律用它们，不用裸 exp/sqrt。
 // 代码由 P2 在 VM harness 验证后交付，原样落地（自检最差相对误差 1.78e-16，判据 ≤1e-14）：
@@ -2443,28 +2440,14 @@ let rec_seed = 0        // 本轮推荐的并列定序种子；choose_requiremen
 let rec_pref_rows = []  // 本轮 pref_rank 结果 [{i k b learn s h rank why}]，rec_snapshot 填充，ask_model 与调试页用
 //
 // ---- 函数空壳（签名冻结；返回 [] / "" / 0 = 本路不走 PREF，调用方回退旧逻辑）----
-// [P1] 12 维特征，缺失填 0；对应 ref_pref.py features()，BPM 查 SEED_BPM
+// [P1] 12 维特征，缺失填 0；对应 ref_pref.py features()
+// 第 3 维是节奏密度三档（2026-10-12 泛舟定，替代 BPM）：歌曲对象的 pc 字段，快 1 / 中 0 / 慢 -1，未标注为 nil
 fn pref_x(s){
     let x = [0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0]
     if s.en != nil { x[0] = (s.en - 3) / 2 }
     if s.vo != nil { if s.vo { x[1] = 1.0 } else { x[1] = -1.0 } }
-    // BPM：SEED_BPM 是 [{k b}] 数组，线性扫描。
-    // 注意运行时限制：for k v in 对脚本构造的对象迭代为空（pick 靠它，会静默读不到），
-    // 但 SEED_BPM 每行是源码字面量、字段必存在，直接静态读 e.k / e.b（与 score_song 读 s.en 同款）。
-    let k = key_of(s)
-    let has_bpm = false
-    let bpm = 0.0
-    for e in SEED_BPM {
-        if e.k == k { has_bpm = true bpm = e.b }
-    }
-    // 裁剪用 if 分支不用 min/max：运行时的 min/max/abs 走 f32，未触发裁剪也会截断（P2 实测），
-    // 补 BPM 后 V3 的 1e-9 容差必然被打破
-    if has_bpm {
-        let b = (bpm - 110) / 40
-        if b < -1.0 { b = -1.0 }
-        if b > 1.0 { b = 1.0 }
-        x[2] = b
-    }
+    // 每个歌曲对象都带 pc 字段（种子、曲库读入、添加时都写），所以可以静态读
+    if s.pc != nil { x[2] = s.pc + 0.0 }
     // 情绪 7 维：md 与 PREF_FEAT[3..9] 精确相等才置 1，其余（含 nil）全 0
     for j in 7 { if s.md != nil && s.md == PREF_FEAT[j + 3] { x[j + 3] = 1.0 } }
     if s.lg == "zh" { x[10] = 1.0 }
@@ -3445,7 +3428,7 @@ fn add_song(){
     for s in songs {
         if s.t == t && s.a == a { ui.lib_status.set_text("曲库里已经有《" + t + "》") return }
     }
-    songs.push({t: t a: a en: nil vo: nil md: nil lg: nil src: "user" fb: blank_fb()})
+    songs.push({t: t a: a en: nil vo: nil md: nil lg: nil pc: nil src: "user" fb: blank_fb()})
     index_songs()
     save_library()
     ui.new_song.set_text("")
@@ -3467,7 +3450,11 @@ fn remove_song(i){
 }
 fn untagged(){
     let out = []
-    for i s in songs { if s.en == nil && out.len() < 30 { out.push({i: i title: s.t artist: s.a}) } }
+    // 未标注的歌，以及节奏字段加入前已由 AI 补过、还缺节奏的歌
+    for i s in songs {
+        let need = s.en == nil || (s.src == "user_ai" && s.pc == nil)
+        if need && out.len() < 30 { out.push({i: i title: s.t artist: s.a}) }
+    }
     out
 }
 fn ai_tag(){
@@ -3476,14 +3463,15 @@ fn ai_tag(){
     if !host.has("model") { ui.lib_status.set_text("这台设备没有给本应用 AI 权限，无法补标签") return }
     ui.lib_status.set_text("AI 正在补 " + todo.len() + " 首歌的标签…")
     host.request("model.complete", {
-        task: "为每首歌估计：energy 能量 1-5（1 最安静）、vocal 是否有人声、mood 从给定列表选一个、lang 语种（zh 中文、en 英文、instr 纯音乐、other 其他）。不认识的歌按歌名和歌手合理推断。"
+        task: "为每首歌估计：energy 能量 1-5（1 最安静）、vocal 是否有人声、mood 从给定列表选一个、lang 语种（zh 中文、en 英文、instr 纯音乐、other 其他）、pace 节奏密度（听起来的节拍快慢和音符密集程度，不看人声语速：slow 慢、mid 中、fast 快）。不认识的歌按歌名和歌手合理推断。"
         input: {moods: MOODS songs: todo}
         schema: {type: "object" required: ["tags"] additionalProperties: false
             properties: {tags: {type: "array" maxItems: 30
-                items: {type: "object" required: ["i" "energy" "vocal" "mood" "lang"] additionalProperties: false
+                items: {type: "object" required: ["i" "energy" "vocal" "mood" "lang" "pace"] additionalProperties: false
                     properties: {i: {type: "integer" minimum: 0} energy: {type: "integer" minimum: 1 maximum: 5}
                         vocal: {type: "boolean"} mood: {type: "string" enum: MOODS}
-                        lang: {type: "string" enum: ["zh" "en" "instr" "other"]}}}}}}
+                        lang: {type: "string" enum: ["zh" "en" "instr" "other"]}
+                        pace: {type: "string" enum: ["slow" "mid" "fast"]}}}}}}
         class: "fast"
     }, fn(r){ tag_answer(r) })
 }
@@ -3491,9 +3479,10 @@ fn tag_answer(r){
     if !r.is_ok { ui.lib_status.set_text("AI 补标签失败：" + r.error) return }
     let n = 0
     for tg in r.data.output.tags {
-        if tg.i >= 0 && tg.i < songs.len() && songs[tg.i].src == "user" {
+        if tg.i >= 0 && tg.i < songs.len() && (songs[tg.i].src == "user" || songs[tg.i].src == "user_ai") {
             let s = songs[tg.i]
             s.en = tg.energy s.vo = tg.vocal s.md = tg.mood s.lg = tg.lang s.src = "user_ai"
+            if tg.pace == "fast" { s.pc = 1 } else if tg.pace == "slow" { s.pc = -1 } else { s.pc = 0 }
             n = n + 1
         }
     }
@@ -3523,7 +3512,11 @@ fn tag_line(s){
     if s.lg == "en" { lang = "英文" }
     if s.lg == "instr" { lang = "器乐" }
     if s.lg == "other" { lang = "其他语种" }
-    s.a + " · " + energy_word(s.en) + " · " + v + " · " + lang
+    let pace = ""
+    if s.pc == 1 { pace = " · 节奏快" }
+    if s.pc == 0 { pace = " · 节奏中等" }
+    if s.pc == -1 { pace = " · 节奏慢" }
+    s.a + " · " + energy_word(s.en) + " · " + v + " · " + lang + pace
 }
 
 // ---- 情境控制 ----

@@ -1,5 +1,5 @@
 """情境 DJ 偏好学习参考实现（PREF 轮）。应用里的 OctoScript 必须与本文件逐值一致。
-用法：python3 -I ref_pref.py <main.splash> [--bpm bpm.json] --out expected.json
+用法：python3 -I ref_pref.py <main.splash> --out expected.json
 只用标准库。数值约定：浮点按 IEEE double；比较容差 1e-9。"""
 import json, math, re, sys
 
@@ -7,7 +7,7 @@ P = 1000003                     # 哈希模数（质数）
 ETA, R_MAX, BETA_MAX = 0.5, 2.0, 3.0
 TOPK, REC_N = 12, 6
 MOODS = ["欢快", "怀旧", "平静", "振奋", "伤感", "专注", "温暖"]
-FEAT = ["能量", "人声", "BPM"] + MOODS + ["中文", "英文"]          # 12 维，顺序冻结
+FEAT = ["能量", "人声", "节奏"] + MOODS + ["中文", "英文"]          # 12 维，顺序冻结
 ACTS = {"study": (1.5, 1.5, "专注"), "work": (2.5, 0.8, "专注"), "commute": (3.4, 0.0, "欢快"),
         "walk": (3.0, 0.0, "温暖"), "workout": (4.7, 0.0, "振奋"), "relax": (2.0, 0.3, "温暖"),
         "sleep": (1.0, 1.5, "平静")}
@@ -17,9 +17,10 @@ def load_seed(path):
     body = src[src.index("let SEED = ["):]
     body = body[:body.index("\n]")]
     out = []
-    for m in re.finditer(r'\{t: "(.*?)" a: "(.*?)" en: (\d) vo: (\w+) md: "(.*?)" lg: "(\w+)"\}', body):
-        t, a, en, vo, md, lg = m.groups()
-        out.append({"t": t, "a": a, "en": int(en), "vo": vo == "true", "md": md, "lg": lg})
+    for m in re.finditer(r'\{t: "(.*?)" a: "(.*?)" en: (\d) vo: (\w+) md: "(.*?)" lg: "(\w+)"(?: pc: (-?\d))?\}', body):
+        t, a, en, vo, md, lg, pc = m.groups()
+        out.append({"t": t, "a": a, "en": int(en), "vo": vo == "true", "md": md, "lg": lg,
+                    "pc": None if pc is None else int(pc)})
     return out
 
 def key_of(s): return s["t"] + "|" + s["a"]
@@ -34,12 +35,13 @@ def tie_hash(seed, key):
     return h
 
 # ---- 2. 特征（缺失填 0）----
-def features(s, bpm):
-    en, vo, md, lg = s.get("en"), s.get("vo"), s.get("md"), s.get("lg")
-    b = bpm.get(key_of(s))
+def features(s, bpm=None):
+    # 第 3 维：节奏密度三档 pc（快 1 / 中 0 / 慢 -1，缺失 0），2026-10-12 替代 BPM。
+    # bpm 参数只为保持各函数签名不变（ref_explore.py 照旧传入），不再使用。
+    en, vo, md, lg, pc = s.get("en"), s.get("vo"), s.get("md"), s.get("lg"), s.get("pc")
     x = [0.0 if en is None else (en - 3) / 2,
          0.0 if vo is None else (1.0 if vo else -1.0),
-         0.0 if b is None else max(-1.0, min(1.0, (b - 110) / 40))]
+         0.0 if pc is None else float(pc)]
     x += [1.0 if md == m else 0.0 for m in MOODS]
     x += [1.0 if lg == "zh" else 0.0, 1.0 if lg == "en" else 0.0]
     return x
@@ -137,7 +139,7 @@ def apply_vote(table, ev, counter):
 if __name__ == "__main__":
     args = sys.argv[1:]
     songs = load_seed(args[0]); byk = {key_of(s): s for s in songs}
-    bpm = json.load(open(args[args.index("--bpm") + 1], encoding="utf-8")) if "--bpm" in args else {}
+    bpm = {}   # 已不用（节奏写在 SEED 的 pc 字段）
     out = {"constants": {"P": P, "ETA": ETA, "R_MAX": R_MAX, "BETA_MAX": BETA_MAX, "TOPK": TOPK, "FEAT": FEAT},
            "hash": {str(seed): {key_of(s): tie_hash(seed, key_of(s)) for s in songs} for seed in (1, 17, 123456)},
            "features": {key_of(s): features(s, bpm) for s in songs}}

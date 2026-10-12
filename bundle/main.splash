@@ -1335,6 +1335,7 @@ fn boot_done(){
     ui.cities.render()
     start_timeout(0.01, || fetch_weather())
     start_timeout(0.02, || gps_poll())
+    start_timeout(0.5, || hostloc_probe()) // [HOSTLOC probe]
 }
 
 fn save_prefs(){ write_json("prefs.json", prefs) }
@@ -3794,6 +3795,40 @@ fn shown_places(){
     if sim.kind != "off" { return sim_places }
     places
 }
+// ==== [HOSTLOC probe] 实验分支 hostloc/probe 专用，不合并 ====
+// 启动后依次调用 runtime.list、3 次 runtime.describe、location.permission.status、location.get，
+// 再读一次 sys.gps("ok")；全部原始结果在 hostloc_finish 一个处理函数里一次写入 accounts/device/hostloc_probe.json。
+let hostloc_res = []
+let hostloc_sum = "未运行"
+let hostloc_ran = false
+fn hostloc_rec(k, r){ hostloc_res.push({k: k is_ok: r.is_ok data: r.data error: r.error}) }
+fn hostloc_probe(){
+    if hostloc_ran { return }
+    hostloc_ran = true
+    hostloc_sum = "运行中"
+    host.request("runtime.list", {}, fn(r){ hostloc_rec("runtime.list", r) hostloc_step(1) })
+}
+fn hostloc_step(i){
+    if i == 1 { host.request("runtime.describe", {method: "location.get"}, fn(r){ hostloc_rec("runtime.describe location.get", r) hostloc_step(2) }) return }
+    if i == 2 { host.request("runtime.describe", {method: "location.sample"}, fn(r){ hostloc_rec("runtime.describe location.sample", r) hostloc_step(3) }) return }
+    if i == 3 { host.request("runtime.describe", {method: "location.permission.status"}, fn(r){ hostloc_rec("runtime.describe location.permission.status", r) hostloc_step(4) }) return }
+    if i == 4 { host.request("location.permission.status", {}, fn(r){ hostloc_rec("location.permission.status", r) hostloc_step(5) }) return }
+    if i == 5 { host.request("location.get", {}, fn(r){ hostloc_rec("location.get", r) hostloc_finish() }) return }
+}
+fn hostloc_finish(){
+    let ok = 0
+    let parts = []
+    for x in hostloc_res {
+        if x.is_ok { ok = ok + 1 parts.push(x.k + "=ok") }
+        else { parts.push(x.k + "=" + x.error) }
+    }
+    let g = sys.gps("ok")
+    let out = {at: time_now() sys_gps_ok: g results: hostloc_res}
+    let w = fs.write(DATA + "hostloc_probe.json", out.to_json())
+    hostloc_sum = "" + ok + "/" + hostloc_res.len() + " 成功 · sys.gps(ok)=" + g + "\n" + join(parts, "\n")
+    sync_debug()
+}
+
 // ==== [C] 调试页 ====
 let debug_expanded = false
 let debug_include_sim = false
@@ -3855,7 +3890,7 @@ fn c_recent(){
 fn sync_debug(){
     if !debug_expanded { return }
     ui.debug_mode.set_text(if debug_include_sim "含模拟数据（点此只看真实）" else "只显示真实数据（点此含模拟）")
-    ui.debug_note.set_text(dlog_warn + "\n超过600字节：" + dlog_big + "条，最大 " + dlog_big_max + " 字节；完整保留")
+    ui.debug_note.set_text(dlog_warn + "\n超过600字节：" + dlog_big + "条，最大 " + dlog_big_max + " 字节；完整保留" + "\n宿主定位探测：" + hostloc_sum)
     let r = dlog_stats(false)
     let s = dlog_stats(true)
     if r == nil || s == nil {

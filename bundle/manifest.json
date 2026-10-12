@@ -17,11 +17,22 @@
     "net",
     "web",
     "model",
-    "location"
+    "location",
+    "runtime"
   ],
+  "host_api": {
+    "optional": {
+      "location.get": 1,
+      "location.permission.status": 1,
+      "location.sample": 1,
+      "runtime.describe": 1,
+      "runtime.list": 1
+    },
+    "required": {}
+  },
   "id": "context-dj",
   "integrity": {
-    "bundle_blake3": "ec4e3cd50644c4baeecdea9431e9909ff0c898fea987064a326b1949a9320fa6"
+    "bundle_blake3": "8d902adcfb6901bcecea6ec5cee8f0ed8e139fc6f007d8cc671eb43657f37e64"
   },
   "name": "情境 DJ",
   "network": {
@@ -29,6 +40,9 @@
       "api.open-meteo.com"
     ]
   },
+  "requires": [
+    "host-api-v1"
+  ],
   "schema": 1,
   "storage": {
     "max_bytes": 16777216

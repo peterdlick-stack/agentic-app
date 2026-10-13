@@ -14,6 +14,8 @@
 
 **宣传片（0.4.0，2 分 23 秒）**：[docs/media/promo-0.4.0.mp4](docs/media/promo-0.4.0.mp4)，用动画讲清一首歌是怎么被选出来的：本地打分取前 12 名、MiniMax 选 6 首、代码校验与重试、探索位、反馈之后的变化，穿插实机画面。**讲解录屏（0.4.0，2 分 45 秒，带配音和字幕）**：[docs/media/demo-0.4.0-narrated.mp4](docs/media/demo-0.4.0-narrated.mp4)，从情境确认、真实 MiniMax 选歌、本地校验、探索位，到《I LOVE U》歌曲卡和“喜欢”之后的偏好更新。**从商店安装、宿主授权助手的完整实机录屏**（5 分 02 秒）：[docs/media/demo-0.4.0-win.mp4](docs/media/demo-0.4.0-win.mp4)。说明见[演示视频与截图](#演示视频与截图)。
 
+**在 B 站观看**：[宣传片](https://www.bilibili.com/video/BV17Ypz6YEsd)（2 分 23 秒）· [界面实机演示](https://www.bilibili.com/video/BV1BYpz6YELa)（讲解录屏，2 分 45 秒，带配音）
+
 **评审速览**：初赛 4 条建议各改了什么、在哪一行代码、录屏哪一秒能看到，见 [REVIEW-ANSWERS.md](REVIEW-ANSWERS.md)。
 
 ## 30 秒看懂
@@ -131,7 +133,7 @@ flowchart LR
 
 ### 宣传片（0.4.0，2026-10-13）
 
-**[▶ 观看 docs/media/promo-0.4.0.mp4](docs/media/promo-0.4.0.mp4)**（2 分 23 秒，1920×1080，带配乐）。4K 原片（3840×2160，313 MB）在 [Release v0.4.0 的附件](https://github.com/peterdlick-stack/agentic-app/releases/download/v0.4.0/promo-0.4.0-4k.mp4)里。
+**[▶ 在 B 站观看](https://www.bilibili.com/video/BV17Ypz6YEsd)** · [仓库内 1080p 文件](docs/media/promo-0.4.0.mp4)（2 分 23 秒，1920×1080，带配乐）。4K 原片（3840×2160，313 MB）在 [Release v0.4.0 的附件](https://github.com/peterdlick-stack/agentic-app/releases/download/v0.4.0/promo-0.4.0-4k.mp4)里。
 
 中段的打分、名次、标签和代码都是真实数据，取自提交 `8805240` 在 2026-10-12 真机上的一轮（通勤、没有要求、种子 10）。MiniMax 第 1 次的返回、“两次都没通过”的界面和推荐理由是示意，取自测试用例。实机画面来自 2026-10-13 的两轮录屏，和中段的数据不是同一轮。这些在片尾都有说明。
 
@@ -151,7 +153,7 @@ flowchart LR
 
 ### 讲解录屏（0.4.0，2026-10-13）
 
-**[▶ 观看 docs/media/demo-0.4.0-narrated.mp4](docs/media/demo-0.4.0-narrated.mp4)**（2 分 45 秒，1920×1080，中文配音，字幕烧录在画面里，4.2 MB）
+**[▶ 在 B 站观看](https://www.bilibili.com/video/BV1BYpz6YELa)** · **[仓库内文件 docs/media/demo-0.4.0-narrated.mp4](docs/media/demo-0.4.0-narrated.mp4)**（2 分 45 秒，1920×1080，中文配音，字幕烧录在画面里，4.2 MB）
 
 同一天、同一个 0.4.0 应用包，在 Windows 原生 OctoSense rc.5 上录制，全新数据目录，没有历史反馈。选歌是一次真实 MiniMax 请求；**AI 等待段已加速**，画面右下角用橙字标明“AI 选歌实际等待 28 秒 · 已加速”。歌词页按版权要求跳过，全片没有出现歌词。
 

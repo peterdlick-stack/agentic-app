@@ -1,6 +1,7 @@
 # 评审速览：情境 DJ（context-dj）0.4.0
 
 > 给复赛评审的一页索引：初赛点评每一条改了什么、在哪能看到。代码链接都固定在 `v0.4.0`（提交 `8805240`）；`v0.4.0` 之后的提交只改文档和录屏，`bundle/` 没有变。
+> 视频也在 B 站：[宣传片](https://www.bilibili.com/video/BV17Ypz6YEsd) · [界面实机演示](https://www.bilibili.com/video/BV1BYpz6YELa)。
 > 初赛：#101，78/100，评审版本 0.3.4（`d56da0b`）。
 
 ## 1. 初赛 4 条建议 → 0.4.0
@@ -8,7 +9,7 @@
 | # | 初赛建议 | 0.4.0 的处理 | 代码 | 实机证据 |
 |---|---|---|---|---|
 | 1 | 声明了 `location`，但不调用宿主定位服务 | 改为经宿主 location 服务取位：打开时先用 `runtime.describe` 查询 `location.sample` / `location.get`，宿主支持才申请权限、取位；**不再读 `sys.gps`**。宿主不提供定位的平台（Windows、Linux 桌面）如实显示“此平台的 OctoSense 不提供定位”，该项不参与推荐 | [`hostloc_init`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L1624) · [`read_fix`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L1699) | 讲解录屏 0:00 起、完整录屏 0:56 起；Windows rc.5 上 `location.get` 返回 `unsupported_platform`，与宿主文档一致。Android/macOS 路径按文档实现，**未在真机验证** |
-| 2 | AI 选歌质量补一段真实宿主录屏 | 已补：Windows 原生 OctoSense rc.5，全新数据目录，从本地商店安装与 Release 相同的应用包（bundle BLAKE3 `30774f57…`），真实 MiniMax 选歌，没有剪辑，等待段加速并在画面中标明 | — | [讲解录屏 `demo-0.4.0-narrated.mp4`](docs/media/demo-0.4.0-narrated.mp4)（2:45，带配音）；[完整录屏 `demo-0.4.0-win.mp4`](docs/media/demo-0.4.0-win.mp4)（5:02，含商店安装和助手授权） |
+| 2 | AI 选歌质量补一段真实宿主录屏 | 已补：Windows 原生 OctoSense rc.5，全新数据目录，从本地商店安装与 Release 相同的应用包（bundle BLAKE3 `30774f57…`），真实 MiniMax 选歌，没有剪辑，等待段加速并在画面中标明 | — | [讲解录屏 `demo-0.4.0-narrated.mp4`](docs/media/demo-0.4.0-narrated.mp4)（2:45，带配音，[B 站](https://www.bilibili.com/video/BV1BYpz6YELa)）；[完整录屏 `demo-0.4.0-win.mp4`](docs/media/demo-0.4.0-win.mp4)（5:02，含商店安装和助手授权） |
 | 3 | 在真机上验证一次 `ask_user_question` 的宿主放行 | **宿主放行已验证**：授权面板列出 “Ask you questions”，宿主内核日志显示 `tools=1`，与 `AGENT.md` 只声明这一个工具一致。**追问本身还没在真机上弹出**：宿主内核调用模型约 10 秒就超时（内核常量 `DEFAULT_LLM_CONNECT_TIMEOUT_SECS = 10`），同一时段应用自己的选歌调用正常。详见 README “验证情况” | [`bundle/AGENT.md`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/AGENT.md) | 完整录屏 3:58 起 |
 | 4 | 改用 GitHub 发布流程并提高版本号 | 已改用 `tools/octo publish-github` 生成的工作流，版本 0.3.4 → 0.4.0，Release 由 GitHub Actions 证明发布者身份（`actions/attest`，运行 [38262324723](https://github.com/peterdlick-stack/agentic-app/actions/runs/38262324723)）。这是 App Hub 现行文档里唯一接受的发布者身份方式，不需要、也不再使用发布者密钥 | [`.github/workflows/publish-app.yml`](.github/workflows/publish-app.yml) | [Release v0.4.0](https://github.com/peterdlick-stack/agentic-app/releases/tag/v0.4.0) |
 

@@ -188,18 +188,19 @@ Windows 桌面没有定位、录制时天气服务不可用，所以这次选歌
 
 ## 一次完整的任务
 
-以演示视频为例（工作日傍晚，模拟定位“步行”）：
+以 0.4.0 的[讲解录屏](docs/media/demo-0.4.0-narrated.mp4)为例（Windows 原生 OctoSense rc.5，工作日傍晚，全新数据目录，没有历史反馈）：
 
 | # | 谁 | 做什么 | 结果怎么核对 |
 |---|---|---|---|
-| 1 | 应用 | 读取时段、天气（Open-Meteo）、移动状态（GPS 测速）、是否在你标记的地点，并按你过去的确认算出候选活动 | 情境卡上每一项都写明来源和依据；模拟定位时顶部一直显示橙色提示 |
-| 2 | 用户 | 应用猜的是“通勤”，你点了“散步”**纠正**它 | 写入 `labels.json`；改选会替换刚才那条，不会多记 |
-| 3 | 用户 | 补一句“想听点甜的，最好是洛天依” | — |
-| 4 | AI（MiniMax） | 拿到文字形式的情境（不含坐标）、你的话、候选歌和你的喜好分，按固定 JSON 格式**先判断你在做什么，再选 6 首歌并写理由** | 应用检查返回的编号是否合法；你确认的“散步”不会被 AI 改掉；歌单上方显示“AI 理解”，你能看出它是怎么理解的 |
-| 5 | 应用 | AI 报错时改用本地规则；每次尝试 90 秒未完成就判超时（含一次重试时约 150 秒，另加处理和调度延迟）、解锁界面请你再试，超时后才到的结果作废，不会覆盖你之后的操作 | 界面写明这次用的是 AI 还是本地规则，以及原因 |
-| 6 | 应用 | 6 首歌第一次出现在歌单里，各记一条“初见” | `encounters.json`，不含坐标；歌曲卡第 4 页可见 |
-| 7 | 用户 | 进入《I LOVE U》歌曲卡，点“喜欢” | 反馈同时写入总体分和“散步”下的分；第 4 页出现“心动”；回到歌单，这一行出现心形 |
-| 8 | 下一次 | 本地规则下，同样情境里这首歌排得更靠前，在某个活动下点了“不喜欢”的歌在这个活动下基本不会再出现；走 AI 时，喜好分作为参考交给 AI，不保证排序 | 重启后反馈、确认、相遇记录都保留 |
+| 1 | 应用 | 读时段、天气、定位和你标记的地点。这次天气请求失败，Windows 宿主不提供定位，两项都标“不参与”；只按“工作日傍晚”推测，候选前三名描边 | 情境卡上每一项都写来源和依据，不参与的项写明原因 |
+| 2 | 用户 | 点“通勤”确认 | 写入 `labels.json`，写后读回；回到 ① 改选会替换这一条，不会多记 |
+| 3 | 用户 | 选“没有要求，直接选” | — |
+| 4 | 应用 | 本地评分（规则分 + 偏好学习项；本轮还没有反馈，只有规则分生效）把 46 首排序，取前 12 名 | 调试页可看前 12 名及分数 |
+| 5 | AI（MiniMax） | 拿到前 12 首、文字情境（不含坐标），按固定 JSON 格式选 6 首并写理由和证据引用 | 代码逐项校验：是否都在前 12 名、有无重复、证据是否对得上；本轮一次通过（不合格会带错误码重试一次，再不合格退回本地规则并写明原因） |
+| 6 | 应用 | 第 7 首“🎲 试一首”：从前 12 名里没选中的歌中，按本活动下的 ♥ / ✕ 次数做 Beta-Thompson 抽样；都还没评过，各首机会相等，这次抽到《晴天》 | 理由写“试一首：这个场景下你还没评过它” |
+| 7 | 应用 | 7 首歌第一次出现在歌单里，各记一条“初见” | `encounters.json`，不含坐标，写后读回；歌曲卡第 4 页可见 |
+| 8 | 用户 | 进入排第 4 的《I LOVE U》歌曲卡，看故事页，点“喜欢” | 第 4 页出现“心动”；回到歌单，这一行出现心形 |
+| 9 | 下一次 | 这一票更新“通勤”和全局计数（规则分）、通勤下的偏好学习权重，以及这首歌在通勤下的 ♥ 次数（探索抽样） | 重启后反馈、确认、相遇记录都保留；学到的权重不交给 AI |
 
 ## 对照官方评审口径
 
@@ -226,7 +227,7 @@ Windows 桌面没有定位、录制时天气服务不可用，所以这次选歌
 
 - 歌曲卡内容（`cards.json`、歌词、官方封面）要手动放进应用存储；clone 后这些页是空状态
 - 封面背面的用户照片要手动放进应用存储（平台没有相册选择器）
-- 给 `bundle/` 签名、发布到 App Hub 目录、在桌面版里安装
+- 正式发布走 GitHub Actions 证明（`.github/workflows/publish-app.yml`），App Hub 现行文档只接受这种发布者身份，不用发布者密钥；在桌面版里自己安装时，要用一次性测试密钥发布到本地商店（见 [`tools/win/README.md`](tools/win/README.md)）
 - 在桌面版的 AI 设置里配置 AI 提供方；应用自己不保存密钥
 - 桌面没有 GPS，测试和演示要在“感知”页手动打开模拟定位
 - 定位经宿主 location 服务（`host-api-v1`）：应用打开时用 `runtime.describe` 查询 `location.sample` 和 `location.get`，不再读 `sys.gps`。App Hub 文档写明“设备权限方法支持 Android 和 macOS；`location.get` 只支持 Android”；2026-10-12 在 Windows 原生 OctoSense rc.5 上实测，`location.get` 返回 `unsupported_platform`，感知页如实显示“此平台的 OctoSense 不提供定位”，移动状态不参与，地点标记只在模拟定位下可用。Android/macOS 路径按文档实现，**未在真机验证**（官方手机版不能侧载应用）
@@ -282,13 +283,13 @@ flowchart LR
 4. **反馈**：在歌曲卡里点喜欢 / 不喜欢，会同时改变这首歌的总体分和当前活动下的分（范围 -3 到 3）。点“不喜欢”后自动切到下一首。
 5. **播放**：“去听”在应用内网页打开网易云音乐、QQ 音乐或 B 站的搜索页，做法和系统自带的 YouTube 应用一样。
 6. **第一次相遇（v0.3）**：每首歌第一次出现在歌单里（初见）、第一次点“去听”、第一次点“喜欢”（心动）时，记下当时的时段、活动、地点类型、移动状态和天气（`encounters.json`，不含坐标）。每个时刻只记第一次；模拟定位下的记录会被之后的真实记录替换。
-7. **歌曲卡（Demo：《I LOVE U》）**：在歌单或曲库里点一首歌，进入一张可以左右滑动（或点页码圆点）的四页卡片，下方固定一排控制栏（上一首、不喜欢、去听、喜欢、下一首），切歌按进来的那个列表计数，左上角「‹」回到原列表。
+7. **歌曲卡**：在歌单或曲库里点一首歌，进入一张可以左右滑动（或点页码圆点）的四页卡片，下方固定一排控制栏（上一首、不喜欢、去听、喜欢、下一首），切歌按进来的那个列表计数，左上角「‹」回到原列表。
    - ① 封面：有你自己的照片时，点封面可以翻到照片，并标注「你的照片」；没有封面图时显示静态唱片造型
    - ② 歌词：静态全文，可以上下滚动
    - ③ 故事和档案：**事实逐条标出处，解读单独成段并标明“AI 整理，可能不准”**；Demo 里的故事是预制的，界面上标为预制
    - ④ 你和这首歌：初见、第一次去听、心动三个时刻的时间线和统计；模拟定位产生的记录标“测试数据”
-   - 没有卡片内容的歌，第 2、3 页显示空状态，第 1、4 页照常显示。目前只有《I LOVE U》有完整卡片内容
-8. **应用助手（尚未验证）**：manifest 里声明了一个只读的 agent，见 [`bundle/AGENT.md`](bundle/AGENT.md)。在 OctoSense 的 “Ask 情境 DJ” 面板里，它可以根据本地的推荐历史、反馈、确认记录和相遇记录回答“我学习时喜欢听什么”“我的规律是什么”之类的问题，不能修改任何数据。
+   - 没有卡片内容的歌，第 2、3 页显示空状态，第 1、4 页照常显示。目前《I LOVE U》有完整卡片（封面、歌词、带出处的事实、解读、档案）；其余 45 首只有预制解读和署名，没有带出处的事实、封面和歌词。这些内容都放在应用存储里，不在仓库里
+8. **应用助手（部分验证）**：manifest 里声明了一个只读的 agent，见 [`bundle/AGENT.md`](bundle/AGENT.md)。在 OctoSense 的 “Ask 情境 DJ” 面板里，它可以根据本地的推荐历史、反馈、确认记录和相遇记录回答“我学习时喜欢听什么”“我的规律是什么”之类的问题，不能修改任何数据。2026-10-13 在 Windows rc.5 上验证了宿主放行（只拿到 `ask_user_question` 一个工具），但宿主内核调用模型超时，追问还没在真机上弹出（见[验证情况](#验证情况)）。
 
 完整设计、接口和阈值见 [docs/PLAN.md](docs/PLAN.md)（第 2 节 v0.2，第 9–15 节 v0.3，第 16 节支持度与输出检查），歌曲卡见 [docs/DEMO-ILOVEU.md](docs/DEMO-ILOVEU.md)。
 
@@ -335,7 +336,7 @@ flowchart LR
 | 天气 | [Open-Meteo](https://open-meteo.com/)（`api.open-meteo.com`） | 断网或服务出错时不参与推荐 |
 | AI 理解与选歌 | OctoSense 提供的 `model` 服务，比赛中为赛方提供的 MiniMax | 只返回文字；不可用时退回本地规则 |
 | 曲库 | 内置 46 首，能量、人声、情绪、语种为人工粗标 | 不是测量值；可以添加自己的歌，并让 AI 补标签（标明是 AI 推断） |
-| 歌曲故事（《I LOVE U》） | B 站投稿页与简介、作者 2015 年采访、萌娘百科，每条事实在界面上标出处 | 解读为预制内容，标“AI 整理，可能不准”；目前只有这一首有完整卡片 |
+| 歌曲故事 | 《I LOVE U》：B 站投稿页与简介、作者 2015 年采访、萌娘百科，每条事实在界面上标出处；其余 45 首只有预制解读 | 解读为预制内容，标“AI 整理，可能不准”；只有《I LOVE U》有带出处的事实 |
 | 歌词、官方封面、用户照片 | 只放在本机应用存储 | 不进仓库，clone 后运行时这些页显示空状态 |
 
 **权限**（[`bundle/manifest.json`](bundle/manifest.json)）：
@@ -365,7 +366,7 @@ flowchart LR
 | `card-host` | [OctoSense-App-Hub](https://github.com/OctoSense-org/OctoSense-App-Hub) 提交 `58c3c8aed8fc811a16d67c5f784a8a44214ff876`（本机 `Cargo.lock` 有一处本地改动：增加了 `serde` 依赖条目） |
 | 系统 | Windows + WSL `2.4.13.0`，Ubuntu 24.04.3 LTS，内核 `5.15.167.4-microsoft-standard-WSL2`；图形用 WSLg 1.0.65 |
 | AI | MiniMax-M3（提供方 `minimax-cn`，赛方提供），在桌面版 AI 设置里配置 |
-| 应用支持平台 | `listing.json` 声明 `linux`；Windows 原生 rc.5 上经本地商店安装运行通过（声明未改）；Android、macOS 未验证 |
+| 应用支持平台 | `listing.json` 声明 `linux`、`windows`（0.4.0 起加入 Windows，均实际运行过）；Android、macOS 未验证 |
 
 另有一部分 `card-host` 回归测试（故障注入、指令上限）由 Claude 在云端 Linux 容器里用 Xvfb 隐藏窗口跑，那台机器的 App-Hub 提交号没有记录。
 
@@ -373,15 +374,15 @@ flowchart LR
 
 ### 四条路
 
-**① 只读源码**（不需要构建）：全部逻辑在 [`bundle/main.splash`](bundle/main.splash)（约 2500 行）。配套阅读 [`docs/PLAN.md`](docs/PLAN.md)（设计和每一轮测试记录）和 [`AGENTS.md`](AGENTS.md)（实测踩过的坑）。
+**① 只读源码**（不需要构建）：全部逻辑在 [`bundle/main.splash`](bundle/main.splash)（约 4900 行）。配套阅读 [`docs/PLAN.md`](docs/PLAN.md)（设计和每一轮测试记录）和 [`AGENTS.md`](AGENTS.md)（实测踩过的坑）。
 
 **② 门禁检查**：需要按 [OctoScript-App-Design-Flow 的 QUICKSTART](https://github.com/OctoSense-org/OctoScript-App-Design-Flow/blob/main/docs/QUICKSTART.md) 准备好 `tools/octo`（它在那个仓库里，不在本仓库）。
 
 ```sh
 OCTO=<OctoScript-App-Design-Flow 路径>/tools/octo
 git clone https://github.com/peterdlick-stack/agentic-app && cd agentic-app
-git checkout 3345814    # 0.3.3，初赛提交版本
-$OCTO check bundle        # 期望：context-dj 0.3.3 — PASSED
+git checkout v0.4.0      # 复赛版本
+$OCTO check bundle        # 期望：context-dj 0.4.0 — PASSED（唯一警告：源码未签名，证明只加在 Release 上）
 ```
 
 **③ 在 `card-host` 里运行**（全部界面、模拟定位、失败路径）：
@@ -396,7 +397,7 @@ curl -s 127.0.0.1:8141/quit           # 退出
 
 **④ 在 OctoSense 桌面版里完整体验**（真实 AI 选歌）：按 [PUBLISHING](https://github.com/OctoSense-org/OctoScript-App-Design-Flow/blob/main/docs/PUBLISHING.md) 把 `bundle/` 签名后发布到本地 App Hub 目录，在桌面版的 App Hub 里安装并打开；AI 提供方在桌面版的 AI 设置里配置。**Windows 原生桌面版（rc.5）照 [`tools/win/README.md`](tools/win/README.md) 做**：编译 `hub`、发布、启动各一条命令，之后改了代码重新发布再点 Update 即可，数据保留。
 
-**可选：放入歌曲卡内容**。clone 下来的应用里，《I LOVE U》的歌词页和故事页是空状态。要看完整卡片，把下面三个文件放进应用存储目录（格式见 [docs/DEMO-ILOVEU.md](docs/DEMO-ILOVEU.md) 第 4 节）：`accounts/device/cards.json`、`lyrics/iloveu.txt`、`covers/iloveu-front.jpg`。
+**可选：放入歌曲卡内容**。clone 下来的应用里，所有歌的歌词页和故事页都是空状态（内容有版权，不在仓库里）。要看完整卡片，把下面三个文件放进应用存储目录（格式见 [docs/DEMO-ILOVEU.md](docs/DEMO-ILOVEU.md) 第 4 节）：`accounts/device/cards.json`、`lyrics/iloveu.txt`、`covers/iloveu-front.jpg`。
 
 **排障**
 
@@ -411,6 +412,8 @@ curl -s 127.0.0.1:8141/quit           # 退出
 
 | 项目 | 状态 | 在哪里验证 |
 |---|---|---|
+| 门禁检查 `context-dj 0.4.0 — PASSED`（源码，唯一警告为未签名） | ✅ | App Hub `3863591`、`8347a48` 的 `hub check bundle --allow-unsigned` |
+| Release 包发布者证明：`hub publisher-verify` 通过，解包后与提交 `8805240` 的 `bundle/` 一致（除 `manifest.json`） | ✅ | GitHub Actions 运行 [38262324723](https://github.com/peterdlick-stack/agentic-app/actions/runs/38262324723)；App Hub `3863591` |
 | 门禁检查 `context-dj 0.3.3 — PASSED` | ✅ | 干净检出 |
 | App Hub 门禁 `hub check`：`context-dj 0.3.4 — PASSED` | ✅ | 云端容器，App Hub `78dfda5` |
 | 商店截图是 0.3.4 当前界面 | ✅ | `card-host`，2026-10-06 |
@@ -430,6 +433,7 @@ curl -s 127.0.0.1:8141/quit           # 退出
 | 真机 GPS、触屏滑动、手机上的 AI | ⏳ 未验证 | 还没有把商店应用装到手机上的途径 |
 | “去听”在应用内打开网页 | ⏳ 未验证 | Linux 桌面不支持；Windows rc.5 的内嵌浏览器拒绝导航（宿主策略），只显示链接；要在 Android 或 macOS 上验证 |
 | 实机录屏：从本地商店全新安装 0.4.0、真实 MiniMax 选歌 6 + 1 首 | ✅ | Windows 原生 rc.5，2026-10-13，应用包与 Release 相同（`30774f57…`），`res` 为 AI 选歌 |
+| 讲解录屏：真实 MiniMax 选歌一次通过校验、探索位、歌曲卡、♥ 后列表同步；逐帧检查无歌词页 | ✅ | Windows 原生 rc.5，2026-10-13，[`demo-0.4.0-narrated.mp4`](docs/media/demo-0.4.0-narrated.mp4) |
 | 应用助手：宿主放行 `ask_user_question` | ✅ | Windows 原生 rc.5，2026-10-13：授权面板列出 “Ask you questions”，宿主内核日志 `tools=1` |
 | 应用助手：追问弹出并回传 | ❌ 未完成 | 同上：宿主内核请求 MiniMax 约 10 秒即报 `failed to send streaming request`（两次一致），追问未弹出；同一配置下应用自身的选歌调用正常 |
 | 用真实照片翻面、封面连续旋转 | ⏳ 未验证 | 照片翻面只用合成测试图验证过 |
@@ -522,13 +526,14 @@ agentic-app/
 │  ├─ listing.json         商店资料：描述、分类、截图、隐私政策
 │  ├─ AGENT.md             只读应用助手的说明
 │  ├─ assets/icon.svg
-│  └─ screenshots/         商店截图（0.3.4，当前界面）
+│  └─ screenshots/         商店截图（0.3.4 时在 card-host 里拍的，0.4.0 界面有少量文字不同）
 ├─ docs/
 │  ├─ PLAN.md              设计、接口、阈值和每一轮测试记录
 │  ├─ DEMO-ILOVEU.md       歌曲卡的设计规格、数据格式和验收用例
 │  └─ media/               演示视频和 README 截图
 ├─ tools/                  GPT 在作者电脑上做 G0–G5 验证用的脚本（路径写死在作者本机，见 tools/README.md）
 │  └─ win/                 Windows 原生桌面版 rc.5 的开发环境：编译 hub、发布到本地商店、启动（见 tools/win/README.md）
+├─ REVIEW-ANSWERS.md       评审速览：初赛建议 → 0.4.0 的改动、代码行、录屏时间点
 ├─ AGENTS.md               开发约定和实测踩过的坑（CLAUDE.md、GEMINI.md 只是引用它）
 ├─ BRIEF.md                v0.1 的原始需求
 ├─ PRIVACY.md              隐私说明

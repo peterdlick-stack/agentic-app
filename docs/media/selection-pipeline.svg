@@ -1,0 +1,149 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 1010" width="960" height="1010" font-family="'PingFang SC','Microsoft YaHei','Noto Sans CJK SC','Noto Sans SC',sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#66CCFF"/>
+    </marker>
+    <marker id="o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#FFB86B"/>
+    </marker>
+    <style>
+      .t{fill:#E6F1FF;font-size:17px;font-weight:600}
+      .b{fill:#B8CCE4;font-size:13.5px}
+      .c{fill:#66CCFF;font-size:12px;font-family:'JetBrains Mono',Consolas,'Courier New',monospace}
+      .ot{fill:#FFCF9E;font-size:13.5px;font-weight:600}
+      .ob{fill:#E8D3BC;font-size:12.5px}
+      .gt{fill:#9EF0C8;font-size:13.5px;font-weight:600}
+      .gb{fill:#CDEFDD;font-size:12.5px}
+      .box{fill:#12223A;stroke:#2E5378;stroke-width:1.2}
+      .key{fill:#12223A;stroke:#66CCFF;stroke-width:2}
+      .obox{fill:#2A1E14;stroke:#B9773A;stroke-width:1.2}
+      .gbox{fill:#10291F;stroke:#3FA77A;stroke-width:1.2}
+      .n{fill:#66CCFF;font-size:22px;font-weight:700}
+    </style>
+  </defs>
+
+  <rect width="960" height="1010" rx="14" fill="#0B1526"/>
+
+  <!-- header -->
+  <text x="40" y="50" fill="#E6F1FF" font-size="26" font-weight="700">一首歌是怎么被选出来的</text>
+  <text x="40" y="78" fill="#8FA8C8" font-size="13.5">情境 DJ 0.4.0 · 函数与行号对应 bundle/main.splash @ v0.4.0（88052406）</text>
+  <g font-size="12.5">
+    <rect x="640" y="40" width="12" height="12" rx="2" fill="#12223A" stroke="#66CCFF" stroke-width="1.5"/><text x="660" y="51" fill="#B8CCE4">主流程</text>
+    <rect x="720" y="40" width="12" height="12" rx="2" fill="#2A1E14" stroke="#B9773A" stroke-width="1.5"/><text x="740" y="51" fill="#B8CCE4">出问题时</text>
+    <rect x="812" y="40" width="12" height="12" rx="2" fill="#10291F" stroke="#3FA77A" stroke-width="1.5"/><text x="832" y="51" fill="#B8CCE4">实测记录</text>
+  </g>
+
+  <!-- main column: x=70..610 -->
+  <!-- 1 -->
+  <rect class="box" x="70" y="104" width="540" height="96" rx="10"/>
+  <text class="n" x="88" y="136">1</text>
+  <text class="t" x="118" y="134">读情境，判断你在做什么</text>
+  <text class="b" x="118" y="158">时段 · 天气 · 你标记的地点 · 移动 · 你说的一句话</text>
+  <text class="b" x="118" y="178">优先级：手动 &gt; 原话 &gt; 地点 &gt; 移动 &gt; 时段，每项标出来源</text>
+  <text class="c" x="118" y="194">build_ctx :2261 · infer_activity :2112</text>
+
+  <!-- 2 -->
+  <rect class="box" x="70" y="228" width="540" height="96" rx="10"/>
+  <text class="n" x="88" y="260">2</text>
+  <text class="t" x="118" y="258">按你的硬条件筛歌</text>
+  <text class="b" x="118" y="282">从原话解析“不要人声”“只要中文”等，排除已知不符的歌</text>
+  <text class="b" x="118" y="302">缺标签的歌保留，但不当作已经确认符合</text>
+  <text class="c" x="118" y="318">parse_intent :2314 · rec_snapshot :3138</text>
+
+  <!-- 3 -->
+  <rect class="box" x="70" y="352" width="540" height="96" rx="10"/>
+  <text class="n" x="88" y="384">3</text>
+  <text class="t" x="118" y="382">本地打分，再按这个活动学到的偏好排序</text>
+  <text class="b" x="118" y="406">曲库 46 首逐首打分，取前 12 名作为候选</text>
+  <text class="b" x="118" y="426">偏好分活动学习：通勤喜欢的歌，不会被带进睡前</text>
+  <text class="c" x="118" y="442">score_song :2381 · pref_rank :2587 · TOPK = 12 :2480</text>
+
+  <!-- 4 -->
+  <rect class="box" x="70" y="476" width="540" height="96" rx="10"/>
+  <text class="n" x="88" y="508">4</text>
+  <text class="t" x="118" y="506">MiniMax 从这 12 首里挑 6 首，逐首写理由</text>
+  <text class="b" x="118" y="530">只能返回候选的编号，输出受固定 JSON Schema 约束</text>
+  <text class="b" x="118" y="550">候选和原话都声明为数据，其中的指令一律不执行；不发坐标</text>
+  <text class="c" x="118" y="566">ask_model :3458 · signals_for_ai :3443</text>
+
+  <!-- 5 (key) -->
+  <rect class="key" x="70" y="600" width="540" height="96" rx="10"/>
+  <text class="n" x="88" y="632">5</text>
+  <text class="t" x="118" y="630">输出守卫：代码逐项复查模型的回答</text>
+  <text class="b" x="118" y="654">15 种错误码：数量、重复、越界、不在可选集合、违反硬条件、</text>
+  <text class="b" x="118" y="674">证据引用不存在或与歌曲属性对不上、理由缺失或超长……</text>
+  <text class="c" x="118" y="690">validate_rec :3200 · model_answer :3509</text>
+
+  <!-- 6 -->
+  <rect class="box" x="70" y="724" width="540" height="96" rx="10"/>
+  <text class="n" x="88" y="756">6</text>
+  <text class="t" x="118" y="754">第 7 首「🎲 试一首」：留一个探索位</text>
+  <text class="b" x="118" y="778">从前 12 名里没被选中的歌中，用 Beta-Thompson 抽样抽一首</text>
+  <text class="b" x="118" y="798">同一歌手最多 2 首；MiniMax 不知道这一首，不影响它的 6 首</text>
+  <text class="c" x="118" y="814">explore_pick :3018</text>
+
+  <!-- 7 -->
+  <rect class="box" x="70" y="848" width="540" height="96" rx="10"/>
+  <text class="n" x="88" y="880">7</text>
+  <text class="t" x="118" y="878">记下这次决策；你的反馈改写下一次排序</text>
+  <text class="b" x="118" y="902">决策日志记录结果类型：AI / AI 重试后通过 / 本地规则及原因</text>
+  <text class="b" x="118" y="922">歌单上的 ♥ / × 更新这个活动的偏好，下次回到第 3 步生效</text>
+  <text class="c" x="118" y="938">dlog_rec :3313 · pref_vote :2654 · pref_update :2740</text>
+
+  <!-- main arrows -->
+  <g stroke="#66CCFF" stroke-width="2" fill="none" marker-end="url(#a)">
+    <line x1="340" y1="200" x2="340" y2="226"/>
+    <line x1="340" y1="324" x2="340" y2="350"/>
+    <line x1="340" y1="448" x2="340" y2="474"/>
+    <line x1="340" y1="572" x2="340" y2="598"/>
+    <line x1="340" y1="696" x2="340" y2="722"/>
+    <line x1="340" y1="820" x2="340" y2="846"/>
+  </g>
+  <!-- learning loop 7 -> 3 on the left -->
+  <path d="M70,896 H40 V400 H66" stroke="#66CCFF" stroke-width="2" stroke-dasharray="6 5" fill="none" marker-end="url(#a)"/>
+  <text x="34" y="660" fill="#66CCFF" font-size="12.5" transform="rotate(-90 34 660)" text-anchor="middle">下一次推荐</text>
+
+  <!-- right column: failure paths x=650..920 -->
+  <!-- R2: not enough candidates -->
+  <rect class="obox" x="650" y="240" width="270" height="72" rx="9"/>
+  <text class="ot" x="666" y="264">可选的歌不足 6 首</text>
+  <text class="ob" x="666" y="284">不请求模型，直接用本地规则，</text>
+  <text class="ob" x="666" y="302">并写明“曲库里只有几首”</text>
+  <line x1="610" y1="276" x2="648" y2="276" stroke="#FFB86B" stroke-width="1.6" marker-end="url(#o)"/>
+
+  <!-- R4: no model -->
+  <rect class="obox" x="650" y="488" width="270" height="72" rx="9"/>
+  <text class="ot" x="666" y="512">宿主没开放 model 服务</text>
+  <text class="ob" x="666" y="532">改用本地规则，歌单上方</text>
+  <text class="ob" x="666" y="550">写明“本地规则”</text>
+  <line x1="610" y1="524" x2="648" y2="524" stroke="#FFB86B" stroke-width="1.6" marker-end="url(#o)"/>
+
+  <!-- R5a: retry -->
+  <rect class="obox" x="650" y="592" width="270" height="72" rx="9"/>
+  <text class="ot" x="666" y="616">不合格，且首轮用时 ≤ 60 秒</text>
+  <text class="ob" x="666" y="636">把错误码作为 fix 发回模型，</text>
+  <text class="ob" x="666" y="654">要求完整重新生成一次</text>
+  <line x1="610" y1="628" x2="648" y2="628" stroke="#FFB86B" stroke-width="1.6" marker-end="url(#o)"/>
+  <path d="M785,592 V582 H640 V548 H612" stroke="#FFB86B" stroke-width="1.6" fill="none" marker-end="url(#o)"/>
+  <text x="700" y="577" fill="#FFCF9E" font-size="12">回到第 4 步</text>
+
+  <!-- R5b: fallback -->
+  <rect class="obox" x="650" y="684" width="270" height="92" rx="9"/>
+  <text class="ot" x="666" y="708">第二次仍不合格 / 网络失败 /</text>
+  <text class="ot" x="666" y="726">单次超过 90 秒</text>
+  <text class="ob" x="666" y="746">→ 本地规则 local_pick :3318</text>
+  <text class="ob" x="666" y="764">界面写明原因，迟到的结果作废</text>
+  <path d="M630,664 V730 H648" stroke="#FFB86B" stroke-width="1.6" fill="none" marker-end="url(#o)"/>
+  <line x1="610" y1="664" x2="630" y2="664" stroke="#FFB86B" stroke-width="1.6"/>
+
+  <!-- evidence -->
+  <rect class="gbox" x="650" y="806" width="270" height="138" rx="9"/>
+  <text class="gt" x="666" y="830">实测：守卫真的拦下过一次</text>
+  <text class="gb" x="666" y="852">2026-10-11，Windows 原生</text>
+  <text class="gb" x="666" y="870">OctoSense rc.5，真实 MiniMax：</text>
+  <text class="gb" x="666" y="890">第一次输出没通过第 5 步，</text>
+  <text class="gb" x="666" y="908">带着错误码重试后通过，</text>
+  <text class="gb" x="666" y="926">记录为 res = ai_retry</text>
+
+  <text x="40" y="990" fill="#6F88A8" font-size="12">模型只负责“在给定候选里挑选并解释”；筛选、排序、复查、探索和学习都在应用代码里完成，模型拿不到坐标，也不写任何文件。</text>
+</svg>

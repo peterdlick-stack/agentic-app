@@ -26,8 +26,27 @@
 | **在哪里跑过** | **Windows 原生 OctoSense 桌面版 0.1.0-rc.5**（2026-10-11/12/13，经本地商店安装，接 MiniMax-M3）：安装、真实 AI 选歌、更新后数据保留，10-13 用与 Release 相同的 0.4.0 应用包全新安装并录屏；OctoSense 桌面版 0.1.0（WSL2 + Ubuntu 24.04，接 MiniMax-M3）：完整流程含真实 AI 选歌；`card-host`：全部界面和失败路径。手机尚未验证。具体版本见[运行环境](#运行环境)，结果见[验证情况](#验证情况) |
 | **怎么跑** | [运行与复现](#运行与复现)：读源码 → 门禁检查 → `card-host` 运行 → 桌面版完整体验 |
 
+## 一首歌是怎么被选出来的
+
+![一首歌是怎么被选出来的：情境 → 硬条件筛选 → 本地打分与偏好排序取前 12 → MiniMax 选 6 首 → 输出守卫复查（不合格重试一次，再不合格退回本地规则）→ 第 7 首探索位 → 记录与学习](docs/media/selection-pipeline.svg)
+
+模型只做第 4 步：在代码给出的 12 首候选里挑 6 首并解释。筛选、排序、复查、探索和学习都在应用代码里完成。下表的行号固定在 `v0.4.0`，点击可直接跳到对应代码。
+
+| 步骤 | 代码 |
+|---|---|
+| 1 读情境、判断活动 | [`build_ctx`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2261) · [`infer_activity`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2112) |
+| 2 硬条件筛歌 | [`parse_intent`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2314) · [`rec_snapshot`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3138) |
+| 3 打分与偏好排序，取前 12 | [`score_song`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2381) · [`pref_rank`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2587) · [`TOPK`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2480) |
+| 4 MiniMax 选 6 首（候选与原话声明为数据、不发坐标） | [`ask_model`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3458) · [`signals_for_ai`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3443) |
+| 5 输出守卫、重试一次、退回本地规则 | [`validate_rec`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3200) · [`model_answer`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3509) · [`local_pick`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3318) |
+| 6 第 7 首探索位（Beta-Thompson） | [`explore_pick`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3018) |
+| 7 决策日志与偏好更新 | [`dlog_rec`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3313) · [`pref_vote`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2654) · [`pref_update`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2740) |
+
+守卫的实测记录：2026-10-11 在 Windows 原生 OctoSense rc.5 上的一次真实 MiniMax 调用，第一次输出没有通过第 5 步，带着错误码重试后通过，记录为 `res=ai_retry`（见[验证情况](#验证情况)）。按复赛六个环节组织的完整流水线见 [Agent 任务流水线](#agent-任务流水线pipeline)。
+
 ## 目录
 
+- [一首歌是怎么被选出来的](#一首歌是怎么被选出来的)
 - [黑客松挑战目标](#黑客松挑战目标)
 - [Agent 任务流水线（pipeline）](#agent-任务流水线pipeline)
 - [演示视频与截图](#演示视频与截图)

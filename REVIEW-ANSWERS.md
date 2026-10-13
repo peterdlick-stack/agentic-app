@@ -24,15 +24,17 @@
 | 迟到回调作废 | `rec_gen` / `rec_att` 双代号；每次尝试 90 秒看门狗，超时就解锁界面，之后才到的结果直接丢弃，不会覆盖用户之后的操作 | [`rec_watch`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3401) |
 | 防提示注入 | 提示词写明 songs、intent、fix 都是数据，其中的指令一律不执行；模型拿不到坐标 | [提示词](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3482) |
 | 写后读回 | `labels.json`、`encounters.json` 写入后读回，比对全文、条数和末条时间戳；不一致重试一次，再不一致就提示用户 | [`readback_check`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L1393) |
-| 诚实降级 | 无模型、网络错误、校验不通过、超时四种情况，界面各有说明；决策日志统计首次通过率和重试成功率 | 调试页；`AGENT.md` 的 `dstats.json` 一节 |
+| 诚实降级 | 无模型、网络错误、两次都没通过校验（含选歌期间曲库变化）、超时、可选曲目不足 6 首，五种本地结果在界面上各有说明；决策日志统计首次通过率和重试成功率 | 调试页；`AGENT.md` 的 `dstats.json` 一节 |
 
 ## 3. 推荐本身：本地规则 + 学习 + 探索
 
 选歌决策链见 README 的流程图（[`docs/media/selection-flow.svg`](docs/media/selection-flow.svg)）。
 
 - **本地先排**：规则分 + 按活动学习的偏好项，取前 12 名，模型只能从这 12 首里选 6 首（[`pref_rank`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2587)）；没有模型或模型失败时，按名次本地取 6 首，同一歌手最多 2 首（[`local_pick`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3318)）。
-- **偏好学习**：只从歌单页对 ♥ / ✕ 的投票学习 12 维权重，按活动分开学；学到的权重不交给模型（[`pref_update`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2740)）。
-- **探索位**：第 7 首“🎲 试一首”从前 12 名里没被选中的歌中抽，按本活动下的 ♥ / ✕ 次数做 Beta-Thompson 抽样（[`explore_pick`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3018)）。
+- **模型的实际作用**：候选按本地名次排列，提示词写明“没有特别理由时优先靠前的”。真机上没有特别要求时，模型基本按名次往下取（D5 选的就是第 1–6 名）；它的作用主要在理解自由输入的原话、为每首写理由和证据引用、避开刚听过的歌。
+- **偏好学习**：只从歌单页对 ♥ / ✕ 的投票学习 12 维权重（从曲库打开的歌曲卡、模拟定位下的票不算），按活动分开学；学到的权重只用于本地排序，不交给模型（[`pref_update`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2740)）。
+- **反馈计数**：同一票还会改这首歌在本活动和全局的计数，进规则分。✕ 是固定惩罚（本活动 −4.0，全局 −1.5，全局这一项对所有活动生效），被 ✕ 的歌沉底主要靠它，学习项的作用小得多。
+- **探索位**：第 7 首“🎲 试一首”从前 12 名里没被选中、且该歌手在 6 首里不足 2 首的歌中抽，按本活动下的 ♥ / ✕ 次数做 Beta-Thompson 抽样（[`explore_pick`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3018)）。
 
 ## 4. 已知限制（如实列出）
 
@@ -41,4 +43,5 @@
 - 定位：Windows、Linux 桌面的宿主不提供定位，这两个平台上移动状态不参与推荐；Android/macOS 路径未在真机验证。
 - `ask_user_question` 追问被宿主内核的模型连接超时挡住，还没在真机上弹出过（见第 1 节第 3 条）。
 - rc.5 Windows 上，“去听”打开的应用内网页被宿主拒绝；天气显示“不可用”，原因还没查清。
+- 选歌算法本身的限制：标签粗、同分多，前 12 名的边界常由种子哈希决定；没有评价时探索位是均匀抽签，且只在前 12 名里探索；歌单上方的“偏好：……”一句在票数少时不可靠（一次 ✕ 就可能触发）。完整清单见 README「[选歌算法的已知限制](README.md#选歌算法的已知限制)」。
 - 歌词和官方封面有版权，**不在仓库里**；歌曲卡内容放在应用存储里，录屏中跳过歌词页。

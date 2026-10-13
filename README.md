@@ -1,6 +1,6 @@
 # 情境 DJ（context-dj）
 
-> **先弄清你在做什么，再给你挑歌，并说清为什么挑它。**
+> **先弄清你在做什么，再给你挑歌，并给出理由。**
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Hackathon](https://img.shields.io/badge/GOSIM_Agentic_App_黑客松-2026-orange)](https://github.com/gosimfoundation/hackathon-agenticapp26)

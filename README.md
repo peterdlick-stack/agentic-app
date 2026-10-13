@@ -28,21 +28,21 @@
 
 ## 一首歌是怎么被选出来的
 
-![一首歌是怎么被选出来的：情境 → 硬条件筛选 → 本地打分与偏好排序取前 12 → MiniMax 选 6 首 → 输出守卫复查（不合格重试一次，再不合格退回本地规则）→ 第 7 首探索位 → 记录与学习](docs/media/selection-pipeline.svg)
+![一首歌是怎么被选出来的：判断活动并由你确认 → 解析要求、筛掉不符硬条件的歌 → 本地评分取前 12 → MiniMax 选 6 首 → 代码逐项校验（不合格重试一次，再不合格或网络失败、超时就退回本地规则）→ 探索位补第 7 首 → 输出歌单 → 你的投票更新下一次的规则分、学习项和抽样](docs/media/selection-flow.svg)
 
-模型只做第 4 步：在代码给出的 12 首候选里挑 6 首并解释。筛选、排序、复查、探索和学习都在应用代码里完成。下表的行号固定在 `v0.4.0`，点击可直接跳到对应代码。
+模型只做第 ④ 步：在代码给出的 12 首候选里挑 6 首并解释。筛选、排序、校验、探索和学习都在应用代码里完成；橙色是出问题时的回退路径，每条都在界面上写明原因。下表的行号固定在 `v0.4.0`，点击可直接跳到对应代码。
 
-| 步骤 | 代码 |
+| 图中步骤 | 代码 |
 |---|---|
-| 1 读情境、判断活动 | [`build_ctx`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2261) · [`infer_activity`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2112) |
-| 2 硬条件筛歌 | [`parse_intent`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2314) · [`rec_snapshot`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3138) |
-| 3 打分与偏好排序，取前 12 | [`score_song`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2381) · [`pref_rank`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2587) · [`TOPK`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2480) |
-| 4 MiniMax 选 6 首（候选与原话声明为数据、不发坐标） | [`ask_model`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3458) · [`signals_for_ai`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3443) |
-| 5 输出守卫、重试一次、退回本地规则 | [`validate_rec`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3200) · [`model_answer`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3509) · [`local_pick`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3318) |
-| 6 第 7 首探索位（Beta-Thompson） | [`explore_pick`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3018) |
-| 7 决策日志与偏好更新 | [`dlog_rec`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3313) · [`pref_vote`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2654) · [`pref_update`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2740) |
+| ① 判断活动、你确认 | [`build_ctx`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2261) · [`infer_activity`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2112) |
+| ② 解析要求并筛选 | [`parse_intent`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2314) · [`rec_snapshot`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3138) |
+| ③ 本地评分与排序，取前 12 | [`score_song`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2381) · [`pref_rank`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2587) · [`TOPK`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2480) |
+| ④ MiniMax 选 6 首（候选与原话声明为数据、不发坐标） | [`ask_model`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3458) · [`signals_for_ai`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3443) |
+| 代码校验、重试一次、本地回退 | [`validate_rec`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3200) · [`model_answer`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3509) · [`local_pick`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3318) |
+| ⑤ 探索位（Beta-Thompson） | [`explore_pick`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3018) |
+| 投票后的三处更新 | [`pref_vote`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2654) · [`pref_update`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L2740) · [`dlog_rec`](https://github.com/peterdlick-stack/agentic-app/blob/v0.4.0/bundle/main.splash#L3313) |
 
-守卫的实测记录：2026-10-11 在 Windows 原生 OctoSense rc.5 上的一次真实 MiniMax 调用，第一次输出没有通过第 5 步，带着错误码重试后通过，记录为 `res=ai_retry`（见[验证情况](#验证情况)）。按复赛六个环节组织的完整流水线见 [Agent 任务流水线](#agent-任务流水线pipeline)。
+守卫的实测记录：2026-10-11 在 Windows 原生 OctoSense rc.5 上的一次真实 MiniMax 调用，第一次输出没有通过代码校验，带着错误码重试后通过，记录为 `res=ai_retry`（见[验证情况](#验证情况)）。按复赛六个环节组织的完整流水线见 [Agent 任务流水线](#agent-任务流水线pipeline)。
 
 ## 目录
 

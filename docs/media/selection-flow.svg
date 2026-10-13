@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 1330" width="960" height="1330" font-family="'PingFang SC','Microsoft YaHei','Noto Sans CJK SC','Noto Sans SC',sans-serif"><defs><marker id="k" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#5B6B80"/></marker><marker id="o" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#C8711E"/></marker><marker id="g" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#2E8A5C"/></marker><marker id="p" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#7A55C7"/></marker></defs><rect width="960" height="1330" rx="14" fill="#FFFFFF"/><text x="40" y="44" font-size="22" font-weight="700" fill="#14243A">一首歌是怎么被选出来的</text>
+<text x="40" y="68" font-size="13" fill="#4A5B70">情境 DJ 0.4.0 · 本地规则 + 受约束的 MiniMax + 反馈更新</text>
+<rect x="560" y="34" width="13" height="13" rx="3" fill="#EAF4FD" stroke="#2B7BB9" stroke-width="1.6"/>
+<text x="579" y="45" font-size="12.5" fill="#4A5B70">主流程</text>
+<rect x="656" y="34" width="13" height="13" rx="3" fill="#F2EDFC" stroke="#7A55C7" stroke-width="1.6"/>
+<text x="675" y="45" font-size="12.5" fill="#4A5B70">AI 与校验</text>
+<rect x="752" y="34" width="13" height="13" rx="3" fill="#FFF3E3" stroke="#C8711E" stroke-width="1.6"/>
+<text x="771" y="45" font-size="12.5" fill="#4A5B70">回退</text>
+<rect x="848" y="34" width="13" height="13" rx="3" fill="#E8F6EE" stroke="#2E8A5C" stroke-width="1.6"/>
+<text x="867" y="45" font-size="12.5" fill="#4A5B70">反馈</text>
+<rect x="40" y="100" width="210" height="56" rx="9" fill="#FFFFFF" stroke="#9DB3CC" stroke-width="1.4" stroke-dasharray="5 4"/>
+<text x="145.0" y="123.0" text-anchor="middle" font-size="14.5" font-weight="600" fill="#14243A">情境信息</text>
+<text x="145.0" y="143.0" text-anchor="middle" font-size="12.5" fill="#4A5B70">时间 · 天气 · 地点 · 移动状态</text>
+<rect x="290" y="100" width="300" height="56" rx="9" fill="#EAF4FD" stroke="#2B7BB9" stroke-width="1.4"/>
+<text x="440.0" y="123.0" text-anchor="middle" font-size="14.5" font-weight="600" fill="#14243A">① 判断当前活动</text>
+<text x="440.0" y="143.0" text-anchor="middle" font-size="12.5" fill="#4A5B70">情境规则 + 历史确认 → 支持度 P(a | b)</text>
+<path d="M250,128 H286" fill="none" stroke="#5B6B80" stroke-width="1.7" marker-end="url(#k)"/>
+<rect x="290" y="186" width="300" height="50" rx="9" fill="#EAF4FD" stroke="#2B7BB9" stroke-width="1.4"/>
+<text x="440.0" y="216.0" text-anchor="middle" font-size="14.5" font-weight="600" fill="#14243A">你在第一张卡确认活动</text>
+<path d="M440.0,156 V182" fill="none" stroke="#5B6B80" stroke-width="1.7" marker-end="url(#k)"/>
+<rect x="650" y="182" width="250" height="58" rx="9" fill="#E8F6EE" stroke="#2E8A5C" stroke-width="1.4"/>
+<text x="775.0" y="206.0" text-anchor="middle" font-size="14.5" font-weight="600" fill="#14243A">更新活动确认记录</text>
+<text x="775.0" y="226.0" text-anchor="middle" font-size="12.5" fill="#4A5B70">影响下次支持度 P(a | b)</text>
+<path d="M590,211 H646" fill="none" stroke="#2E8A5C" stroke-width="1.7" stroke-dasharray="6 5" marker-end="url(#g)"/>
+<path d="M775,182 V128 H594" fill="none" stroke="#2E8A5C" stroke-width="1.7" stroke-dasharray="6 5" marker-end="url(#g)"/>
+<rect x="673.5" y="109" width="77.0" height="18" rx="3" fill="#FFFFFF" opacity="0.92"/>
+<text x="712" y="122" text-anchor="middle" font-size="12.5" font-weight="600" fill="#2E8A5C">下次活动判断</text>
+<rect x="40" y="262" width="210" height="70" rx="9" fill="#FFFFFF" stroke="#9DB3CC" stroke-width="1.4" stroke-dasharray="5 4"/>
+<text x="145.0" y="282.0" text-anchor="middle" font-size="14.5" font-weight="600" fill="#14243A">你的一句话</text>
+<text x="145.0" y="302.0" text-anchor="middle" font-size="12.5" fill="#4A5B70">人声 · 能量 · 情绪</text>
+<text x="145.0" y="322.0" text-anchor="middle" font-size="12.5" fill="#4A5B70">语种 · 换一批</text>
+<rect x="290" y="268" width="300" height="56" rx="9" fill="#EAF4FD" stroke="#2B7BB9" stroke-width="1.4"/>
+<text x="440.0" y="291.0" text-anchor="middle" font-size="14.5" font-weight="600" fill="#14243A">② 解析要求并筛选</text>
+<text x="440.0" y="311.0" text-anchor="middle" font-size="12.5" fill="#4A5B70">排除标签明确不符硬条件的歌 → 可选集合 E</text>
+<path d="M440.0,236 V264" fill="none" stroke="#5B6B80" stroke-width="1.7" marker-end="url(#k)"/>
+<path d="M250,296 H286" fill="none" stroke="#5B6B80" stroke-width="1.7" marker-end="url(#k)"/>
+<polygon points="440.0,358.0 555.0,400 440.0,442.0 325.0,400" fill="#FFFFFF" stroke="#8494A8" stroke-width="1.4"/>
+<text x="440.0" y="405" text-anchor="middle" font-size="13.5" font-weight="600" fill="#14243A">可选歌曲少于 6 首？</text>
+<path d="M440.0,324 V356" fill="none" stroke="#5B6B80" stroke-width="1.7" marker-end="url(#k)"/>
+<path d="M325.0,400 H155 V474" fill="none" stroke="#C8711E" stroke-width="1.7" marker-end="url(#o)"/>
+<rect x="240.25" y="381" width="19.5" height="18" rx="3" fill="#FFFFFF" opacity="0.92"/>
+<text x="250" y="394" text-anchor="middle" font-size="12.5" font-weight="600" fill="#C8711E">是</text>
+<rect x="60" y="478" width="190" height="64" rx="9" fill="#FFF3E3" stroke="#C8711E" stroke-width="1.4"/>
+<text x="155.0" y="495.0" text-anchor="middle" font-size="14.5" font-weight="600" fill="#14243A">本地输出全部可选歌曲</text>
+<text x="155.0" y="515.0" text-anchor="middle" font-size="12.5" fill="#4A5B70">注明曲库里只有几首</text>
+<text x="155.0" y="535.0" text-anchor="middle" font-size="12.5" fill="#4A5B70">不经过 MiniMax 与探索</text>
+<path d="M60,510 H40 V1056 H286" fill="none" stroke="#C8711E" stroke-width="1.7" marker-end="url(#o)"/>
+<path d="M440.0,442 V486" fill="none" stroke="#5B6B80" stroke-width="1.7" marker-end="url(#k)"/>
+<rect x="456.0" y="455" width="19.5" height="18" rx="3" fill="#FFFFFF" opacity="0.92"/>
+<text x="460.0" y="468" text-anchor="start" font-size="12.5" font-weight="600" fill="#5B6B80">否</text>
+<rect x="290" y="490" width="300" height="60" rx="9" fill="#EAF4FD" stroke="#2B7BB9" stroke-width="1.4"/>
+<text x="440.0" y="515.0" text-anchor="middle" font-size="14.5" font-weight="600" fill="#14243A">③ 本地评分与排序</text>
+<text x="440.0" y="535.0" text-anchor="middle" font-size="12.5" fill="#4A5B70">规则分 b + 学习项 v_a·x → 取前 12 首 T</text>
+<polygon points="440.0,580.0 555.0,618 440.0,656.0 325.0,618" fill="#FFFFFF" stroke="#8494A8" stroke-width="1.4"/>
+<text x="440.0" y="623" text-anchor="middle" font-size="13.5" font-weight="600" fill="#14243A">宿主开放 model 服务？</text>
+<path d="M440.0,550 V576" fill="none" stroke="#5B6B80" stroke-width="1.7" marker-end="url(#k)"/>
+<path d="M555.0,618 H775 V799" fill="none" stroke="#C8711E" stroke-width="1.7" marker-end="url(#o)"/>
+<rect x="678.75" y="599" width="42.5" height="18" rx="3" fill="#FFFFFF" opacity="0.92"/>
+<text x="700" y="612" text-anchor="middle" font-size="12.5" font-weight="600" fill="#C8711E">未开放</text>
+<path d="M440.0,656 V694" fill="none" stroke="#5B6B80" stroke-width="1.7" marker-end="url(#k)"/>
+<rect x="456.0" y="667" width="31.0" height="18" rx="3" fill="#FFFFFF" opacity="0.92"/>
+<text x="460.0" y="680" text-anchor="start" font-size="12.5" font-weight="600" fill="#5B6B80">开放</text>
+<rect x="290" y="698" width="300" height="60" rx="9" fill="#F2EDFC" stroke="#7A55C7" stroke-width="2.6"/>
+<text x="440.0" y="723.0" text-anchor="middle" font-size="14.5" font-weight="600" fill="#14243A">④ MiniMax 从 T 里选 6 首</text>
+<text x="440.0" y="743.0" text-anchor="middle" font-size="12.5" fill="#4A5B70">写理由与证据引用</text>
+<path d="M590,738 H720 V799" fill="none" stroke="#C8711E" stroke-width="1.7" marker-end="url(#o)"/>
+<rect x="598" y="718" width="169.0" height="18" rx="3" fill="#FFFFFF" opacity="0.92"/>
+<text x="602" y="731" text-anchor="start" font-size="12.5" font-weight="600" fill="#C8711E">网络失败 / 超过 90 秒</text>
+<polygon points="440.0,798.0 550.0,840 440.0,882.0 330.0,840" fill="#F2EDFC" stroke="#7A55C7" stroke-width="2.6"/>
+<text x="440.0" y="836" text-anchor="middle" font-size="13.5" font-weight="600" fill="#14243A">代码逐项校验 15 项</text>
+<text x="440.0" y="854" text-anchor="middle" font-size="13.5" font-weight="600" fill="#14243A">合格？</text>
+<path d="M440.0,758 V796" fill="none" stroke="#5B6B80" stroke-width="1.7" marker-end="url(#k)"/>
+<path d="M330.0,840 H224" fill="none" stroke="#7A55C7" stroke-width="1.7" marker-end="url(#p)"/>
+<rect x="226" y="873" width="157.5" height="18" rx="3" fill="#FFFFFF" opacity="0.92"/>
+<text x="230" y="886" text-anchor="start" font-size="12.5" font-weight="600" fill="#7A55C7">首次不合格且 ≤ 60 秒</text>
+<rect x="60" y="812" width="160" height="56" rx="9" fill="#F2EDFC" stroke="#7A55C7" stroke-width="1.4"/>
+<text x="140.0" y="835.0" text-anchor="middle" font-size="14.5" font-weight="600" fill="#14243A">附带错误码重试</text>
+<text x="140.0" y="855.0" text-anchor="middle" font-size="12.5" fill="#4A5B70">完整重新生成一次</text>
+<path d="M140,812 V728 H286" fill="none" stroke="#7A55C7" stroke-width="1.7" marker-end="url(#p)"/>
+<rect x="113.0" y="759" width="54.0" height="18" rx="3" fill="#FFFFFF" opacity="0.92"/>
+<text x="140" y="772" text-anchor="middle" font-size="12.5" font-weight="600" fill="#7A55C7">重新请求</text>
+<rect x="650" y="803" width="250" height="64" rx="9" fill="#FFF3E3" stroke="#C8711E" stroke-width="1.4"/>
+<text x="775.0" y="830.0" text-anchor="middle" font-size="14.5" font-weight="600" fill="#14243A">本地规则选 6 首</text>
+<text x="775.0" y="850.0" text-anchor="middle" font-size="12.5" fill="#4A5B70">T 中按名次取，同一歌手 ≤ 2 首</text>
+<path d="M550.0,840 H646" fill="none" stroke="#C8711E" stroke-width="1.7" marker-end="url(#o)"/>
+<rect x="555.75" y="817" width="88.5" height="18" rx="3" fill="#FFFFFF" opacity="0.92"/>
+<text x="600" y="830" text-anchor="middle" font-size="12.5" font-weight="600" fill="#C8711E">第二次仍不合格</text>
+<rect x="290" y="912" width="300" height="60" rx="9" fill="#EAF4FD" stroke="#2B7BB9" stroke-width="1.4"/>
+<text x="440.0" y="937.0" text-anchor="middle" font-size="14.5" font-weight="600" fill="#14243A">⑤ 探索位：Beta-Thompson 抽样</text>
+<text x="440.0" y="957.0" text-anchor="middle" font-size="12.5" fill="#4A5B70">从 T 中未入选的歌里补第 7 首</text>
+<path d="M440.0,882 V908" fill="none" stroke="#5B6B80" stroke-width="1.7" marker-end="url(#k)"/>
+<rect x="456.0" y="887" width="31.0" height="18" rx="3" fill="#FFFFFF" opacity="0.92"/>
+<text x="460.0" y="900" text-anchor="start" font-size="12.5" font-weight="600" fill="#5B6B80">合格</text>
+<path d="M775,867 V930 H594" fill="none" stroke="#C8711E" stroke-width="1.7" marker-end="url(#o)"/>
+<rect x="290" y="1030" width="300" height="52" rx="9" fill="#EAF4FD" stroke="#2B7BB9" stroke-width="1.4"/>
+<text x="440.0" y="1051.0" text-anchor="middle" font-size="14.5" font-weight="600" fill="#14243A">输出歌单</text>
+<text x="440.0" y="1071.0" text-anchor="middle" font-size="12.5" fill="#4A5B70">正常情况：6 首主选 + 1 首探索</text>
+<path d="M440.0,972 V1026" fill="none" stroke="#5B6B80" stroke-width="1.7" marker-end="url(#k)"/>
+<rect x="290" y="1110" width="300" height="52" rx="9" fill="#E8F6EE" stroke="#2E8A5C" stroke-width="1.4"/>
+<text x="440.0" y="1131.0" text-anchor="middle" font-size="14.5" font-weight="600" fill="#14243A">你对歌单投票 ♥ / ×</text>
+<text x="440.0" y="1151.0" text-anchor="middle" font-size="12.5" fill="#4A5B70">同一批投票，下面三处共用</text>
+<path d="M440.0,1082 V1106" fill="none" stroke="#5B6B80" stroke-width="1.7" marker-end="url(#k)"/>
+<path d="M440.0,1162 V1180" fill="none" stroke="#2E8A5C" stroke-width="1.7"/>
+<path d="M190.0,1180 H770.0" fill="none" stroke="#2E8A5C" stroke-width="1.7"/>
+<path d="M190.0,1180 V1196" fill="none" stroke="#2E8A5C" stroke-width="1.7" marker-end="url(#g)"/>
+<path d="M480.0,1180 V1196" fill="none" stroke="#2E8A5C" stroke-width="1.7" marker-end="url(#g)"/>
+<path d="M770.0,1180 V1196" fill="none" stroke="#2E8A5C" stroke-width="1.7" marker-end="url(#g)"/>
+<rect x="60" y="1200" width="260" height="62" rx="9" fill="#E8F6EE" stroke="#2E8A5C" stroke-width="1.4"/>
+<text x="190.0" y="1226.0" text-anchor="middle" font-size="14.5" font-weight="600" fill="#14243A">更新活动计数与全局计数</text>
+<text x="190.0" y="1246.0" text-anchor="middle" font-size="12.5" fill="#4A5B70">下次 ③ 的规则分</text>
+<rect x="350" y="1200" width="260" height="62" rx="9" fill="#E8F6EE" stroke="#2E8A5C" stroke-width="1.4"/>
+<text x="480.0" y="1226.0" text-anchor="middle" font-size="14.5" font-weight="600" fill="#14243A">在线更新当前活动偏好 v_a</text>
+<text x="480.0" y="1246.0" text-anchor="middle" font-size="12.5" fill="#4A5B70">下次 ③ 的学习项</text>
+<rect x="640" y="1200" width="260" height="62" rx="9" fill="#E8F6EE" stroke="#2E8A5C" stroke-width="1.4"/>
+<text x="770.0" y="1226.0" text-anchor="middle" font-size="14.5" font-weight="600" fill="#14243A">累计这首歌的 ♥ c1 / × c0</text>
+<text x="770.0" y="1246.0" text-anchor="middle" font-size="12.5" fill="#4A5B70">下次 ⑤ 的抽样（含主选与探索位）</text>
+<path d="M190.0,1262 V1290 H935 V950 H594" fill="none" stroke="#2E8A5C" stroke-width="1.7" stroke-dasharray="6 5" marker-end="url(#g)"/>
+<path d="M480.0,1262 V1290" fill="none" stroke="#2E8A5C" stroke-width="1.7" stroke-dasharray="6 5"/>
+<path d="M770.0,1262 V1290" fill="none" stroke="#2E8A5C" stroke-width="1.7" stroke-dasharray="6 5"/>
+<path d="M935,950 V520 H594" fill="none" stroke="#2E8A5C" stroke-width="1.7" stroke-dasharray="6 5" marker-end="url(#g)"/>
+<rect x="827.25" y="1295" width="65.5" height="18" rx="3" fill="#FFFFFF" opacity="0.92"/>
+<text x="860" y="1308" text-anchor="middle" font-size="12.5" font-weight="600" fill="#2E8A5C">下一次推荐</text>
+<rect x="858.75" y="931" width="42.5" height="18" rx="3" fill="#FFFFFF" opacity="0.92"/>
+<text x="880" y="944" text-anchor="middle" font-size="12.5" font-weight="600" fill="#2E8A5C">→ ⑤</text>
+<rect x="858.75" y="501" width="42.5" height="18" rx="3" fill="#FFFFFF" opacity="0.92"/>
+<text x="880" y="514" text-anchor="middle" font-size="12.5" font-weight="600" fill="#2E8A5C">→ ③</text></svg>

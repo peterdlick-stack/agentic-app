@@ -420,7 +420,7 @@ curl -s 127.0.0.1:8141/quit           # 退出
 | Release 包发布者证明：`hub publisher-verify` 通过，解包后与提交 `8805240` 的 `bundle/` 一致（除 `manifest.json`） | ✅ | GitHub Actions 运行 [38262324723](https://github.com/peterdlick-stack/agentic-app/actions/runs/38262324723)；App Hub `3863591` |
 | 门禁检查 `context-dj 0.3.3 — PASSED` | ✅ | 干净检出 |
 | App Hub 门禁 `hub check`：`context-dj 0.3.4 — PASSED` | ✅ | 云端容器，App Hub `78dfda5` |
-| 商店截图是 0.3.4 当前界面 | ✅ | `card-host`，2026-10-06 |
+| 商店截图是 0.4.0 当前界面 | ✅ | Windows 桌面版 rc.5，2026-10-13（412×739，Dock 遮挡部分裁掉；0.3.4 旧图见 Git 历史） |
 | 三步主界面、候选确认与撤销、去重 | ✅ | `card-host` + 桌面版 |
 | 真实 MiniMax：情境判断 + 选歌 + 理由 | ✅ | 桌面版（v0.2 的 5 个场景、彩排 18 次请求、正式录制） |
 | AI 不可用退回本地规则；选歌途中出错不卡死 | ✅ | `card-host`（无 model 服务、故障注入） |
@@ -505,7 +505,7 @@ agentic-app/
 │  ├─ listing.json         商店资料：描述、分类、截图、隐私政策
 │  ├─ AGENT.md             只读应用助手的说明
 │  ├─ assets/icon.svg
-│  └─ screenshots/         商店截图（0.3.4 时在 card-host 里拍的，0.4.0 界面有少量文字不同）
+│  └─ screenshots/         商店截图（0.4.0 在 Windows 桌面版 rc.5 里重拍，2026-10-13，412×739；桌面 Dock 恒显遮挡窗口底部，已如实裁掉，0.3.4 旧图 412×892 见 Git 历史）
 ├─ .github/workflows/      GitHub 发布流程（publish-app.yml，由 tools/octo publish-github 生成）
 ├─ docs/
 │  ├─ PLAN.md              设计、接口、阈值和每一轮测试记录

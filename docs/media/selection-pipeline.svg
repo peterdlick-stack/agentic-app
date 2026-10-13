@@ -55,7 +55,7 @@
   <text class="n" x="88" y="384">3</text>
   <text class="t" x="118" y="382">本地打分，再按这个活动学到的偏好排序</text>
   <text class="b" x="118" y="406">曲库 46 首逐首打分，取前 12 名作为候选</text>
-  <text class="b" x="118" y="426">偏好分活动学习：通勤喜欢的歌，不会被带进睡前</text>
+  <text class="b" x="118" y="426">学习权重按活动分开；♥ / × 计数另有一份全局的</text>
   <text class="c" x="118" y="442">score_song :2381 · pref_rank :2587 · TOPK = 12 :2480</text>
 
   <!-- 4 -->

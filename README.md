@@ -10,7 +10,9 @@
 
 一个 OctoSense 脚本应用（`bundle/main.splash` 一个文件），GOSIM 智能体应用黑客松 2026 音乐场景参赛作品，队伍 KYBER（成员见[文末](#作者支持与许可)）。
 
-[![观看演示视频（2 分 38 秒）](docs/media/demo-cover.jpg)](docs/media/demo.mp4)
+[![观看实机录屏（0.4.0，Windows 原生 OctoSense rc.5，5 分 02 秒）](docs/media/demo-0.4.0-cover.jpg)](docs/media/demo-0.4.0-win.mp4)
+
+**实机录屏（0.4.0）**：[docs/media/demo-0.4.0-win.mp4](docs/media/demo-0.4.0-win.mp4)，从商店安装到真实 MiniMax 选歌、助手授权，说明见[演示视频与截图](#演示视频与截图)。初赛版的竖屏演示（0.3.3，含《I LOVE U》歌曲卡完整内容）：[docs/media/demo.mp4](docs/media/demo.mp4)。
 
 ## 30 秒看懂
 
@@ -21,7 +23,7 @@
 | **用户权限** | 永远以用户表述为准，AI 不能覆盖；每一项情境都写明来源和依据；模拟定位、预制内容、AI 解读在界面上都有标注 |
 | **出了问题会怎样** | AI 不可用或报错 → 改用本地规则并写明原因；每次 AI 尝试 90 秒未完成（含一次重试时约 150 秒，另加处理和调度延迟）→ 解锁界面、提示再试，迟到的结果作废；没有定位、天气失败 → 该项不参与推荐；启动读文件超时 → 看门狗整步重试并显示原因，不会卡死 |
 | **版本** | **0.4.0**（本版，经 GitHub 发布流程生成带证明的 Release，标签 `v0.4.0`）：定位改走宿主 location 服务，新增选歌输出守卫、偏好学习与探索位、支持度、决策日志、调试页和读回检查，验证见第 16 节。此前：**0.3.3** 提交 [`3345814`](https://github.com/peterdlick-stack/agentic-app/commit/3345814) 为初赛版本；2026-10-06 的 **0.3.4** App Hub 提交（#101）只更新商店信息和截图，程序与 0.3.3 相同。 |
-| **在哪里跑过** | **Windows 原生 OctoSense 桌面版 0.1.0-rc.5**（2026-10-11，经本地商店安装，接 MiniMax-M3）：安装、真实 AI 选歌、更新后数据保留；OctoSense 桌面版 0.1.0（WSL2 + Ubuntu 24.04，接 MiniMax-M3）：完整流程含真实 AI 选歌；`card-host`：全部界面和失败路径。手机尚未验证。具体版本见[运行环境](#运行环境)，结果见[验证情况](#验证情况) |
+| **在哪里跑过** | **Windows 原生 OctoSense 桌面版 0.1.0-rc.5**（2026-10-11/12/13，经本地商店安装，接 MiniMax-M3）：安装、真实 AI 选歌、更新后数据保留，10-13 用与 Release 相同的 0.4.0 应用包全新安装并录屏；OctoSense 桌面版 0.1.0（WSL2 + Ubuntu 24.04，接 MiniMax-M3）：完整流程含真实 AI 选歌；`card-host`：全部界面和失败路径。手机尚未验证。具体版本见[运行环境](#运行环境)，结果见[验证情况](#验证情况) |
 | **怎么跑** | [运行与复现](#运行与复现)：读源码 → 门禁检查 → `card-host` 运行 → 桌面版完整体验 |
 
 ## 目录
@@ -104,7 +106,26 @@ flowchart LR
 
 ## 演示视频与截图
 
-**[▶ 观看演示视频 docs/media/demo.mp4](docs/media/demo.mp4)**（2 分 38 秒，1080×1920 竖屏，带字幕，无配音，3.2 MB）
+### 实机录屏（0.4.0，2026-10-13）
+
+**[▶ 观看 docs/media/demo-0.4.0-win.mp4](docs/media/demo-0.4.0-win.mp4)**（5 分 02 秒，1400×900，带中文字幕，无配音，7.8 MB）
+
+在作者的 Windows 笔记本上，用 **Windows 原生 OctoSense 桌面版 0.1.0-rc.5** 录制。应用包是提交 `8805240` 的 `bundle/`，经本地商店发布（盖戳后 bundle BLAKE3 `30774f57…`，与 GitHub Release `v0.4.0` 相同），用全新的数据目录安装，所以没有历史反馈和偏好。录屏由脚本逐帧截取 OctoSense 窗口（12 帧/秒），除下面注明的一段加速外没有剪掉任何画面。
+
+| 时间 | 画面 |
+|---|---|
+| 0:00 | App Hub 里只有本地商店的情境 DJ → Get → 安装页逐项列出权限（含位置、“Its assistant may ask you questions”）→ Install → Open |
+| 0:56 | ① 你在做什么：时段“工作日上午 10:34”；天气“不可用 · 不参与”；定位“此平台的 OctoSense 不提供定位（宿主声明 location.* 仅支持 macOS/Android）· 不参与” |
+| 1:20 | 确认“通勤” → ② 点“甜一点” → **真实 MiniMax 请求**，实际等待 66 秒，这一段 **12 倍速**并在画面中标明 |
+| 1:41 | ③ 歌单：“AI 选歌 · 工作日上午 · 通勤（你确认的）”，“AI 理解：通勤路上想要温暖甜一点的音乐……”；6 首逐首附理由（稻香、江南、Waltz for Debby、Paris in the Rain、成都等），第 7 首“🎲 Happy”是探索位，理由“试一首：这个场景下你还没评过它” |
+| 3:09 | 打开探索歌的歌曲卡；进曲库打开《I LOVE U》翻到“故事和档案”“你和这首歌”：发布包不含封面和故事，这里如实显示为空 |
+| 3:58 | 首次唤起助手：宿主弹出 “Let 情境 DJ's agent start?”，列出 “Ask you questions” → Allow；随后助手请求模型时宿主内核报 `failed to send streaming request`，追问没有弹出（原因见[验证情况](#验证情况)） |
+
+Windows 桌面没有定位、录制时天气服务不可用，所以这次选歌只用到时段、你确认的活动和你的一句话。
+
+### 初赛版竖屏演示（0.3.3，2026-10-06）
+
+**[▶ 观看 docs/media/demo.mp4](docs/media/demo.mp4)**（2 分 38 秒，1080×1920 竖屏，带字幕，无配音，3.2 MB）
 
 在 OctoSense 桌面版（应用 0.3.3）里一镜到底录制：从主界面确认情境 → 要求“想听点甜的，最好是洛天依” → **MiniMax 当场选歌**（真实等待约 12 秒，没有剪辑、没有加速）→ 进入《I LOVE U》歌曲卡，看封面（封面背面可以放用户自己的照片，目前需要手动放进应用存储；录像里没有演示这一步）、故事页、点喜欢后的相遇页 → 回到歌单。桌面没有 GPS，演示用模拟定位“步行”，界面上的橙色提示和“测试数据”标注全程保留。为避免版权问题，跳过歌词页，录像里不出现歌词。
 
@@ -370,7 +391,9 @@ curl -s 127.0.0.1:8141/quit           # 退出
 | 真实 MiniMax 下迟到结果被作废 | ⏳ 未验证 | 当时所用 `card-host` 未配置 model；不代表所有宿主版本的能力 |
 | 真机 GPS、触屏滑动、手机上的 AI | ⏳ 未验证 | 还没有把商店应用装到手机上的途径 |
 | “去听”在应用内打开网页 | ⏳ 未验证 | Linux 桌面不支持；Windows rc.5 的内嵌浏览器拒绝导航（宿主策略），只显示链接；要在 Android 或 macOS 上验证 |
-| 应用助手面板 | ⏳ 未验证 | — |
+| 实机录屏：从本地商店全新安装 0.4.0、真实 MiniMax 选歌 6 + 1 首 | ✅ | Windows 原生 rc.5，2026-10-13，应用包与 Release 相同（`30774f57…`），`res` 为 AI 选歌 |
+| 应用助手：宿主放行 `ask_user_question` | ✅ | Windows 原生 rc.5，2026-10-13：授权面板列出 “Ask you questions”，宿主内核日志 `tools=1` |
+| 应用助手：追问弹出并回传 | ❌ 未完成 | 同上：宿主内核请求 MiniMax 约 10 秒即报 `failed to send streaming request`（两次一致），追问未弹出；同一配置下应用自身的选歌调用正常 |
 | 用真实照片翻面、封面连续旋转 | ⏳ 未验证 | 照片翻面只用合成测试图验证过 |
 
 **已知问题**：推荐理由偏直白，演示里那次基本复述了用户的话（“用户指定的洛天依甜歌，直接安排”），下一步要改提示词。内置 46 首歌的标签是人工粗标的。
@@ -379,6 +402,8 @@ curl -s 127.0.0.1:8141/quit           # 退出
 
 <details>
 <summary><b>逐轮验证记录（按时间倒序）</b></summary>
+
+**实机录屏与助手放行（2026-10-13）**：用 `tools/win/republish.sh --ref origin/main` 把提交 `8805240` 发布为 `0.4.0-local.5`（盖戳后摘要 `30774f57…`，与 Release 相同），在 Windows 原生 OctoSense rc.5 上用全新的数据目录安装、录屏。真实 MiniMax 选歌 1 次，等待 66 秒，出 6 首 + 探索 1 首。首次唤起应用助手时宿主弹出授权面板，点 Allow 后宿主内核日志 `calling LLM … tools=1`，即助手只拿到 `AGENT.md` 声明的 `ask_user_question` 一个工具。但助手请求模型时，宿主内核在约 10 秒处报 `failed to send streaming request to minimax-cn@api/MiniMax-M3`，两次一致，追问没有弹出。排查：OctoSense 源码（`7534fc7`）里该连接超时是常量 `DEFAULT_LLM_CONNECT_TIMEOUT_SECS = 10`，助手调用路径不读配置；同一时段同一 MiniMax 配置下应用自身的选歌调用成功；同一台电脑用 curl / .NET / TCP 连 `api.minimaxi.com` 都在 1.5 秒内连上。我们判断问题在宿主内核一侧，原因在宿主外部查不到，留作已知问题。
 
 **0.4.0（2026-10-12，复赛版）**：在 `pref/learn` 基础上只改版本号、商店更新说明、平台（加 `windows`）和本 README，并加入 `.github/workflows/publish-app.yml`（App Flow `tools/octo publish-github` 生成，App Hub 工具链 `3863591`）。定位改走宿主服务的验证：Windows 原生 OctoSense rc.5 上探测 `runtime.list` 无 `location.*`、`location.get` 返回 `unsupported_platform`，界面显示“此平台的 OctoSense 不提供定位”，真实 MiniMax 选歌 6 首 + 探索 1 首正常（2026-10-12）。
 

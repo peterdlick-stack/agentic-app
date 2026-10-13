@@ -131,7 +131,7 @@ flowchart LR
 
 ### 宣传片（0.4.0，2026-10-13）
 
-**[▶ 观看 docs/media/promo-0.4.0.mp4](docs/media/promo-0.4.0.mp4)**（2 分 23 秒，1920×1080，带配乐）
+**[▶ 观看 docs/media/promo-0.4.0.mp4](docs/media/promo-0.4.0.mp4)**（2 分 23 秒，1920×1080，带配乐）。4K 原片（3840×2160，313 MB）在 [Release v0.4.0 的附件](https://github.com/peterdlick-stack/agentic-app/releases/download/v0.4.0/promo-0.4.0-4k.mp4)里。
 
 中段的打分、名次、标签和代码都是真实数据，取自提交 `8805240` 在 2026-10-12 真机上的一轮（通勤、没有要求、种子 10）。MiniMax 第 1 次的返回、“两次都没通过”的界面和推荐理由是示意，取自测试用例。实机画面来自 2026-10-13 的两轮录屏，和中段的数据不是同一轮。这些在片尾都有说明。
 

@@ -185,6 +185,21 @@ flowchart LR
 
 Windows 桌面没有定位、录制时天气服务不可用，所以这次选歌只用到时段、你确认的活动和你的一句话。
 
+### 截图（0.4.0，2026-10-13）
+
+在 Windows 原生 OctoSense rc.5 上截取，窗口 412×739，底部被宿主 Dock 遮挡的部分已裁掉。Windows 宿主不提供定位，当时天气请求也失败，所以情境卡上这两项都标“不参与”。
+
+| ① 你在做什么 | ③ 歌单 | 歌曲卡 · 封面 |
+|---|---|---|
+| ![你在做什么](docs/media/store-0.4.0/01-step1.png) | ![歌单](docs/media/store-0.4.0/02-playlist.png) | ![歌曲卡](docs/media/store-0.4.0/03-songcard.png) |
+
+| 歌曲卡 · 你和这首歌 | 感知页 | 曲库 |
+|---|---|---|
+| ![你和这首歌](docs/media/store-0.4.0/04-encounter.png) | ![感知](docs/media/store-0.4.0/05-sense.png) | ![曲库](docs/media/store-0.4.0/06-library.png) |
+
+应用包里的商店截图（`bundle/screenshots/`）保持与 Release v0.4.0 相同，仍是 0.3.4 时的界面，改动它会改变应用包摘要。
+
+
 ## 一次完整的任务
 
 以 0.4.0 的[讲解录屏](docs/media/demo-0.4.0-narrated.mp4)为例（Windows 原生 OctoSense rc.5，工作日傍晚，全新数据目录，没有历史反馈）：

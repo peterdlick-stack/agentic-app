@@ -494,6 +494,7 @@ manifest 里声明了一个只读的 agent，见 [`bundle/AGENT.md`](bundle/AGEN
 | 组件 | 版本 |
 |---|---|
 | OctoSense 桌面版（Windows 原生） | `0.1.0-rc.5`，Release tag `desktop-v0.1.0-rc.5`（提交 `83d356c2`），装在 `%LOCALAPPDATA%\OctoSense` |
+| OctoSense 桌面版 rc.6 | 2026-10-14 复赛截止前确认 rc.6 可以启动；**本应用尚未在 rc.6 上安装和验证**，以上结果均来自 rc.5 |
 | `hub`（本地商店发布、门禁检查） | 从 rc.5 锁定的 App Hub 提交 `8347a489141c0e24cab564883db7c4592935a8b2` 编译（[`tools/win/build-hub.sh`](tools/win/build-hub.sh)） |
 | AI | MiniMax-M3（赛方提供）；在桌面版 AI providers 里用 Custom endpoint `https://api.minimaxi.com/v1`（OpenAI 协议）配置 |
 | 系统 | Windows 笔记本；发布脚本在 WSL（Ubuntu 24.04）里运行 |
@@ -569,6 +570,7 @@ hub check bundle --allow-unsigned   # 期望：context-dj 0.4.0 — PASSED（唯
 | Windows 原生桌面版 rc.5：本地商店安装、打开、本地规则歌单、♥ 与相遇记录重启后保留 | ✅ | 2026-10-11，提交 `0ceab2e`（`0.3.4`，摘要 `ef69aaac…`） |
 | Windows 原生桌面版 rc.5：真实 MiniMax 选歌和理由 | ✅ | 同上，1 次真实调用，`res=ai_retry`（输出守卫拦截一次后重试成功） |
 | Windows 原生桌面版 rc.5：发布新版本后在 App Hub 更新，数据全部保留 | ✅ | 同上，`0.3.4-local.1` → `local.2` |
+| Windows 原生桌面版 rc.6：安装与完整流程 | ⏳ 未验证 | 2026-10-14 只确认 rc.6 宿主可以启动，来不及在截止前安装本应用 |
 | 桌面上用鼠标横拖翻页 | ❌ 未通过 | 桌面版（远程桥拖动未触发翻页，页码圆点可用） |
 | 真实 MiniMax 下迟到结果被作废 | ⏳ 未验证 | 当时所用 `card-host` 未配置 model；不代表所有宿主版本的能力 |
 | 真机 GPS、触屏滑动、手机上的 AI | ⏳ 未验证 | 还没有把商店应用装到手机上的途径 |
